@@ -2,11 +2,14 @@
 #define RANDOM_ALGORITHM_H
 
 #include "../../games/maze/maze_state.h"
+#include "../../common/game_util.h"
 
 // 무작위 행동 알고리즘 
 int randomAction(const State& state);
 
-// 시드를 고정해서 같은 게임 상황을 표시하면서 비교
-void playGame(const int seed);
+// 시드를 고정해서 게임을 무작위 알고리즘으로 진행
+inline void playGameRandom(const int seed) {
+    playGameWithStrategy(seed, randomAction);
+}
 
 #endif // RANDOM_ALGORITHM_H 
