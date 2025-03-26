@@ -21,6 +21,9 @@ public:
 
     // 현재 게임 상황을 문자열로 출력
     virtual std::string toString() const = 0;
+
+    // 현재 게임 상황을 평가
+    virtual void evaluateScore() = 0;
 };
 
 #endif // GAME_STATE_H 
