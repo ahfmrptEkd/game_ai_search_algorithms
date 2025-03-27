@@ -25,6 +25,7 @@ private:
 public:
     Coord character_ = Coord();
     int game_score_ = 0;
+    int first_action_ = -1;
     ScoreType evaluated_score_ = 0;
     
     MazeState();
@@ -36,6 +37,7 @@ public:
     std::vector<int> legalActions() const override;
     std::string toString() const override;
     void evaluateScore() override;
+    bool operator<(const MazeState& other) const;
 };
 
 using State = MazeState;

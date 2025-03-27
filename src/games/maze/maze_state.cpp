@@ -93,3 +93,8 @@ void MazeState::evaluateScore()
 {
     this->evaluated_score_ = this->game_score_;
 }   
+
+bool MazeState::operator<(const MazeState& other) const
+{
+    return this->evaluated_score_ < other.evaluated_score_;
+}
