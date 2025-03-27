@@ -3,17 +3,17 @@
 #include <iostream>
 #include <random>
 
-int beamSearchAction(const State& state, const int beam_width, const int beam_depth)
+int beamSearchAction(const State& state, const BeamConfig& config)
 {
     auto legal_actions = state.legalActions();
     std::priority_queue<State> now_beam;
     State best_state;
 
     now_beam.push(state);
-    for (int t = 0; t < beam_depth; t++)
+    for (int t = 0; t < config.beam_depth; t++)
     {
         std::priority_queue<State> next_beam;
-        for (int i = 0; i < beam_width; i++)
+        for (int i = 0; i < config.beam_width; i++)
         {
             if (now_beam.empty())
                 break;
