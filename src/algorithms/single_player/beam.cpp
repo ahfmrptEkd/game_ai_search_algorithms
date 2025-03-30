@@ -9,12 +9,22 @@ int beamSearchAction(const State& state, const BeamConfig& config)
     std::priority_queue<State> now_beam;
     State best_state;
 
+    TimeKeeper* time_keeper = nullptr;
+    if (config.time_threshold > 0) {
+        time_keeper = new TimeKeeper(config.time_threshold);
+    }
+
     now_beam.push(state);
     for (int t = 0; t < config.beam_depth; t++)
     {
         std::priority_queue<State> next_beam;
         for (int i = 0; i < config.beam_width; i++)
         {
+            // 시간 제한 체크
+            if (time_keeper && time_keeper->isTimeOver()) {
+                break;
+            }
+            
             if (now_beam.empty())
                 break;
             
@@ -33,13 +43,24 @@ int beamSearchAction(const State& state, const BeamConfig& config)
             }
         }
         
+        if (time_keeper && time_keeper->isTimeOver()) {
+            break;
+        }
+        
         now_beam = next_beam;
-        best_state = now_beam.top();
+        if (!now_beam.empty()) {
+            best_state = now_beam.top();
+        }
 
         if (best_state.isDone())
         {
             break;
         }
     }
+    
+    if (time_keeper) {
+        delete time_keeper;
+    }
+    
     return best_state.first_action_;
 }
