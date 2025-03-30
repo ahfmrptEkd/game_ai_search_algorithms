@@ -9,9 +9,9 @@
 using ScoreType = int64_t;  // 게임 평가 점수 자료형 결정
 constexpr const ScoreType INF = 1000000000LL;
 
-constexpr const int H = 3;
-constexpr const int W = 4;
-constexpr int END_TURN = 4;
+constexpr const int H = 30;
+constexpr const int W = 30;
+constexpr int END_TURN = 100;
 
 // 방향 상수 정의
 constexpr const int DX[4] = {1, -1, 0, 0};
