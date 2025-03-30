@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
     {
         {"random", playGameRandom},
         {"greedy", playGameGreedy},
-        {"beam", playGameBeam},
-        {"chokudai", playGameChokudai},
+        {"beam", [](int seed){ playGameBeam(seed, 1); }},        
+        {"chokudai", [](int seed){ playGameChokudai(seed, 1); }} 
     };
     
     std::string algorithm = "random";
