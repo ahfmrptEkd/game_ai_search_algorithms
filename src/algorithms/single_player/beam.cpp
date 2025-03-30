@@ -5,7 +5,6 @@
 
 int beamSearchAction(const State& state, const BeamConfig& config)
 {
-    auto legal_actions = state.legalActions();
     std::priority_queue<State> now_beam;
     State best_state;
 
@@ -29,8 +28,9 @@ int beamSearchAction(const State& state, const BeamConfig& config)
                 break;
             
             State now_state = now_beam.top();
-            now_beam.pop();
-            for (const auto& action : legal_actions)
+            now_beam.pop();   
+             
+            for (const auto& action : now_state.legalActions())
             {
                 State next_state = now_state;
                 next_state.progress(action);
