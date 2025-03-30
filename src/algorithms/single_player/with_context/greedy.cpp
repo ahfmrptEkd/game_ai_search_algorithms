@@ -1,5 +1,5 @@
 #include "greedy.h"
-#include "../../common/game_util.h"
+#include "../../../common/game_util.h"
 #include <iostream>
 #include <random>
 

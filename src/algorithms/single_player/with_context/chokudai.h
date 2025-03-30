@@ -1,8 +1,8 @@
 #ifndef CHOKUDAI_H
 #define CHOKUDAI_H
 
-#include "../../games/maze/maze_state.h"
-#include "../../common/game_util.h"
+#include "../../../games/maze/maze_state.h"
+#include "../../../common/game_util.h"
 
 struct ChokudaiConfig {
     int beam_width = 1;

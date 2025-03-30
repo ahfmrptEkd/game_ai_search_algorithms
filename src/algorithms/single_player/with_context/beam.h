@@ -1,8 +1,8 @@
 #ifndef BEAM_H
 #define BEAM_H
 
-#include "../../games/maze/maze_state.h"
-#include "../../common/game_util.h"
+#include "../../../games/maze/maze_state.h"
+#include "../../../common/game_util.h"
 
 struct BeamConfig {
     int beam_width = 2;

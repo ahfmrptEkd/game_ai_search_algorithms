@@ -1,7 +1,7 @@
-#include "../algorithms/single_player/random.h"
-#include "../algorithms/single_player/greedy.h"
-#include "../algorithms/single_player/beam.h"
-#include "../algorithms/single_player/chokudai.h"
+#include "../algorithms/single_player/with_context/random.h"
+#include "../algorithms/single_player/with_context/greedy.h"
+#include "../algorithms/single_player/with_context/beam.h"
+#include "../algorithms/single_player/with_context/chokudai.h"
 #include "../common/coord.h"
 #include <iostream>
 #include <string>
