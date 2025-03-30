@@ -1,6 +1,7 @@
 #include "../algorithms/single_player/random.h"
 #include "../algorithms/single_player/greedy.h"
 #include "../algorithms/single_player/beam.h"
+#include "../algorithms/single_player/chokudai.h"
 #include "../common/coord.h"
 #include <iostream>
 #include <string>
@@ -17,6 +18,7 @@ int main(int argc, char* argv[])
         {"random", playGameRandom},
         {"greedy", playGameGreedy},
         {"beam", playGameBeam},
+        {"chokudai", playGameChokudai},
     };
     
     std::string algorithm = "random";
