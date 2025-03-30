@@ -26,8 +26,10 @@ public:
     }
 };
 
-// 모든 알고리즘에서 공통으로 사용할 난수 생성기
-extern std::mt19937 mt_for_action;
+// 모든 알고리즘에서 공통으로 사용할 유틸리티를 위한 네임스페이스
+namespace GameUtil {
+    extern std::mt19937 mt_for_action;
+}
 
 // 알고리즘 전략을 매개변수로 받아 게임을 진행한다
 inline void playGameWithStrategy(const int seed, std::function<int(const State&)> strategy_func) {
