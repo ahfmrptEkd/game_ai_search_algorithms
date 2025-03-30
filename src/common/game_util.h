@@ -4,7 +4,27 @@
 #include <iostream>
 #include <functional>
 #include <random>
+#include <chrono>
 #include "../games/maze/maze_state.h"
+
+class TimeKeeper 
+{
+private:
+    std::chrono::high_resolution_clock::time_point start_time_;
+    int64_t time_threshold_;
+public:
+    TimeKeeper(const int64_t &time_threshold)
+        : start_time_(std::chrono::high_resolution_clock::now()),
+          time_threshold_(time_threshold)
+    {
+    }
+    
+    bool isTimeOver() const
+    {
+        auto diff = std::chrono::high_resolution_clock::now() - this->start_time_;
+        return std::chrono::duration_cast<std::chrono::milliseconds>(diff).count() >= time_threshold_;
+    }
+};
 
 // 모든 알고리즘에서 공통으로 사용할 난수 생성기
 extern std::mt19937 mt_for_action;
