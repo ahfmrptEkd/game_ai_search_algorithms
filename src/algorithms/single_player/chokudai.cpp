@@ -5,6 +5,11 @@
 int chokudaiSearchAction(const State& state, const ChokudaiConfig& config) {
     auto beam = std::vector<std::priority_queue<State>>(config.beam_depth + 1);
     beam[0].push(state);
+
+    TimeKeeper* time_keeper = nullptr;
+    if (config.time_threshold > 0) {
+        time_keeper = new TimeKeeper(config.time_threshold);
+    }
     
     for (int cnt = 0; cnt < config.beam_number; cnt++) {
         for (int t = 0; t < config.beam_depth; t++) {
@@ -12,6 +17,12 @@ int chokudaiSearchAction(const State& state, const ChokudaiConfig& config) {
             auto& next_beam = beam[t + 1];
             
             for (int i = 0; i < config.beam_width; i++) {
+
+                if (time_keeper && time_keeper->isTimeOver()) 
+                {
+                    break;
+                }
+
                 if (now_beam.empty()) break;
                 State now_state = now_beam.top();
                 if (now_state.isDone()) break;
@@ -25,7 +36,22 @@ int chokudaiSearchAction(const State& state, const ChokudaiConfig& config) {
                     next_beam.push(next_state);
                 }
             }
+
+            if (time_keeper && time_keeper->isTimeOver()) 
+            {
+                break;
+            }
         }
+
+        if (time_keeper && time_keeper->isTimeOver()) 
+        {
+            break;
+        }
+    }
+
+    if (time_keeper) 
+    {
+        delete time_keeper;
     }
     
     for (int t = config.beam_depth; t >= 0; t--) {
