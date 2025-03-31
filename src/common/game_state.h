@@ -27,8 +27,8 @@ namespace GameConstants {
     
     // 알고리즘 파라미터 상수 추가
     namespace AlgorithmParams {
-        constexpr const int SEARCH_WIDTH = 5;
-        constexpr const int SEARCH_DEPTH = 10;
+        constexpr const int SEARCH_WIDTH = 2;
+        constexpr const int SEARCH_DEPTH = 4;
         constexpr const int SEARCH_NUMBER = 2;
         constexpr const int64_t TIME_THRESHOLD = 1;
     }
