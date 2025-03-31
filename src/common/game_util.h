@@ -5,6 +5,7 @@
 #include <functional>
 #include <random>
 #include <chrono>
+#include <sstream>
 #include "../games/maze/maze_state.h"
 
 class TimeKeeper 
@@ -29,6 +30,91 @@ public:
 // 모든 알고리즘에서 공통으로 사용할 유틸리티를 위한 네임스페이스
 namespace GameUtil {
     extern std::mt19937 mt_for_action;
+
+    // 미로 게임 관련 유틸리티
+    // 렌더링 함수
+    template <int H, int W>
+    inline std::string renderSingleCharMaze(const int points[H][W], const Coord& character, char empty_char = '.')
+    {
+        std::ostringstream ss;
+        for (int h = 0; h < H; ++h)
+        {
+            for (int w = 0; w < W; ++w)
+            {
+                if (character.y_ == h && character.x_ == w)
+                {
+                    ss << '@';
+                }
+                else if (points[h][w] > 0)
+                {
+                    ss << points[h][w];
+                }
+                else
+                {
+                    ss << empty_char;
+                }
+            }
+            ss << '\n';
+        }
+        return ss.str();
+    }
+
+    // 여러 캐릭터 있는 미로 렌더링
+    template <int H, int W, int N>
+    inline std::string renderMultiCharMaze(const int points[H][W], const Coord characters[N], char empty_char = '.')
+    {
+        std::ostringstream ss;
+        for (int h = 0; h < H; ++h)
+        {
+            for (int w = 0; w < W; ++w)
+            {
+                bool is_character = false;
+                for (int n = 0; n < N; ++n)
+                {
+                    if (characters[n].y_ == h && characters[n].x_ == w)
+                    {
+                        ss << '@';
+                        is_character = true;
+                        break;
+                    }
+                    
+                }
+                if (!is_character)
+                {
+                    if (points[h][w] > 0)
+                    {
+                        ss << points[h][w];
+                    }
+                    else
+                    {
+                        ss << empty_char;
+                    }
+                }
+            }
+            ss << '\n';
+        }
+        return ss.str();
+    }
+
+    // 위치 유효성 검사
+    template <int H, int W>
+    inline bool isValidCoord(const Coord& coord)
+    {
+        return coord.y_ >= 0 && coord.y_ < H && coord.x_ >= 0 && coord.x_ < W;
+    }
+
+    // 랜덤 점수 맵 생성
+    template <int H, int W>
+    inline void generateRandomPoints(int points[H][W], std::mt19937& mt, int min_point = 0, int max_point = 9)
+    {
+        for (int y = 0; y < H; y++)
+        {
+            for (int x = 0; x < W; x++)
+            {
+                points[y][x] = min_point + (mt() % (max_point - min_point + 1));
+            }
+        }
+    }   
 }
 
 // 알고리즘 전략을 매개변수로 받아 게임을 진행한다
