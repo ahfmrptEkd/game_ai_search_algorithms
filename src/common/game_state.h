@@ -15,9 +15,9 @@ namespace GameConstants {
     
     // 모든 게임에 공통으로 사용되는 보드 관련 상수
     namespace Board {
-        constexpr const int H = 30;
-        constexpr const int W = 30;
-        constexpr const int END_TURN = 100;
+        constexpr const int H = 5;
+        constexpr const int W = 5;
+        constexpr const int END_TURN = 5;
     }
     
     namespace AutoMaze {
