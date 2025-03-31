@@ -3,6 +3,29 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
+
+// 모든 게임에서 공통으로 사용하는 상수
+namespace GameConstants {
+    using ScoreType = int64_t;
+    constexpr const ScoreType INF = 1000000000LL;
+    
+    constexpr const int DX[4] = {1, -1, 0, 0};
+    constexpr const int DY[4] = {0, 0, 1, -1};
+    
+    namespace Maze {
+        constexpr const int H = 30;
+        constexpr const int W = 30;
+        constexpr const int END_TURN = 100;
+    }
+    
+    namespace AutoMaze {
+        constexpr const int H = 5;
+        constexpr const int W = 5;
+        constexpr const int END_TURN = 5;
+        constexpr const int CHARACTER_N = 3;
+    }
+}
 
 // 게임 상태 인터페이스
 // 모든 게임 구현체가 공통으로 구현해야 하는 인터페이스
