@@ -1,4 +1,5 @@
 #include "maze_state.h"
+#include "../../common/game_util.h"
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -12,15 +13,8 @@ MazeState::MazeState(const int seed)
     this->character_.y_ = mt_for_construct() % GameConstants::Maze::H;
     this->character_.x_ = mt_for_construct() % GameConstants::Maze::W;
 
-    for (int y = 0; y < GameConstants::Maze::H; y++)
-        for (int x = 0; x < GameConstants::Maze::W; x++)
-        {
-            if (y == character_.y_ && x == character_.x_)
-            {
-                continue;
-            }
-            this->points_[y][x] = mt_for_construct() % 10;
-        }
+    GameUtil::generateRandomPoints<GameConstants::Maze::H, GameConstants::Maze::W>(this->points_, mt_for_construct, 0, 9);
+    this->points_[this->character_.y_][this->character_.x_] = 0;
 }
 
 // 게임 종료 판정
@@ -51,7 +45,7 @@ std::vector<int> MazeState::legalActions() const
     {
         int ty = this->character_.y_ + GameConstants::DY[action];
         int tx = this->character_.x_ + GameConstants::DX[action];
-        if (ty >= 0 && ty < GameConstants::Maze::H && tx >= 0 && tx < GameConstants::Maze::W)
+        if (GameUtil::isValidCoord<GameConstants::Maze::H, GameConstants::Maze::W>(Coord(ty, tx)))
         {
             actions.emplace_back(action);
         }
@@ -65,27 +59,7 @@ std::string MazeState::toString() const
     std::stringstream ss;
     ss << "turn:\t" << this->turn_ << "\n";
     ss << "score:\t" << this->game_score_ << "\n";
-
-    for (int h = 0; h < GameConstants::Maze::H; h++)
-    {
-        for (int w = 0; w < GameConstants::Maze::W; w++)
-        {
-            if (this->character_.y_ == h && this->character_.x_ == w)
-            {
-                ss << '@';
-            }
-            else if (this->points_[h][w] > 0)
-            {
-                ss << points_[h][w];
-            }
-            else
-            {
-                ss << '.';
-            }
-        }
-        ss << '\n';
-    }
-    
+    ss << GameUtil::renderSingleCharMaze<GameConstants::Maze::H, GameConstants::Maze::W>(this->points_, this->character_);
     return ss.str();
 }
 

@@ -1,4 +1,5 @@
 #include "automaze_state.h"
+#include "../../common/game_util.h"
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -8,13 +9,7 @@ AutoMazeState::AutoMazeState(const int seed)
     : turn_(0), game_score_(0), evaluated_score_(0)
 {
     auto mt_for_construct = std::mt19937(seed);
-    for (int y = 0; y < GameConstants::AutoMaze::H; y++)
-    {
-        for (int x = 0; x < GameConstants::AutoMaze::W; x++)
-        {
-            points_[y][x] = mt_for_construct() % 9 + 1;
-        }
-    }
+    GameUtil::generateRandomPoints<GameConstants::AutoMaze::H, GameConstants::AutoMaze::W>(this->points_, mt_for_construct, 0, 9);
 }
 
 // 지정 위치에 지정 캐릭터를 배치한다.
@@ -92,37 +87,7 @@ std::string AutoMazeState::toString() const
     std::stringstream ss;
     ss << "turn:\t" << this->turn_ << "\n";
     ss << "score:\t" << this->game_score_ << "\n";
-
-    for (int h = 0; h < GameConstants::AutoMaze::H; h++)
-    {
-        for (int w = 0; w < GameConstants::AutoMaze::W; w++)
-        {
-            bool is_written = false;
-
-            for (const auto &character : this->characters_)
-            {
-                if (character.y_ == h && character.x_ == w)
-                {
-                    ss << "@";
-                    is_written = true;
-                    break;
-                }
-            }
-            if (!is_written)
-            {
-                if (this->points_[h][w] > 0)
-                {
-                    ss << points_[h][w];
-                }
-                else
-                {
-                    ss << '.';
-                }
-            }
-        }
-        ss << '\n';
-    }
-    
+    ss << GameUtil::renderMultiCharMaze<GameConstants::AutoMaze::H, GameConstants::AutoMaze::W, GameConstants::AutoMaze::CHARACTER_N>(this->points_, this->characters_);
     return ss.str();
 }
 
