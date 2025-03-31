@@ -14,11 +14,12 @@ EXAMPLES_DIR = $(SRCDIR)/examples
 COMMON_SRC = $(COMMON_DIR)/game_util.cpp
 
 # 사용 가능한 게임 목록
-GAMES = maze automaze
+GAMES = maze automaze twomaze
 
 # 게임별 규칙 포함
 include $(GAMES_DIR)/maze/Makefile.inc
 include $(GAMES_DIR)/automaze/Makefile.inc
+include $(GAMES_DIR)/twomaze/Makefile.inc
 
 # 기본 타겟: 모든 게임 빌드
 all: $(GAMES)
