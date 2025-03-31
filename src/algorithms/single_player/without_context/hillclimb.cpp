@@ -1,0 +1,47 @@
+#include "hillclimb.h"
+#include "../../../common/game_util.h"
+#include <random>
+
+// 힐클라임 배치 알고리즘 구현
+AutoMazeState hillClimbPlacement(const AutoMazeState &state, int number) 
+{
+    AutoMazeState now_state = state;
+    for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++)
+    {
+        int y = GameUtil::mt_for_action() % GameConstants::Board::H;
+        int x = GameUtil::mt_for_action() % GameConstants::Board::W;
+        now_state.setCharacter(character_id, y, x);
+    }
+    
+    ScoreType best_score = now_state.getScore();
+    
+    // 힐클라임 반복
+    for (int i = 0; i < number; i++)
+    {
+        // 상태 복사
+        auto next_state = now_state;
+        
+        // 무작위로 캐릭터 하나 선택 (transition() 함수 대체)
+        int character_id = GameUtil::mt_for_action() % GameConstants::AutoMaze::CHARACTER_N;
+        int y = GameUtil::mt_for_action() % GameConstants::Board::H;
+        int x = GameUtil::mt_for_action() % GameConstants::Board::W;
+        next_state.setCharacter(character_id, y, x);
+        
+        // 점수 계산 및 비교
+        auto next_score = next_state.getScore();
+        if (next_score > best_score)
+        {
+            best_score = next_score;
+            now_state = next_state;
+        }
+    }
+    
+    return now_state;
+}
+
+void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState&, int), const int seed) 
+{
+    auto state = AutoMazeState(seed);
+    state = ai_func(state, 1000); // 1000번 반복
+    auto score = state.getScore(true);
+}

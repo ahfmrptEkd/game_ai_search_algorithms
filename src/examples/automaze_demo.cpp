@@ -1,4 +1,5 @@
 #include "../algorithms/single_player/without_context/random.h"
+#include "../algorithms/single_player/without_context/hillclimb.h"
 #include <iostream>
 #include <string>
 #include <map>
@@ -10,7 +11,8 @@ int main(int argc, char* argv[])
     
     std::map<std::string, std::function<void(int)>> algorithms = 
     {
-        {"random", playGameRandom}
+        {"random", playGameRandom},
+        {"hillclimb", playGameHillClimb}
         // 나중에 다른 알고리즘 추가 가능
     };
     
