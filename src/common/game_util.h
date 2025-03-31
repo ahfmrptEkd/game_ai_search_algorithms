@@ -118,8 +118,9 @@ namespace GameUtil {
 }
 
 // 알고리즘 전략을 매개변수로 받아 게임을 진행한다
-inline void playGameWithStrategy(const int seed, std::function<int(const State&)> strategy_func) {
-    auto state = State(seed);
+template <typename GameStateType>
+inline void playGameWithStrategy(const int seed, std::function<int(const GameStateType&)> strategy_func) {
+    auto state = GameStateType(seed);
     std::cout << state.toString() << std::endl;
     while (!state.isDone()) {
         state.progress(strategy_func(state));

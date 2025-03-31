@@ -32,6 +32,4 @@ public:
     bool operator<(const MazeState& other) const;
 };
 
-using State = MazeState;
-
 #endif // MAZE_STATE_H 

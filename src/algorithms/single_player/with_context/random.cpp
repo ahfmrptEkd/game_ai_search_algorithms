@@ -5,7 +5,7 @@
 #include <vector>
 
 // 무작위 행동 알고리즘
-int randomAction(const State& state)
+int randomAction(const MazeState& state)
 {
     auto legal_actions = state.legalActions();
     if (legal_actions.empty())

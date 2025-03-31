@@ -4,14 +4,14 @@
 #include <random>
 
 // 탐욕법으로 행동을 결정한다.
-int greedyAction(const State& state)
+int greedyAction(const MazeState& state)
 {
     auto legal_actions = state.legalActions();
     ScoreType best_score = -GameConstants::INF; 
     int best_action = -1;
     for (const auto action : legal_actions)
     {
-        State now_state = state;
+        MazeState now_state = state;
         now_state.progress(action);
         now_state.evaluateScore();
         if (now_state.evaluated_score_ > best_score)

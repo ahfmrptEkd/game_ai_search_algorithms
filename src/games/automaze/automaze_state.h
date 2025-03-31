@@ -37,7 +37,4 @@ public:
     bool operator<(const AutoMazeState& other) const;
 };
 
-// 특정 게임에 한정된 사용은 지양하고 직접 클래스 이름 사용
-// using State = AutoMazeState;
-
 #endif // AUTOMAZE_STATE_H

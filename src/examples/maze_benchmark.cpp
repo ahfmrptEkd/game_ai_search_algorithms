@@ -9,13 +9,13 @@
 #include <functional>
 #include <random>
 
-void testAlgorithmScore(const int game_number, std::function<int(const State&)> strategy_func)
+void testAlgorithmScore(const int game_number, std::function<int(const MazeState&)> strategy_func)
 {
     std::mt19937 mt_for_construct(0);
     double score_mean = 0;
     for (int i = 0; i < game_number; i++)
     {
-        auto state = State(mt_for_construct());
+        auto state = MazeState(mt_for_construct());
         while (!state.isDone())
         {
             state.progress(strategy_func(state));
@@ -29,16 +29,16 @@ void testAlgorithmScore(const int game_number, std::function<int(const State&)> 
 
 int main(int argc, char* argv[]) 
 {
-    std::map<std::string, std::function<int(const State&)>> algorithms = 
+    std::map<std::string, std::function<int(const MazeState&)>> algorithms = 
     {
         {"random", randomAction},
         {"greedy", greedyAction},
-        {"beam", [](const State& state){ 
+        {"beam", [](const MazeState& state){ 
             BeamConfig config; 
             config.time_threshold = 1;
             return beamSearchAction(state, config); 
         }},
-        {"chokudai", [](const State& state){ 
+        {"chokudai", [](const MazeState& state){ 
             ChokudaiConfig config; 
             config.time_threshold = 1;
             return chokudaiSearchAction(state, config); 

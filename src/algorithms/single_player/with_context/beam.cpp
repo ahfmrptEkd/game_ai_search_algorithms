@@ -3,10 +3,10 @@
 #include <iostream>
 #include <random>
 
-int beamSearchAction(const State& state, const BeamConfig& config)
+int beamSearchAction(const MazeState& state, const BeamConfig& config)
 {
-    std::priority_queue<State> now_beam;
-    State best_state;
+    std::priority_queue<MazeState> now_beam;
+    MazeState best_state;
 
     TimeKeeper* time_keeper = nullptr;
     if (config.time_threshold > 0) {
@@ -16,7 +16,7 @@ int beamSearchAction(const State& state, const BeamConfig& config)
     now_beam.push(state);
     for (int t = 0; t < config.beam_depth; t++)
     {
-        std::priority_queue<State> next_beam;
+        std::priority_queue<MazeState> next_beam;
         for (int i = 0; i < config.beam_width; i++)
         {
             // 시간 제한 체크
@@ -27,12 +27,12 @@ int beamSearchAction(const State& state, const BeamConfig& config)
             if (now_beam.empty())
                 break;
             
-            State now_state = now_beam.top();
+            MazeState now_state = now_beam.top();
             now_beam.pop();   
              
             for (const auto& action : now_state.legalActions())
             {
-                State next_state = now_state;
+                MazeState next_state = now_state;
                 next_state.progress(action);
                 next_state.evaluateScore();
                 if (t == 0)
