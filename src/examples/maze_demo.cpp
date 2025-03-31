@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[]) 
 {
-    const int seed = 121321;
+    const int seed = 0;
     
     // 사용 가능한 알고리즘을 맵으로 관리 (이름 -> 함수 포인터)
     std::map<std::string, std::function<void(int)>> algorithms = 

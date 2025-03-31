@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) 
 {
-    const int seed = 12345;
+    const int seed = 0;
     
     std::map<std::string, std::function<void(int)>> algorithms = 
     {
