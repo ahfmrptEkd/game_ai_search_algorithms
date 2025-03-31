@@ -12,3 +12,12 @@ $(BINDIR)/automaze_demo: $(EXAMPLES_DIR)/automaze_demo.cpp $(AUTOMAZE_SRC) $(AUT
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "AutoMaze game built successfully!" 
+
+# AutoMaze 벤치마크 빌드 규칙
+automaze_benchmark: $(BINDIR)/automaze_benchmark
+
+$(BINDIR)/automaze_benchmark: $(EXAMPLES_DIR)/automaze_benchmark.cpp $(AUTOMAZE_SRC) $(AUTOMAZE_ALGO) $(COMMON_SRC)
+	@echo "Building automaze benchmark..."
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	@echo "AutoMaze benchmark built successfully!"

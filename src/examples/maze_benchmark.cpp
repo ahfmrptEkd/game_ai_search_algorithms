@@ -3,6 +3,7 @@
 #include "../algorithms/single_player/with_context/beam.h"
 #include "../algorithms/single_player/with_context/chokudai.h"
 #include "../common/coord.h"
+#include "../common/game_util.h"
 #include <iostream>
 #include <string>
 #include <map>
@@ -11,11 +12,11 @@
 
 void testAlgorithmScore(const int game_number, std::function<int(const MazeState&)> strategy_func)
 {
-    std::mt19937 mt_for_construct(0);
+    GameUtil::mt_for_action.seed(0);
     double score_mean = 0;
     for (int i = 0; i < game_number; i++)
     {
-        auto state = MazeState(mt_for_construct());
+        auto state = MazeState(GameUtil::mt_for_action());
         while (!state.isDone())
         {
             state.progress(strategy_func(state));
