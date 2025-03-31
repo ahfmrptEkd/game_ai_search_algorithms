@@ -4,7 +4,7 @@
 #include <random>
 
 // 랜덤 배치 알고리즘 구현
-AutoMazeState randomPlacement(const AutoMazeState &state)
+AutoMazeState randomPlacement(const AutoMazeState& state)
 {
     AutoMazeState now_state = state;
     for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++)

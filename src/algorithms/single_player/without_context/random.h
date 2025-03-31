@@ -2,7 +2,6 @@
 #define RANDOM_ALGORITHM_WITHOUT_CONTEXT_H
 
 #include "../../../games/automaze/automaze_state.h"
-#include <iostream>
 
 // 캐릭터를 랜덤하게 배치하는 함수
 AutoMazeState randomPlacement(const AutoMazeState &state);
