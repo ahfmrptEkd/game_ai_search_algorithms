@@ -7,6 +7,7 @@ SRCDIR = src
 BINDIR = bin
 GAMES_DIR = $(SRCDIR)/games
 ALGO_DIR = $(SRCDIR)/algorithms/single_player
+ALGO_DIR_2P = $(SRCDIR)/algorithms/two_player
 COMMON_DIR = $(SRCDIR)/common
 EXAMPLES_DIR = $(SRCDIR)/examples
 
