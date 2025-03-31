@@ -13,17 +13,24 @@ namespace GameConstants {
     constexpr const int DX[4] = {1, -1, 0, 0};
     constexpr const int DY[4] = {0, 0, 1, -1};
     
-    namespace Maze {
+    // 모든 게임에 공통으로 사용되는 보드 관련 상수
+    namespace Board {
         constexpr const int H = 30;
         constexpr const int W = 30;
         constexpr const int END_TURN = 100;
     }
     
     namespace AutoMaze {
-        constexpr const int H = 5;
-        constexpr const int W = 5;
-        constexpr const int END_TURN = 5;
+        // AutoMaze에만 있는 특수 상수
         constexpr const int CHARACTER_N = 3;
+    }
+    
+    // 알고리즘 파라미터 상수 추가
+    namespace AlgorithmParams {
+        constexpr const int SEARCH_WIDTH = 5;
+        constexpr const int SEARCH_DEPTH = 10;
+        constexpr const int SEARCH_NUMBER = 2;
+        constexpr const int64_t TIME_THRESHOLD = 1;
     }
 }
 

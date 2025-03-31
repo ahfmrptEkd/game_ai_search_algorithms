@@ -11,7 +11,7 @@ using ScoreType = GameConstants::ScoreType;
 
 class MazeState : public GameState {
 private:
-    int points_[GameConstants::Maze::H][GameConstants::Maze::W] = {};
+    int points_[GameConstants::Board::H][GameConstants::Board::W] = {};
     int turn_ = 0;
 
 public:

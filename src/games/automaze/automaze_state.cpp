@@ -9,7 +9,7 @@ AutoMazeState::AutoMazeState(const int seed)
     : turn_(0), game_score_(0), evaluated_score_(0)
 {
     auto mt_for_construct = std::mt19937(seed);
-    GameUtil::generateRandomPoints<GameConstants::AutoMaze::H, GameConstants::AutoMaze::W>(this->points_, mt_for_construct, 0, 9);
+    GameUtil::generateRandomPoints<GameConstants::Board::H, GameConstants::Board::W>(this->points_, mt_for_construct, 0, 9);
 }
 
 // 지정 위치에 지정 캐릭터를 배치한다.
@@ -29,7 +29,7 @@ void AutoMazeState::movePlayer(const int character_id)
     {
         int ty = character.y_ + GameConstants::DY[action];
         int tx = character.x_ + GameConstants::DX[action];
-        if (ty >= 0 && ty < GameConstants::AutoMaze::H && tx >= 0 && tx < GameConstants::AutoMaze::W)
+        if (ty >= 0 && ty < GameConstants::Board::H && tx >= 0 && tx < GameConstants::Board::W)
         {
             auto point = this->points_[ty][tx];
             if (point > best_point)
@@ -63,7 +63,7 @@ void AutoMazeState::progress(const int action)
 // 게임 종료 판정
 bool AutoMazeState::isDone() const
 {
-    return this->turn_ == GameConstants::AutoMaze::END_TURN;
+    return this->turn_ == GameConstants::Board::END_TURN;
 }
 
 // 현재 상황에서 가능한 행동을 모두 수집
@@ -72,7 +72,7 @@ std::vector<int> AutoMazeState::legalActions() const
     // 단순화를 위해 모든 캐릭터 위치 조합을 가능한 액션으로 반환
     // 실제 구현에서는 중복 위치 제거 등 추가 로직 필요
     std::vector<int> actions;
-    int max_actions = pow(GameConstants::AutoMaze::H * GameConstants::AutoMaze::W, GameConstants::AutoMaze::CHARACTER_N);
+    int max_actions = pow(GameConstants::Board::H * GameConstants::Board::W, GameConstants::AutoMaze::CHARACTER_N);
     
     // 액션 수가 너무 많을 수 있어 실제 구현에서는 제한이 필요할 수 있음
     for (int i = 0; i < max_actions; i++) {
@@ -87,7 +87,7 @@ std::string AutoMazeState::toString() const
     std::stringstream ss;
     ss << "turn:\t" << this->turn_ << "\n";
     ss << "score:\t" << this->game_score_ << "\n";
-    ss << GameUtil::renderMultiCharMaze<GameConstants::AutoMaze::H, GameConstants::AutoMaze::W, GameConstants::AutoMaze::CHARACTER_N>(this->points_, this->characters_);
+    ss << GameUtil::renderMultiCharMaze<GameConstants::Board::H, GameConstants::Board::W, GameConstants::AutoMaze::CHARACTER_N>(this->points_, this->characters_);
     return ss.str();
 }
 

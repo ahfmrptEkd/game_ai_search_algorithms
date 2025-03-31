@@ -3,7 +3,7 @@
 #include <chrono>
 
 int chokudaiSearchAction(const MazeState& state, const ChokudaiConfig& config) {
-    auto beam = std::vector<std::priority_queue<MazeState>>(config.beam_depth + 1);
+    auto beam = std::vector<std::priority_queue<MazeState>>(config.search_depth + 1);
     beam[0].push(state);
 
     TimeKeeper* time_keeper = nullptr;
@@ -11,12 +11,12 @@ int chokudaiSearchAction(const MazeState& state, const ChokudaiConfig& config) {
         time_keeper = new TimeKeeper(config.time_threshold);
     }
     
-    for (int cnt = 0; cnt < config.beam_number; cnt++) {
-        for (int t = 0; t < config.beam_depth; t++) {
+    for (int cnt = 0; cnt < config.search_number; cnt++) {
+        for (int t = 0; t < config.search_depth; t++) {
             auto& now_beam = beam[t];
             auto& next_beam = beam[t + 1];
             
-            for (int i = 0; i < config.beam_width; i++) {
+            for (int i = 0; i < config.search_width; i++) {
 
                 if (time_keeper && time_keeper->isTimeOver()) 
                 {
@@ -54,7 +54,7 @@ int chokudaiSearchAction(const MazeState& state, const ChokudaiConfig& config) {
         delete time_keeper;
     }
     
-    for (int t = config.beam_depth; t >= 0; t--) {
+    for (int t = config.search_depth; t >= 0; t--) {
         if (!beam[t].empty()) {
             return beam[t].top().first_action_;
         }

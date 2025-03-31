@@ -1,6 +1,7 @@
 #include "random.h"
 #include "../../../common/game_util.h"
 #include <iostream>
+#include <random>
 
 // 랜덤 배치 알고리즘 구현
 AutoMazeState randomPlacement(const AutoMazeState &state)
@@ -8,8 +9,8 @@ AutoMazeState randomPlacement(const AutoMazeState &state)
     AutoMazeState now_state = state;
     for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++)
     {
-        int y = GameUtil::mt_for_action() % GameConstants::AutoMaze::H;
-        int x = GameUtil::mt_for_action() % GameConstants::AutoMaze::W;
+        int y = GameUtil::mt_for_action() % GameConstants::Board::H;
+        int x = GameUtil::mt_for_action() % GameConstants::Board::W;
 
         now_state.setCharacter(character_id, y, x);
     }

@@ -13,7 +13,7 @@ using ScoreType = GameConstants::ScoreType;
 
 class AutoMazeState : public GameState {
 private:
-    int points_[GameConstants::AutoMaze::H][GameConstants::AutoMaze::W] = {};
+    int points_[GameConstants::Board::H][GameConstants::Board::W] = {};
     int turn_ = 0;
     Coord characters_[GameConstants::AutoMaze::CHARACTER_N] = {};
     void movePlayer(const int character_id);

@@ -14,10 +14,10 @@ int beamSearchAction(const MazeState& state, const BeamConfig& config)
     }
 
     now_beam.push(state);
-    for (int t = 0; t < config.beam_depth; t++)
+    for (int t = 0; t < config.search_depth; t++)
     {
         std::priority_queue<MazeState> next_beam;
-        for (int i = 0; i < config.beam_width; i++)
+        for (int i = 0; i < config.search_width; i++)
         {
             // 시간 제한 체크
             if (time_keeper && time_keeper->isTimeOver()) {

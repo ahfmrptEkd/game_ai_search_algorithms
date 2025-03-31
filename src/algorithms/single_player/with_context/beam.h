@@ -5,9 +5,9 @@
 #include "../../../common/game_util.h"
 
 struct BeamConfig {
-    int beam_width = 5;
-    int beam_depth = 10;
-    int64_t time_threshold = 1; // ms
+    int search_width = GameConstants::AlgorithmParams::SEARCH_WIDTH;
+    int search_depth = GameConstants::AlgorithmParams::SEARCH_DEPTH;
+    int64_t time_threshold = GameConstants::AlgorithmParams::TIME_THRESHOLD; // ms
 };
 
 // 빔 탐색으로 행동을 결정한다.
