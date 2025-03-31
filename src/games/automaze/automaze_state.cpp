@@ -51,9 +51,9 @@ void AutoMazeState::progress(const int action)
     {
         movePlayer(character_id);
     }
-    for (auto &character : this->characters_)
+    for (auto& character : this->characters_)
     {
-        auto &point = this->points_[character.y_][character.x_];
+        auto& point = this->points_[character.y_][character.x_];
         this->game_score_ += point;
         point = 0;
     }
