@@ -9,11 +9,11 @@ MazeState::MazeState() {}
 MazeState::MazeState(const int seed)
 {
     auto mt_for_construct = std::mt19937(seed);
-    this->character_.y_ = mt_for_construct() % H;
-    this->character_.x_ = mt_for_construct() % W;
+    this->character_.y_ = mt_for_construct() % GameConstants::Maze::H;
+    this->character_.x_ = mt_for_construct() % GameConstants::Maze::W;
 
-    for (int y = 0; y < H; y++)
-        for (int x = 0; x < W; x++)
+    for (int y = 0; y < GameConstants::Maze::H; y++)
+        for (int x = 0; x < GameConstants::Maze::W; x++)
         {
             if (y == character_.y_ && x == character_.x_)
             {
@@ -26,14 +26,14 @@ MazeState::MazeState(const int seed)
 // 게임 종료 판정
 bool MazeState::isDone() const
 {
-    return this->turn_ == END_TURN;
+    return this->turn_ == GameConstants::Maze::END_TURN;
 }
 
 // 지정한 action으로 게임을 1턴 진행
 void MazeState::progress(const int action)
 {
-    this->character_.x_ += DX[action];
-    this->character_.y_ += DY[action];
+    this->character_.x_ += GameConstants::DX[action];
+    this->character_.y_ += GameConstants::DY[action];
     auto& point = this->points_[this->character_.y_][this->character_.x_];
     if (point > 0)
     {
@@ -49,9 +49,9 @@ std::vector<int> MazeState::legalActions() const
     std::vector<int> actions;
     for (int action = 0; action < 4; action++)
     {
-        int ty = this->character_.y_ + DY[action];
-        int tx = this->character_.x_ + DX[action];
-        if (ty >= 0 && ty < H && tx >= 0 && tx < W)
+        int ty = this->character_.y_ + GameConstants::DY[action];
+        int tx = this->character_.x_ + GameConstants::DX[action];
+        if (ty >= 0 && ty < GameConstants::Maze::H && tx >= 0 && tx < GameConstants::Maze::W)
         {
             actions.emplace_back(action);
         }
@@ -66,9 +66,9 @@ std::string MazeState::toString() const
     ss << "turn:\t" << this->turn_ << "\n";
     ss << "score:\t" << this->game_score_ << "\n";
 
-    for (int h = 0; h < H; h++)
+    for (int h = 0; h < GameConstants::Maze::H; h++)
     {
-        for (int w = 0; w < W; w++)
+        for (int w = 0; w < GameConstants::Maze::W; w++)
         {
             if (this->character_.y_ == h && this->character_.x_ == w)
             {

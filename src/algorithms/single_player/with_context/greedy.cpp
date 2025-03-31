@@ -7,7 +7,7 @@
 int greedyAction(const State& state)
 {
     auto legal_actions = state.legalActions();
-    ScoreType best_score = -INF; 
+    ScoreType best_score = -GameConstants::INF; 
     int best_action = -1;
     for (const auto action : legal_actions)
     {
