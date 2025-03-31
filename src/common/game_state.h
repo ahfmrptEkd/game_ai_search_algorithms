@@ -24,6 +24,10 @@ namespace GameConstants {
         // AutoMaze에만 있는 특수 상수
         constexpr const int CHARACTER_N = 3;
     }
+
+    namespace TwoMaze {
+        constexpr const int PLAYER_N = 2;
+    }
     
     // 알고리즘 파라미터 상수 추가
     namespace AlgorithmParams {
