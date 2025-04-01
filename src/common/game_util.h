@@ -128,4 +128,16 @@ inline void playGameWithStrategy(const int seed, std::function<int(const GameSta
     }
 }
 
+// 두 플레이어 미로 게임 관련 유틸리티
+
+enum WinningStatus {
+    WIN,
+    LOSE,
+    DRAW,
+    NONE
+};
+
+// 게임 결과 출력 유틸리티 함수
+void printGameResult(WinningStatus status);
+
 #endif // GAME_UTIL_H 
