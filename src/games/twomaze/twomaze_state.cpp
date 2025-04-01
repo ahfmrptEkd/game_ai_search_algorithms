@@ -8,6 +8,7 @@
 TwoMazeState::TwoMazeState(){}
 
 TwoMazeState::TwoMazeState(const int seed)
+    : turn_(0)
 {
     auto mt_for_construct = GameUtil::mt_for_action;
 
@@ -44,7 +45,7 @@ TwoMazeState::TwoMazeState(const int seed)
 
 bool TwoMazeState::isDone() const
 {
-    return this->turn_ == GameConstants::Board::END_TURN;
+    return this->turn_ >= GameConstants::Board::END_TURN;
 }
 
 void TwoMazeState::progress(const int action)
@@ -103,38 +104,31 @@ std::string TwoMazeState::toString() const
     }
 
     // 게임 보드
-    for (int h = 0; h < GameConstants::Board::H; h++)
-        for (int w = 0; w < GameConstants::Board::W; w++)
-        {
+    for (int h = 0; h < GameConstants::Board::H; h++) {
+        for (int w = 0; w < GameConstants::Board::W; w++) {
             bool is_player = false;
-            for (int player_id = 0; player_id < GameConstants::TwoMaze::PLAYER_N; player_id++)
-            {
+            for (int player_id = 0; player_id < GameConstants::TwoMaze::PLAYER_N; player_id++) {
                 int actual_player_id = player_id;
-                if (this->turn_ % 2 == 1)
-                {
+                if (this->turn_ % 2 == 1) {
                     actual_player_id = (player_id + 1) % 2;
                 }
                 const auto& player = this->players_[player_id];
-                if (player.coord_.y_ == h && player.coord_.x_ == w)
-                {
+                if (player.coord_.y_ == h && player.coord_.x_ == w) {
                     ss << (actual_player_id == 0 ? "A" : "B");
                     is_player = true;
                     break;
                 }
             }
-            if (!is_player)
-            {
-                if (this->points_[h][w] > 0)
-                {
+            if (!is_player) {
+                if (this->points_[h][w] > 0) {
                     ss << this->points_[h][w];
-                }
-                else
-                {
+                } else {
                     ss << ".";
                 }
             }
-            ss << "\n";
         }
+        ss << "\n";
+    }
     return ss.str();
 }
 

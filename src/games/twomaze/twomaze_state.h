@@ -26,7 +26,7 @@ struct TwoMazePlayer {
 class TwoMazeState : public GameState {
 private:
     int points_[GameConstants::Board::H][GameConstants::Board::W] = {};
-    int turn_;
+    int turn_ = 0;
     TwoMazePlayer players_[GameConstants::TwoMaze::PLAYER_N];
 public:
     int first_action_ = -1;
