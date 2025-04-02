@@ -1,3 +1,4 @@
+// src/algorithms/two_player/alternate/minimax.cpp
 #include "minimax.h"
 #include "../../../common/game_util.h"
 #include "../../../common/game_state.h"
@@ -22,7 +23,8 @@ namespace minimax {
         for (const auto action : legal_actions) {
             TwoMazeState next_state = state;
             next_state.progress(action);
-            ScoreType score = miniMaxScore(next_state, depth - 1);
+            // 여기가 중요: 상대방 시점에서는 최소화하는 것이 우리에게 최선이므로 부호를 반전
+            ScoreType score = -miniMaxScore(next_state, depth - 1);
             if (score > bestScore) {
                 bestScore = score;
             }
@@ -39,7 +41,8 @@ namespace minimax {
         for (const auto action : state.legalActions()) {
             TwoMazeState next_state = state;
             next_state.progress(action);
-            ScoreType score = miniMaxScore(next_state, depth - 1);
+            // 여기도 마찬가지: 상대 시점에서의 최소화
+            ScoreType score = -miniMaxScore(next_state, depth - 1);
 
             if (score > best_score) {
                 best_action = action;

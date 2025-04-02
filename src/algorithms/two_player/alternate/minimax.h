@@ -1,8 +1,10 @@
+// src/algorithms/two_player/alternate/minimax.h
 #ifndef MINIMAX_H
 #define MINIMAX_H
 
 #include "../../../games/twomaze/twomaze_state.h"
 #include "../../../common/game_util.h"
+#include "random.h"
 
 namespace minimax {
     // minimax 알고리즘을 점수 계산
@@ -16,9 +18,8 @@ namespace minimax {
 int miniMaxSearchAction(const TwoMazeState& state, const int depth);
 
 inline void playGameMinimax(const int seed, int depth = GameConstants::AlgorithmParams::SEARCH_DEPTH) {
-    playGameWithStrategy<TwoMazeState>(seed, [depth] (const TwoMazeState& state) 
-    {
+    playGame([depth] (const TwoMazeState& state) {
         return miniMaxSearchAction(state, depth);
-    });
+    }, seed);
 }
 #endif // MINIMAX_H
