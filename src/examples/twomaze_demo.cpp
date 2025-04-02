@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     
     std::map<std::string, std::function<void(int)>> algorithms = 
     {
-        {"random", playGameTwoMazeRandom},
+        {"random", playGameRandom},
         // 다른 알고리즘 추가
     };
     
