@@ -8,6 +8,7 @@ TWOMAZE_ALGO := $(ALGO_DIR_2P)/alternate/random.cpp \
 				$(ALGO_DIR_2P)/alternate/deepening.cpp \
 				$(ALGO_DIR_2P)/alternate/mc.cpp \
 				$(ALGO_DIR_2P)/alternate/mcts.cpp \
+				$(ALGO_DIR_2P)/alternate/thunder.cpp \
 				
 
 				
