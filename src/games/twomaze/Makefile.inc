@@ -6,6 +6,8 @@ TWOMAZE_ALGO := $(ALGO_DIR_2P)/alternate/random.cpp \
 				$(ALGO_DIR_2P)/alternate/minimax.cpp \
 				$(ALGO_DIR_2P)/alternate/alphabeta.cpp \
 				$(ALGO_DIR_2P)/alternate/deepening.cpp \
+				$(ALGO_DIR_2P)/alternate/mc.cpp \
+
 				
 				
 
