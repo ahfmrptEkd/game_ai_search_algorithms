@@ -1,6 +1,7 @@
 // src/examples/twomaze_demo.cpp
 #include "../algorithms/two_player/alternate/random.h"
 #include "../algorithms/two_player/alternate/minimax.h"
+#include "../algorithms/two_player/alternate/alphabeta.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <string>
@@ -15,7 +16,8 @@ int main(int argc, char* argv[])
     std::map<std::string, std::function<void(int)>> algorithms = 
     {
         {"random", [](int seed) { playGameRandom(seed); }},
-        {"minimax", [](int seed) { playGameMinimax(seed); }}
+        {"minimax", [](int seed) { playGameMinimax(seed); }},
+        {"alphabeta", [](int seed) {playGameAlphaBeta(seed);}}
         // 다른 알고리즘 추가
     };
     
