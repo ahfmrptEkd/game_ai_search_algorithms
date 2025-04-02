@@ -6,14 +6,16 @@
 namespace minimax {
     ScoreType miniMaxScore(const TwoMazeState& state, const int depth) {
         if (state.isDone() || depth == 0) {
-            state.evaluateScore();
-            return state.evaluated_score_;
+            TwoMazeState state_copy = state;
+            state_copy.evaluateScore();
+            return state_copy.evaluated_score_;
         }
 
         auto legal_actions = state.legalActions();
         if (legal_actions.empty()) {
-            state.evaluateScore();
-            return state.evaluated_score_;
+            TwoMazeState state_copy = state;
+            state_copy.evaluateScore();
+            return state_copy.evaluated_score_;
         }
 
         ScoreType bestScore = -GameConstants::INF;
