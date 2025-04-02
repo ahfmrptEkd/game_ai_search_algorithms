@@ -3,6 +3,7 @@
 #include "../algorithms/two_player/alternate/minimax.h"
 #include "../algorithms/two_player/alternate/alphabeta.h"
 #include "../algorithms/two_player/alternate/deepening.h"
+#include "../algorithms/two_player/alternate/mc.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <string>
@@ -19,7 +20,8 @@ int main(int argc, char* argv[])
         {"random", [](int seed) { playGameRandom(seed); }},
         {"minimax", [](int seed) { playGameMinimax(seed); }},
         {"alphabeta", [](int seed) {playGameAlphaBeta(seed);}},
-        {"deepening", [](int seed) {playGameIterativeDeepening(seed);}}
+        {"deepening", [](int seed) {playGameIterativeDeepening(seed);}},
+        {"mc", [](int seed) {playGameMonteCarlo(seed);}}
         // 다른 알고리즘 추가
     };
     
