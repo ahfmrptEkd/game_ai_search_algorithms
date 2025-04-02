@@ -11,10 +11,11 @@ int main(int argc, char* argv[])
 {
     GameUtil::mt_for_action.seed(0);
     
+    // 사용 가능한 알고리즘을 맵으로 관리 (이름 -> 함수 포인터)
     std::map<std::string, std::function<void(int)>> algorithms = 
     {
-        {"random", playGameRandom},
-        {"minimax", playGameMinimax},
+        {"random", [](int seed) { playGameRandom(seed); }},
+        {"minimax", [](int seed) { playGameMinimax(seed); }}
         // 다른 알고리즘 추가
     };
     
