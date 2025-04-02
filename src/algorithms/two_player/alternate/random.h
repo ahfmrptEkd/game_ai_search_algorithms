@@ -14,7 +14,4 @@ void playGame(const std::function<int(const TwoMazeState&)>& action_func, const 
 inline void playGameRandom(const int seed) {
     playGame(randomAction, seed);
 }
-
-void playGameTwoMazeRandom(const std::function<int(const TwoMazeState&)>& action_func, const int seed);
-
 #endif // TWOPLAYER_RANDOM_H

@@ -15,7 +15,7 @@ int randomAction(const TwoMazeState& state)
     return legal_actions[GameUtil::mt_for_action() % (legal_actions.size())];
 }
 
-void playGameTwoMazeRandom(const std::function<int(const TwoMazeState&)>& action_func, const int seed)
+void playGame(const std::function<int(const TwoMazeState&)>& action_func, const int seed)
 {
     auto state = TwoMazeState(seed);
     
