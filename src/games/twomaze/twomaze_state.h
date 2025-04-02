@@ -2,19 +2,12 @@
 #define TWOMAZE_STATE_H
 
 #include "../../common/game_state.h"
+#include "../../common/game_util.h"
 #include "../../common/coord.h"
 #include <vector>
 #include <string>
 
 using ScoreType = GameConstants::ScoreType;
-
-enum WinningStatus
-{
-    WIN,
-    LOSE,
-    DRAW,
-    NONE,
-};
 
 struct TwoMazePlayer {
     Coord coord_;
