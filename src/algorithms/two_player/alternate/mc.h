@@ -4,7 +4,7 @@
 #include "../../../games/twomaze/twomaze_state.h"
 #include "../../../common/game_util.h"
 #include "random.h"
-namespace montecarlo {
+namespace monte_carlo {
     // 몬테카를로 플레이아웃 - 랜덤 플레이아웃으로 게임 종료시 승패 점수 반환
     double playout(TwoMazeState state);
 
