@@ -5,6 +5,8 @@ TWOMAZE_SRC := $(GAMES_DIR)/twomaze/twomaze_state.cpp
 TWOMAZE_ALGO := $(ALGO_DIR_2P)/alternate/random.cpp \
 				$(ALGO_DIR_2P)/alternate/minimax.cpp \
 				$(ALGO_DIR_2P)/alternate/alphabeta.cpp \
+				$(ALGO_DIR_2P)/alternate/deepening.cpp \
+				
 				
 
 # TwoMaze 게임 빌드 규칙
