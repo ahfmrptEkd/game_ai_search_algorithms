@@ -5,6 +5,7 @@
 #include "../algorithms/two_player/alternate/deepening.h"
 #include "../algorithms/two_player/alternate/mc.h"
 #include "../algorithms/two_player/alternate/mcts.h"
+#include "../algorithms/two_player/alternate/thunder.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <string>
@@ -23,7 +24,8 @@ int main(int argc, char* argv[])
         {"alphabeta", [](int seed) {playGameAlphaBeta(seed);}},
         {"deepening", [](int seed) {playGameIterativeDeepening(seed);}},
         {"mc", [](int seed) {playGameMonteCarlo(seed);}},
-        {"mcts", [](int seed) {playGameMCTS(seed);}}
+        {"mcts", [](int seed) {playGameMCTS(seed);}},
+        {"thunder", [](int seed) {playGameThunder(seed);}}
         // 다른 알고리즘 추가
     };
     
