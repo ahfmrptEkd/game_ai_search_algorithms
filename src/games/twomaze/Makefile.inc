@@ -3,6 +3,7 @@ TWOMAZE_SRC := $(GAMES_DIR)/twomaze/twomaze_state.cpp
 
 # TwoMaze 알고리즘 파일
 TWOMAZE_ALGO := $(ALGO_DIR_2P)/alternate/random.cpp \
+				$(ALGO_DIR_2P)/alternate/minimax.cpp \
 
 # TwoMaze 게임 빌드 규칙
 twomaze: $(BINDIR)/twomaze_demo
