@@ -27,6 +27,7 @@ namespace GameConstants {
 
     namespace TwoMaze {
         constexpr const int PLAYER_N = 2;
+        constexpr const int PLAYOUT_NUMBER = 1000;
     }
     
     // 알고리즘 파라미터 상수 추가
