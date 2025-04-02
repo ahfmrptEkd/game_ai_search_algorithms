@@ -39,6 +39,7 @@ public:
     int getCurrentPlayerScore() const;
     int getOpponentScore() const;
     bool operator<(const TwoMazeState& other) const;
+    double getScoreRate() const;
 };
 
 #endif // TWOMAZE_STATE_H

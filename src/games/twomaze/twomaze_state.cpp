@@ -162,3 +162,10 @@ int TwoMazeState::getOpponentScore() const {
 bool TwoMazeState::operator<(const TwoMazeState& other) const {
     return this->evaluated_score_ < other.evaluated_score_;
 }
+
+double TwoMazeState::getScoreRate() const {
+    int total_score = players_[0].game_score_ + players_[1].game_score_;
+    if (total_score == 0)
+        return 0.0;
+    return static_cast<double>(players_[0].game_score_) / static_cast<double>(total_score);
+}
