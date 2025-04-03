@@ -63,9 +63,11 @@ std::string MazeState::toString() const
     return ss.str();
 }
 
-void MazeState::evaluateScore()
+// 평가 점수 계산 및 반환
+GameConstants::ScoreType MazeState::evaluateScore()
 {
-    this->evaluated_score_ = this->game_score_;
+    this->evaluated_score_ = static_cast<GameConstants::ScoreType>(this->game_score_);
+    return this->evaluated_score_;
 }   
 
 bool MazeState::operator<(const MazeState& other) const

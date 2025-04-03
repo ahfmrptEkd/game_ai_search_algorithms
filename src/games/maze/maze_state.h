@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "../../common/coord.h"
 #include "../../common/game_state.h"
 
@@ -28,7 +29,22 @@ public:
     void progress(const int action) override;
     std::vector<int> legalActions() const override;
     std::string toString() const override;
-    void evaluateScore() override;
+    
+    // 평가 점수 반환 메소드로 변경
+    GameConstants::ScoreType evaluateScore() override;
+    
+    // 상태 복제 메소드 추가
+    std::unique_ptr<GameState> clone() const override {
+        return std::make_unique<MazeState>(*this);
+    }
+    
+    // 상태 비교 연산자 구현
+    bool operator<(const GameState& other) const override {
+        const MazeState& maze_other = static_cast<const MazeState&>(other);
+        return this->evaluated_score_ < maze_other.evaluated_score_;
+    }
+    
+    // 특정 게임에만 필요한 비교 연산자
     bool operator<(const MazeState& other) const;
 };
 
