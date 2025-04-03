@@ -45,8 +45,8 @@ BenchmarkResult testAlgorithmPerformance(
             
             while (!state.isDone()) {
                 // 시간 측정은 테스트 알고리즘의 턴일 때만
-                if ((state.turn_ % 2 == 0 && first_player == 0) || 
-                    (state.turn_ % 2 == 1 && first_player == 1)) {
+                if ((state.getCurrentTurn() % 2 == 0 && first_player == 0) || 
+                    (state.getCurrentTurn() % 2 == 1 && first_player == 1)) {
                     auto start_time = std::chrono::high_resolution_clock::now();
                     int action = player1_func(state);
                     auto end_time = std::chrono::high_resolution_clock::now();
