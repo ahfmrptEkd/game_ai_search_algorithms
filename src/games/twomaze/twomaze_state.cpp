@@ -169,3 +169,7 @@ double TwoMazeState::getScoreRate() const {
         return 0.0;
     return static_cast<double>(players_[0].game_score_) / static_cast<double>(total_score);
 }
+
+int TwoMazeState::getCurrentTurn() const {
+    return this->turn_;
+}

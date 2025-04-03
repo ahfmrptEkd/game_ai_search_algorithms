@@ -27,6 +27,7 @@ public:
 
     TwoMazeState();
     TwoMazeState(const int seed);
+    int getCurrentTurn() const;
 
     bool isDone() const override;
     void progress(const int action) override;
