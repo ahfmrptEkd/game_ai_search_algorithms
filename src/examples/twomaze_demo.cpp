@@ -25,7 +25,8 @@ int main(int argc, char* argv[])
         {"deepening", [](int seed) {playGameIterativeDeepening(seed);}},
         {"mc", [](int seed) {playGameMonteCarlo(seed);}},
         {"mcts", [](int seed) {playGameMCTS(seed);}},
-        {"thunder", [](int seed) {playGameThunder(seed);}}
+        {"thunder", [](int seed) {playGameThunder(seed, 1000);}},
+        {"thunder_time", [](int seed) {playGameThunderWithTime(seed, 100);}}
         // 다른 알고리즘 추가
     };
     
