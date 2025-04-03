@@ -176,8 +176,6 @@ int main(int argc, char* argv[]) {
     int simulation_count = 1000; // 기본 시뮬레이션 수
     int64_t time_threshold = 100; // 기본 시간 제한 (밀리초)
     std::string benchmark_mode = "all"; // 기본 모드: 모든 알고리즘 비교
-    std::string algo1 = "";     // 상세 비교용 알고리즘 1
-    std::string algo2 = "";     // 상세 비교용 알고리즘 2
     
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -189,19 +187,13 @@ int main(int argc, char* argv[]) {
             time_threshold = std::stol(argv[++i]);
         } else if (arg == "--mode" && i + 1 < argc) {
             benchmark_mode = argv[++i];
-        } else if (arg == "--algo1" && i + 1 < argc) {
-            algo1 = argv[++i];
-        } else if (arg == "--algo2" && i + 1 < argc) {
-            algo2 = argv[++i];
         } else if (arg == "--help") {
             std::cout << "사용법: twomaze_benchmark [옵션]\n"
                       << "옵션:\n"
                       << "  --games N        Number of games per algorithm pair\n"
                       << "  --sims N         Number of simulations for simulation-based algorithms\n"
                       << "  --time N         Time threshold in milliseconds for time-based algorithms\n"
-                      << "  --mode MODE      Benchmark mode (all, time, detail)\n"
-                      << "  --algo1 NAME     First algorithm for detailed comparison\n"
-                      << "  --algo2 NAME     Second algorithm for detailed comparison\n"
+                      << "  --mode MODE      Benchmark mode (all, time)\n"
                       << "  --help           Show this help message\n";
             return 0;
         }
