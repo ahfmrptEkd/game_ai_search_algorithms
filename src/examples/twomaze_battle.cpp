@@ -97,9 +97,9 @@ int main(int argc, char* argv[]) {
                       << "옵션:\n"
                       << "  --algo1 NAME     First algorithm name\n"
                       << "  --algo2 NAME     Second algorithm name\n"
-                      << "  --games N        Number of games to play\n"
-                      << "  --sims N         Number of simulations for MC-based algorithms\n"
-                      << "  --time N         Time threshold in milliseconds\n"
+                      << "  --games N        Number of games to play; default: 50\n"
+                      << "  --sims N         Number of simulations for MC-based algorithms; default: 1000\n"
+                      << "  --time N         Time threshold in milliseconds; default: 100\n"
                       << "  --help           Show this help message\n"
                       << "\n사용 가능한 알고리즘: Random, Minimax, AlphaBeta, Iterative, MonteCarlo, MCTS, Thunder, Thunder_Time\n";
             return 0;
