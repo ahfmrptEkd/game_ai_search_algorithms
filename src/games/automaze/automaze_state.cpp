@@ -92,9 +92,10 @@ std::string AutoMazeState::toString() const
 }
 
 // 현재 게임 상태 평가
-void AutoMazeState::evaluateScore()
+GameConstants::ScoreType AutoMazeState::evaluateScore()
 {
     this->evaluated_score_ = this->getScore();
+    return this->evaluated_score_;
 }
 
 // 게임 점수 계산
