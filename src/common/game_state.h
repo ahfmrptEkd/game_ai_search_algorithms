@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <string>
-#include <cstdint>
+#include <memory>
+#include "game_constants.h"
 
 // 모든 게임에서 공통으로 사용하는 상수
 namespace GameConstants {
@@ -57,8 +58,26 @@ public:
     // 현재 게임 상황을 문자열로 출력
     virtual std::string toString() const = 0;
 
-    // 현재 게임 상황을 평가
-    virtual void evaluateScore() = 0;
+    // 현재 게임 상황을 평가 - 점수 반환 추가
+    virtual GameConstants::ScoreType evaluateScore() = 0;
+
+    // 상태 복제 함수 추가
+    virtual std::unique_ptr<GameState> clone() const = 0;
+    
+    // 상태 비교 함수 추가
+    virtual bool operator<(const GameState& other) const = 0;
+    
+    // 템플릿 메소드 추가 - 공통 동작 구현
+    template<typename StateType>
+    static std::vector<StateType> getNextStates(const StateType& state) {
+        std::vector<StateType> next_states;
+        for (const auto& action : state.legalActions()) {
+            StateType next_state = state;
+            next_state.progress(action);
+            next_states.push_back(next_state);
+        }
+        return next_states;
+    }
 };
 
 #endif // GAME_STATE_H 
