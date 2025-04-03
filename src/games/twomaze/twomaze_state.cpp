@@ -132,9 +132,10 @@ std::string TwoMazeState::toString() const
     return ss.str();
 }
 
-void TwoMazeState::evaluateScore() {
+GameConstants::ScoreType TwoMazeState::evaluateScore() {
     // 기본적인 평가: 현재 플레이어 점수 - 상대 플레이어 점수
-    this->evaluated_score_ = this->getCurrentPlayerScore() - this->getOpponentScore();
+    this->evaluated_score_ = static_cast<GameConstants::ScoreType>(this->getCurrentPlayerScore() - this->getOpponentScore());
+    return this->evaluated_score_;
 }
 
 WinningStatus TwoMazeState::getWinningStatus() const {

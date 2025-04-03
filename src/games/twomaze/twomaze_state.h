@@ -6,6 +6,7 @@
 #include "../../common/coord.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 using ScoreType = GameConstants::ScoreType;
 
@@ -33,7 +34,17 @@ public:
     void progress(const int action) override;
     std::vector<int> legalActions() const override;
     std::string toString() const override;
-    void evaluateScore() override;
+    GameConstants::ScoreType evaluateScore() override;
+    
+    // 복제 및 비교 메소드 추가
+    std::unique_ptr<GameState> clone() const override {
+        return std::make_unique<TwoMazeState>(*this);
+    }
+    
+    bool operator<(const GameState& other) const override {
+        const TwoMazeState& maze_other = static_cast<const TwoMazeState&>(other);
+        return this->evaluated_score_ < maze_other.evaluated_score_;
+    }
     
     // 추가 메서드
     WinningStatus getWinningStatus() const;
