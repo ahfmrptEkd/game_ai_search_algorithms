@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
         {"AlphaBeta", [](const TwoMazeState& state) { 
             return alphaBetaSearchAction(state, 4); 
         }},
-        {"Iterative", [time_ms](const TwoMazeState& state) { 
+        {"Deepening", [time_ms](const TwoMazeState& state) { 
             return iterativeDeepeningSearchAction(state, time_ms); 
         }},
         {"MonteCarlo", [simulation_count](const TwoMazeState& state) { 
