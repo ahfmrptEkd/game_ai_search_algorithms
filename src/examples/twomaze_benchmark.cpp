@@ -133,7 +133,7 @@ void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_cou
 }
 
 // 시간 제한 기반으로 알고리즘 성능 분석하는 함수
-void analyzeTimeConstraints(const std::vector<AlgorithmInfo>& time_algorithms, 
+void analyzeTimeConstraints(const std::vector<std::pair<std::string, std::function<int(const TwoMazeState&, int64_t)>>>& time_algorithms, 
                            const AlgorithmInfo& baseline_algo,
                            const std::vector<int64_t>& time_limits,
                            int game_count) {
@@ -146,10 +146,13 @@ void analyzeTimeConstraints(const std::vector<AlgorithmInfo>& time_algorithms,
     std::cout << std::endl;
     
     for (const auto& algo_info : time_algorithms) {
-        std::cout << std::setw(20) << algo_info.name;
+        std::cout << std::setw(20) << algo_info.first; // .name 대신 .first 사용
         
         for (const auto& time_ms : time_limits) {
-            auto time_constrained_func = algo_info.action_func;
+            // 현재 시간 제한으로 함수 생성
+            auto time_constrained_func = [&algo_info, time_ms](const TwoMazeState& state) {
+                return algo_info.second(state, time_ms);
+            }; // 세미콜론 추가
             
             // 기준 알고리즘과 대결
             BenchmarkResult result = testAlgorithmPerformance(
@@ -228,15 +231,15 @@ int main(int argc, char* argv[]) {
     };
     
     // 시간 제한 기반 알고리즘 & 시간은 나중에 조정됨
-    std::vector<AlgorithmInfo> time_algorithms = {
-        {"MCTS_Time", [](const TwoMazeState& state) { 
-            return mctsSearchAction(state, 100);
+    std::vector<std::pair<std::string, std::function<int(const TwoMazeState&, int64_t)>>> time_algorithms = {
+        {"MCTS_Sims", [](const TwoMazeState& state, int64_t time_ms) { 
+            return mctsSearchAction(state, time_ms); // 시간값을 시뮬레이션 횟수로 사용
         }},
-        {"Thunder_Time", [](const TwoMazeState& state) { 
-            return thunderSearchActionWithTime(state, 100);
+        {"Thunder_Time", [](const TwoMazeState& state, int64_t time_ms) { 
+            return thunderSearchActionWithTime(state, time_ms); 
         }},
-        {"Deepening_Time", [](const TwoMazeState& state) { 
-            return iterativeDeepeningSearchAction(state, 100);
+        {"Deepening_Time", [](const TwoMazeState& state, int64_t time_ms) { 
+            return iterativeDeepeningSearchAction(state, time_ms);
         }}
     };
     
@@ -246,8 +249,8 @@ int main(int argc, char* argv[]) {
     if (benchmark_mode == "all" || benchmark_mode == "full") {
         runFullBenchmark(all_algorithms, game_count);
     } else if (benchmark_mode == "time") {
-        // 시간 제한 기반 분석 - 기준 알고리즘은 랜덤으로 설정
-        analyzeTimeConstraints(time_algorithms, all_algorithms[0], time_limits, game_count);
+        // 시간 제한 기반 분석 - 기준 알고리즘은 랜덤[0] 또는 몬테카를로 알고리즘[4] 으로 설정
+        analyzeTimeConstraints(time_algorithms, all_algorithms[4], time_limits, game_count);
     } else {
         std::cout << "알 수 없는 모드: " << benchmark_mode << "\n";
         return 1;
