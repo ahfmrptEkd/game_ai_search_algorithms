@@ -8,16 +8,12 @@ TWOMAZE_ALGO := $(ALGO_DIR_2P)/alternate/random.cpp \
 				$(ALGO_DIR_2P)/alternate/deepening.cpp \
 				$(ALGO_DIR_2P)/alternate/mc.cpp \
 				$(ALGO_DIR_2P)/alternate/mcts.cpp \
-				$(ALGO_DIR_2P)/alternate/thunder.cpp \
-				
-
-				
-				
+				$(ALGO_DIR_2P)/alternate/thunder.cpp
 
 # TwoMaze 게임 빌드 규칙
 twomaze: $(BINDIR)/twomaze_demo
 
-$(BINDIR)/twomaze_demo: $(EXAMPLES_DIR)/twomaze_demo.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/twomaze_demo: $(EXAMPLES_DIR)/twomaze_demo.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building TwoMaze game..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
@@ -26,7 +22,7 @@ $(BINDIR)/twomaze_demo: $(EXAMPLES_DIR)/twomaze_demo.cpp $(TWOMAZE_SRC) $(TWOMAZ
 # TwoMaze 벤치마크 빌드 규칙
 twomaze_benchmark: $(BINDIR)/twomaze_benchmark
 
-$(BINDIR)/twomaze_benchmark: $(EXAMPLES_DIR)/twomaze_benchmark.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/twomaze_benchmark: $(EXAMPLES_DIR)/twomaze_benchmark.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building TwoMaze benchmark..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
@@ -35,7 +31,7 @@ $(BINDIR)/twomaze_benchmark: $(EXAMPLES_DIR)/twomaze_benchmark.cpp $(TWOMAZE_SRC
 # 2인용 게임 AI 대결 정의
 twomaze_battle: $(BINDIR)/twomaze_battle
 
-$(BINDIR)/twomaze_battle: $(EXAMPLES_DIR)/twomaze_battle.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/twomaze_battle: $(EXAMPLES_DIR)/twomaze_battle.cpp $(TWOMAZE_SRC) $(TWOMAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building TwoMaze AI battle..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@

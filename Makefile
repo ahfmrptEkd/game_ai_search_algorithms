@@ -10,9 +10,11 @@ ALGO_DIR = $(SRCDIR)/algorithms/single_player
 ALGO_DIR_2P = $(SRCDIR)/algorithms/two_player
 COMMON_DIR = $(SRCDIR)/common
 EXAMPLES_DIR = $(SRCDIR)/examples
+ALGO_BASE_DIR = $(SRCDIR)/algorithms
 
 # 공통 소스 파일
 COMMON_SRC = $(COMMON_DIR)/game_util.cpp
+ALGO_FACTORY_SRC = $(ALGO_BASE_DIR)/algorithm_factory.cpp
 
 # 사용 가능한 게임 목록
 GAMES = maze automaze twomaze

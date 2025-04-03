@@ -8,7 +8,7 @@ MAZE_ALGO := $(ALGO_DIR)/with_context/random.cpp \
 # Maze 게임 빌드 규칙
 maze: $(BINDIR)/maze_demo
 
-$(BINDIR)/maze_demo: $(EXAMPLES_DIR)/maze_demo.cpp $(MAZE_SRC) $(MAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/maze_demo: $(EXAMPLES_DIR)/maze_demo.cpp $(MAZE_SRC) $(MAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building maze game..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
@@ -17,7 +17,7 @@ $(BINDIR)/maze_demo: $(EXAMPLES_DIR)/maze_demo.cpp $(MAZE_SRC) $(MAZE_ALGO) $(CO
 # Maze 벤치마크 빌드 규칙
 maze_benchmark: $(BINDIR)/maze_benchmark
 
-$(BINDIR)/maze_benchmark: $(EXAMPLES_DIR)/maze_benchmark.cpp $(MAZE_SRC) $(MAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/maze_benchmark: $(EXAMPLES_DIR)/maze_benchmark.cpp $(MAZE_SRC) $(MAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building maze benchmark..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@

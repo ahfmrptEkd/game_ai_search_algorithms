@@ -7,7 +7,7 @@ AUTOMAZE_ALGO := $(ALGO_DIR)/without_context/random.cpp \
 # AutoMaze 게임 빌드 규칙
 automaze: $(BINDIR)/automaze_demo
 
-$(BINDIR)/automaze_demo: $(EXAMPLES_DIR)/automaze_demo.cpp $(AUTOMAZE_SRC) $(AUTOMAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/automaze_demo: $(EXAMPLES_DIR)/automaze_demo.cpp $(AUTOMAZE_SRC) $(AUTOMAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building automaze game..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
@@ -16,7 +16,7 @@ $(BINDIR)/automaze_demo: $(EXAMPLES_DIR)/automaze_demo.cpp $(AUTOMAZE_SRC) $(AUT
 # AutoMaze 벤치마크 빌드 규칙
 automaze_benchmark: $(BINDIR)/automaze_benchmark
 
-$(BINDIR)/automaze_benchmark: $(EXAMPLES_DIR)/automaze_benchmark.cpp $(AUTOMAZE_SRC) $(AUTOMAZE_ALGO) $(COMMON_SRC)
+$(BINDIR)/automaze_benchmark: $(EXAMPLES_DIR)/automaze_benchmark.cpp $(AUTOMAZE_SRC) $(AUTOMAZE_ALGO) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 	@echo "Building automaze benchmark..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
