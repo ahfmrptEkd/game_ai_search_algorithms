@@ -139,10 +139,22 @@ void TwoMazeState::evaluateScore() {
 
 WinningStatus TwoMazeState::getWinningStatus() const {
     if (isDone()) {
-        if (players_[0].game_score_ > players_[1].game_score_) {
-            return WinningStatus::WIN;
-        } else if (players_[0].game_score_ < players_[1].game_score_) {
-            return WinningStatus::LOSE;
+        int player0_score, player1_score;
+        
+        if (this->turn_ % 2 == 0) {
+            // 짝수 턴: 원래 순서대로
+            player0_score = players_[0].game_score_;
+            player1_score = players_[1].game_score_;
+        } else {
+            // 홀수 턴: 교체된 순서 (players_[1]이 원래 player0, players_[0]이 원래 player1)
+            player0_score = players_[1].game_score_;
+            player1_score = players_[0].game_score_;
+        }
+        
+        if (player0_score > player1_score) {
+            return WinningStatus::WIN; 
+        } else if (player0_score < player1_score) {
+            return WinningStatus::LOSE; 
         } else {
             return WinningStatus::DRAW;
         }
@@ -164,10 +176,23 @@ bool TwoMazeState::operator<(const TwoMazeState& other) const {
 }
 
 double TwoMazeState::getScoreRate() const {
-    int total_score = players_[0].game_score_ + players_[1].game_score_;
+    int player0_score, player1_score;
+    
+    if (this->turn_ % 2 == 0) {
+        // 짝수 턴: 원래 순서
+        player0_score = players_[0].game_score_;
+        player1_score = players_[1].game_score_;
+    } else {
+        // 홀수 턴: 교체된 순서
+        player0_score = players_[1].game_score_;
+        player1_score = players_[0].game_score_;
+    }
+    
+    int total_score = player0_score + player1_score;
     if (total_score == 0)
-        return 0.0;
-    return static_cast<double>(players_[0].game_score_) / static_cast<double>(total_score);
+        return 0.5; // 0으로 나누기 방지, 무승부 상태로 처리
+        
+    return static_cast<double>(player0_score) / static_cast<double>(total_score);
 }
 
 int TwoMazeState::getCurrentTurn() const {
