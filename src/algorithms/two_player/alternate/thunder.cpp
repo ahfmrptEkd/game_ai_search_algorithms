@@ -88,7 +88,7 @@ namespace thunder {
         return this->child_nodes_[best_action_index];
     }
     
-    int thunderAction(const TwoMazeState& state, int simulation_number) {
+    int thunderSearchAction(const TwoMazeState& state, int simulation_number) {
         auto legal_actions = state.legalActions();
         if (legal_actions.empty()) {
             return -1;
@@ -116,8 +116,46 @@ namespace thunder {
         
         return legal_actions[best_action_index];
     }
+
+    int thunderSearchActionWithTime(const TwoMazeState& state, const int64_t time_ms) {
+        auto legal_actions = state.legalActions();
+        if (legal_actions.empty()){
+            return -1;
+        }        
+
+        Node root_node = Node(state);
+        root_node.expand();
+
+        TimeKeeper time_keeper(time_ms);
+
+        // 시간이 남아 있는 동안 최대한 많은 시뮬레이션 수행
+        int simulation_count = 0;
+        while (!time_keeper.isTimeOver()) {
+            root_node.evaluate();
+            simulation_count++;
+        }
+
+        int best_action_searched_number = -1;
+        int best_action_index = -1;
+
+        assert(legal_actions.size() == root_node.child_nodes_.size());
+
+        for (int i = 0; i < legal_actions.size(); i++) {
+            int n = root_node.child_nodes_[i].n_;
+            if (n > best_action_searched_number) {
+                best_action_index = i;
+                best_action_searched_number = n;
+            }
+        }
+        
+        return legal_actions[best_action_index];
+    }
 }
 
 int thunderSearchAction(const TwoMazeState& state, int simulation_number) {
-    return thunder::thunderAction(state, simulation_number);
+    return thunder::thunderSearchAction(state, simulation_number);
+}
+
+int thunderSearchActionWithTime(const TwoMazeState& state, const int64_t time_ms) {
+    return thunder::thunderSearchActionWithTime(state, time_ms);
 }
