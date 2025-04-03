@@ -88,22 +88,23 @@ BenchmarkResult testAlgorithmPerformance(
 void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_count) {
     std::cout << "전체 벤치마크 실행 중... " << game_count << "게임/알고리즘 쌍\n" << std::endl;
     
-    std::cout << std::setw(20) << "알고리즘";
+    // 헤더 출력 - 각 알고리즘 이름 사이에 충분한 간격
+    std::cout << std::left << std::setw(14) << "알고리즘";
     for (const auto& algo : algorithms) {
-        std::cout << std::setw(12) << algo.name;
+        std::cout << std::setw(14) << algo.name;
     }
     std::cout << std::setw(12) << "평균 승률%" << std::endl;
     
     // 각 알고리즘에 대한 승률 표 생성
     for (size_t i = 0; i < algorithms.size(); i++) {
-        std::cout << std::setw(20) << algorithms[i].name;
+        std::cout << std::left << std::setw(14) << algorithms[i].name;
         
         double total_win_rate = 0.0;
         int opponent_count = 0;
         
         for (size_t j = 0; j < algorithms.size(); j++) {
             if (i == j) {
-                std::cout << std::setw(12) << "-";
+                std::cout << std::setw(14) << "-";
                 continue;
             }
             
@@ -113,8 +114,8 @@ void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_cou
                 game_count
             );
             
-            std::cout << std::setw(12) << std::fixed << std::setprecision(2) 
-                      << (result.win_rate * 100) << "%";
+            std::cout << std::right << std::setw(10) << std::fixed << std::setprecision(2) 
+                      << (result.win_rate * 100) << "%   ";
             
             total_win_rate += result.win_rate;
             opponent_count++;
@@ -123,7 +124,7 @@ void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_cou
         // 평균 승률 계산 및 출력
         if (opponent_count > 0) {
             double avg_win_rate = total_win_rate / opponent_count;
-            std::cout << std::setw(12) << std::fixed << std::setprecision(2) 
+            std::cout << std::right << std::setw(10) << std::fixed << std::setprecision(2) 
                       << (avg_win_rate * 100) << "%";
         } else {
             std::cout << std::setw(12) << "-";
