@@ -200,11 +200,6 @@ WinningStatus SimMazeState::getWinningStatus() const
     return WinningStatus::NONE;
 }
 
-int SimMazeState::getPlayerScore(int player_id) const
-{
-    return this->players_[player_id].game_score_;
-}
-
 bool SimMazeState::operator<(const SimMazeState& other) const
 {
     return this->evaluated_score_ < other.evaluated_score_;
