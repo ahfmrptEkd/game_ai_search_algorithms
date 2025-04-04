@@ -122,7 +122,7 @@ private:
 public:
     int selectAction(const GameState& state) override {
         auto maze_state = static_cast<const MazeState&>(state);
-        return randomAction(maze_state);
+        return mazeRandomAction(maze_state);
     }
     
     std::string getName() const override {
