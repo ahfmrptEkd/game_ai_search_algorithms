@@ -11,6 +11,11 @@
 void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
     
+    // 게임 설정
+    params.searchWidth = 5;
+    params.searchDepth = 5;
+    params.searchNumber = 100;
+
     if (algorithm_name == "BeamSearch" || algorithm_name == "Chokudai") {
         params.timeThreshold = 1; // 1ms 시간 제한
     }
