@@ -96,6 +96,38 @@ void SimMazeState::advance(const int action0, const int action1)
     this->turn_++;
 }
 
+std::vector<int> SimMazeState::legalActions() const
+{
+    // 두 플레이어의 모든 가능한 액션 조합 반환
+    std::vector<int> actions;
+    auto actions0 = legalActions(0);
+    auto actions1 = legalActions(1);
+    
+    for (const auto action0 : actions0) {
+        for (const auto action1 : actions1) {
+            actions.push_back(encodeActions(action0, action1));
+        }
+    }
+    
+    return actions;
+}
+
+std::vector<int> SimMazeState::legalActions(const int player_id) const
+{
+    std::vector<int> actions;
+    const auto& player = this->players_[player_id];
+    
+    for (int action = 0; action < 4; action++) {
+        int ty = player.coord_.y_ + GameConstants::DY[action];
+        int tx = player.coord_.x_ + GameConstants::DX[action];
+        
+        if (GameUtil::isValidCoord<GameConstants::Board::H, GameConstants::Board::W>(Coord(ty, tx))) {
+            actions.emplace_back(action);
+        }
+    }
+    return actions;
+}
+
 std::string SimMazeState::toString() const
 {
     std::stringstream ss;
