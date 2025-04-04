@@ -1,37 +1,54 @@
-#include "../algorithms/two_player/alternate/random.h"
-#include "../algorithms/two_player/alternate/minimax.h"
-#include "../algorithms/two_player/alternate/alphabeta.h"
-#include "../algorithms/two_player/alternate/deepening.h"
-#include "../algorithms/two_player/alternate/mc.h"
-#include "../algorithms/two_player/alternate/mcts.h"
-#include "../algorithms/two_player/alternate/thunder.h"
+#include "../algorithms/algorithm_interface.h"
+#include "../games/twomaze/twomaze_state.h"
+#include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include <functional>
 #include <chrono>
 #include <ctime>
 
-struct AlgorithmInfo {
-    std::string name;
-    std::function<int(const TwoMazeState&)> action_func;
-};
-
 struct BenchmarkResult {
     double win_rate;
     double avg_score;
-    double avg_simulation_count;
     double avg_time_ms;
 };
 
+// 알고리즘 파라미터 구성 유틸리티 함수
+void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& params, 
+                             int simulation_count, int64_t time_threshold) {
+    if (algo_name == "Minimax" || algo_name == "AlphaBeta") {
+        params.searchDepth = 4;
+    } else if (algo_name == "IterativeDeepening") {
+        params.timeThreshold = time_threshold;
+    } else if (algo_name == "MonteCarlo" || algo_name == "MCTS" || algo_name == "Thunder") {
+        params.playoutNumber = simulation_count;
+    } else if (algo_name == "ThunderTime") {
+        params.timeThreshold = time_threshold;
+    }
+}
+
 BenchmarkResult testAlgorithmPerformance(
-    const std::function<int(const TwoMazeState&)>& test_algo,
-    const std::function<int(const TwoMazeState&)>& opponent_algo,
-    int game_count
+    const std::string& test_algo_name,
+    const std::string& opponent_algo_name,
+    int game_count,
+    int simulation_count,
+    int64_t time_threshold
 ) {
+    // 테스트 알고리즘 설정
+    AlgorithmParams test_params;
+    configureAlgorithmParams(test_algo_name, test_params, simulation_count, time_threshold);
+    auto test_algo = AlgorithmFactory::createAlgorithm(test_algo_name, test_params);
+    
+    // 상대 알고리즘 설정
+    AlgorithmParams opponent_params;
+    configureAlgorithmParams(opponent_algo_name, opponent_params, simulation_count, time_threshold);
+    auto opponent_algo = AlgorithmFactory::createAlgorithm(opponent_algo_name, opponent_params);
+    
     double win_count = 0;
     double score_sum = 0;
     double total_time_ms = 0;
@@ -39,29 +56,31 @@ BenchmarkResult testAlgorithmPerformance(
     for (int i = 0; i < game_count; i++) {
         // 선공과 후공을 번갈아가며 테스트 (공정성 확보)
         for (int first_player = 0; first_player < 2; first_player++) {
-            auto state = TwoMazeState(i);
-            auto& player1_func = (first_player == 0) ? test_algo : opponent_algo;
-            auto& player2_func = (first_player == 0) ? opponent_algo : test_algo;
+            auto state = std::make_unique<TwoMazeState>(i);
             
-            while (!state.isDone()) {
+            // 현재 플레이어가 테스트 알고리즘인지 상대 알고리즘인지 결정
+            auto& player1 = (first_player == 0) ? test_algo : opponent_algo;
+            auto& player2 = (first_player == 0) ? opponent_algo : test_algo;
+            
+            while (!state->isDone()) {
                 // 시간 측정은 테스트 알고리즘의 턴일 때만
-                if ((state.getCurrentTurn() % 2 == 0 && first_player == 0) || 
-                    (state.getCurrentTurn() % 2 == 1 && first_player == 1)) {
+                if ((state->getCurrentTurn() % 2 == 0 && first_player == 0) || 
+                    (state->getCurrentTurn() % 2 == 1 && first_player == 1)) {
                     auto start_time = std::chrono::high_resolution_clock::now();
-                    int action = player1_func(state);
+                    int action = player1->selectAction(*state);
                     auto end_time = std::chrono::high_resolution_clock::now();
                     
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
                         end_time - start_time).count();
                     total_time_ms += duration;
                     
-                    state.progress(action);
+                    state->progress(action);
                 } else {
-                    state.progress(player2_func(state));
+                    state->progress(player2->selectAction(*state));
                 }
             }
             
-            WinningStatus status = state.getWinningStatus();
+            WinningStatus status = state->getWinningStatus();
             bool is_win = (first_player == 0 && status == WinningStatus::WIN) ||
                          (first_player == 1 && status == WinningStatus::LOSE);
             bool is_draw = status == WinningStatus::DRAW;
@@ -69,8 +88,7 @@ BenchmarkResult testAlgorithmPerformance(
             if (is_win) win_count += 1.0;
             else if (is_draw) win_count += 0.5;
             
-            int player_index = (first_player == 0) ? 0 : 1;
-            score_sum += state.getCurrentPlayerScore();
+            score_sum += state->getCurrentPlayerScore();
         }
     }
     
@@ -79,39 +97,50 @@ BenchmarkResult testAlgorithmPerformance(
     result.win_rate = win_count / (game_count * 2);
     result.avg_score = score_sum / (game_count * 2);
     result.avg_time_ms = total_time_ms / (game_count * 2);
-    result.avg_simulation_count = 0; 
     
     return result;
 }
 
 // 모든 알고리즘 쌍에 대해 대결 시키는 함수
-void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_count) {
+void runFullBenchmark(const std::map<std::string, std::string>& algorithms, 
+                      int game_count, int simulation_count, int64_t time_threshold) {
     std::cout << "전체 벤치마크 실행 중... " << game_count << "게임/알고리즘 쌍\n" << std::endl;
+    
+    // 알고리즘 이름 목록 (표시용)
+    std::vector<std::string> algo_names;
+    std::vector<std::string> algo_internal_names;
+    
+    for (const auto& algo_pair : algorithms) {
+        algo_names.push_back(algo_pair.first);
+        algo_internal_names.push_back(algo_pair.second);
+    }
     
     // 헤더 출력 - 각 알고리즘 이름 사이에 충분한 간격
     std::cout << std::left << std::setw(14) << "알고리즘";
-    for (const auto& algo : algorithms) {
-        std::cout << std::setw(14) << algo.name;
+    for (const auto& name : algo_names) {
+        std::cout << std::setw(14) << name;
     }
     std::cout << std::setw(12) << "평균 승률%" << std::endl;
     
     // 각 알고리즘에 대한 승률 표 생성
-    for (size_t i = 0; i < algorithms.size(); i++) {
-        std::cout << std::left << std::setw(14) << algorithms[i].name;
+    for (size_t i = 0; i < algo_names.size(); i++) {
+        std::cout << std::left << std::setw(14) << algo_names[i];
         
         double total_win_rate = 0.0;
         int opponent_count = 0;
         
-        for (size_t j = 0; j < algorithms.size(); j++) {
+        for (size_t j = 0; j < algo_names.size(); j++) {
             if (i == j) {
                 std::cout << std::setw(14) << "-";
                 continue;
             }
             
             BenchmarkResult result = testAlgorithmPerformance(
-                algorithms[i].action_func, 
-                algorithms[j].action_func, 
-                game_count
+                algo_internal_names[i],
+                algo_internal_names[j],
+                game_count,
+                simulation_count,
+                time_threshold
             );
             
             std::cout << std::right << std::setw(10) << std::fixed << std::setprecision(2) 
@@ -134,10 +163,11 @@ void runFullBenchmark(const std::vector<AlgorithmInfo>& algorithms, int game_cou
 }
 
 // 시간 제한 기반으로 알고리즘 성능 분석하는 함수
-void analyzeTimeConstraints(const std::vector<std::pair<std::string, std::function<int(const TwoMazeState&, int64_t)>>>& time_algorithms, 
-                           const AlgorithmInfo& baseline_algo,
+void analyzeTimeConstraints(const std::map<std::string, std::string>& time_algorithms,
+                           const std::string& baseline_algo_name,
                            const std::vector<int64_t>& time_limits,
-                           int game_count) {
+                           int game_count,
+                           int simulation_count) {
     std::cout << "\n시간 제한 기반 성능 분석 중...\n" << std::endl;
     
     std::cout << std::setw(20) << "알고리즘";
@@ -146,20 +176,18 @@ void analyzeTimeConstraints(const std::vector<std::pair<std::string, std::functi
     }
     std::cout << std::endl;
     
-    for (const auto& algo_info : time_algorithms) {
-        std::cout << std::setw(20) << algo_info.first; // .name 대신 .first 사용
+    for (const auto& algo_pair : time_algorithms) {
+        std::cout << std::setw(20) << algo_pair.first;
         
         for (const auto& time_ms : time_limits) {
-            // 현재 시간 제한으로 함수 생성
-            auto time_constrained_func = [&algo_info, time_ms](const TwoMazeState& state) {
-                return algo_info.second(state, time_ms);
-            }; // 세미콜론 추가
             
             // 기준 알고리즘과 대결
             BenchmarkResult result = testAlgorithmPerformance(
-                time_constrained_func,
-                baseline_algo.action_func,
-                game_count
+                algo_pair.second,
+                baseline_algo_name,
+                game_count,
+                simulation_count,
+                time_ms  // 이 알고리즘의 시간 제한 설정
             );
             
             std::cout << std::setw(10) << std::fixed << std::setprecision(2) 
@@ -200,52 +228,39 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    // 알고리즘 정의
-    std::vector<AlgorithmInfo> all_algorithms = {
-        {"Random", randomAction},
-        {"Minimax", [simulation_count](const TwoMazeState& state) { 
-            return miniMaxSearchAction(state, 4); // 깊이 4로 고정
-        }},
-        {"AlphaBeta", [simulation_count](const TwoMazeState& state) { 
-            return alphaBetaSearchAction(state, 4); // 깊이 4로 고정
-        }},
-        {"Deepening", [time_threshold](const TwoMazeState& state) { 
-            return iterativeDeepeningSearchAction(state, time_threshold);
-        }},
-        {"MonteCarlo", [simulation_count](const TwoMazeState& state) { 
-            return monteCarloSearchAction(state, simulation_count);
-        }},
-        {"MCTS", [simulation_count](const TwoMazeState& state) { 
-            return mctsSearchAction(state, simulation_count);
-        }},
-        {"Thunder", [simulation_count](const TwoMazeState& state) { 
-            return thunderSearchAction(state, simulation_count);
-        }}
+    // 알고리즘 매핑 (커맨드라인 -> 내부 이름)
+    std::map<std::string, std::string> algorithms = {
+        {"Random", "TwoMazeRandom"},
+        {"Minimax", "Minimax"},
+        {"AlphaBeta", "AlphaBeta"},
+        {"Deepening", "IterativeDeepening"},
+        {"MonteCarlo", "MonteCarlo"},
+        {"MCTS", "MCTS"},
+        {"Thunder", "Thunder"}
     };
     
-    // 시간 제한 기반 알고리즘 & 시간은 나중에 조정됨
-    std::vector<std::pair<std::string, std::function<int(const TwoMazeState&, int64_t)>>> time_algorithms = {
-        {"MCTS_Sims", [](const TwoMazeState& state, int64_t time_ms) { 
-            return mctsSearchAction(state, time_ms); // 시간값을 시뮬레이션 횟수로 사용
-        }},
-        {"Thunder_Time", [](const TwoMazeState& state, int64_t time_ms) { 
-            return thunderSearchActionWithTime(state, time_ms); 
-        }},
-        {"Deepening_Time", [](const TwoMazeState& state, int64_t time_ms) { 
-            return iterativeDeepeningSearchAction(state, time_ms);
-        }}
+    // 시간 제한 테스트용 알고리즘
+    std::map<std::string, std::string> time_algorithms = {
+        {"MCTS", "MCTS"},
+        {"Thunder", "Thunder"},
+        {"Deepening", "IterativeDeepening"}
     };
     
     std::vector<int64_t> time_limits = {1, 10, 50, 100, 250, 500, 1000};
     
     // 벤치마크 모드에 따라 실행
-    if (benchmark_mode == "all" || benchmark_mode == "full") {
-        runFullBenchmark(all_algorithms, game_count);
-    } else if (benchmark_mode == "time") {
-        // 시간 제한 기반 분석 - 기준 알고리즘은 랜덤[0] 또는 몬테카를로 알고리즘[4] 으로 설정
-        analyzeTimeConstraints(time_algorithms, all_algorithms[4], time_limits, game_count);
-    } else {
-        std::cout << "알 수 없는 모드: " << benchmark_mode << "\n";
+    try {
+        if (benchmark_mode == "all" || benchmark_mode == "full") {
+            runFullBenchmark(algorithms, game_count, simulation_count, time_threshold);
+        } else if (benchmark_mode == "time") {
+            // 기준 알고리즘: MonteCarlo
+            analyzeTimeConstraints(time_algorithms, "MonteCarlo", time_limits, game_count, simulation_count);
+        } else {
+            std::cout << "알 수 없는 모드: " << benchmark_mode << "\n";
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "오류 발생: " << e.what() << std::endl;
         return 1;
     }
     
