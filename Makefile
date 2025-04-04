@@ -39,12 +39,13 @@ ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) \
 GAMES = maze automaze twomaze
 
 # 기본 타겟: 모든 게임 빌드
-all: $(GAMES)
+all: $(GAMES) twomaze_battle
 
 # 개별 게임 타겟 정의
 maze: $(BINDIR)/maze_demo
 automaze: $(BINDIR)/automaze_demo
 twomaze: $(BINDIR)/twomaze_demo
+twomaze_battle: $(BINDIR)/twomaze_battle
 
 # 벤치마크 타겟
 benchmark: maze_benchmark automaze_benchmark twomaze_benchmark
@@ -128,4 +129,4 @@ help:
 	@echo "  make automaze_benchmark - 자동 미로 벤치마크 빌드"
 	@echo "  make twomaze_benchmark  - 2인 미로 벤치마크 빌드"
 
-.PHONY: all $(GAMES) benchmark maze_benchmark automaze_benchmark twomaze_benchmark clean help test
+.PHONY: all $(GAMES) benchmark maze_benchmark automaze_benchmark twomaze_benchmark clean help test twomaze_battle
