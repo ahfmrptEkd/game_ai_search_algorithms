@@ -1,49 +1,54 @@
-// src/examples/twomaze_battle.cpp
-#include "../algorithms/two_player/alternate/random.h"
-#include "../algorithms/two_player/alternate/minimax.h"
-#include "../algorithms/two_player/alternate/alphabeta.h"
-#include "../algorithms/two_player/alternate/deepening.h"
-#include "../algorithms/two_player/alternate/mc.h"
-#include "../algorithms/two_player/alternate/mcts.h"
-#include "../algorithms/two_player/alternate/thunder.h"
+#include "../algorithms/algorithm_interface.h"
+#include "../games/twomaze/twomaze_state.h"
+#include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <map>
 #include <chrono>
+#include <memory>
 #include <functional>
 
-using AIFunction = std::function<int(const TwoMazeState&)>;
-using StringAIPair = std::pair<std::string, AIFunction>;
-
 // 두 알고리즘의 승률 비교
-void compareAlgorithms(const StringAIPair& ai1, const StringAIPair& ai2, int game_count) {
+void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name, int game_count) {
+    
+    // 알고리즘 1의 파라미터 설정
+    AlgorithmParams params1;
+    configureAlgorithmParams(ai1_name, params1);
+    auto ai1 = AlgorithmFactory::createAlgorithm(ai1_name, params1);
+    
+    // 알고리즘 2의 파라미터 설정
+    AlgorithmParams params2;
+    configureAlgorithmParams(ai2_name, params2);
+    auto ai2 = AlgorithmFactory::createAlgorithm(ai2_name, params2);
+    
     double ai1_win_rate = 0.0;
     int total_games = 0;
     
-    std::cout << "비교 중: " << ai1.first << " vs " << ai2.first << " (" << game_count << " 게임)" << std::endl;
+    std::cout << "비교 중: " << ai1->getName() << " vs " << ai2->getName() << " (" << game_count << " 게임)" << std::endl;
     std::cout << "진행 중: ";
     std::cout.flush();
     
     for (int i = 0; i < game_count; i++) {
-        auto base_state = TwoMazeState(i);
+        auto base_state = std::make_unique<TwoMazeState>(i);
         
         // 선공/후공을 교대로 진행
         for (int j = 0; j < 2; j++) {
-            auto state = base_state;
+            auto state = std::make_unique<TwoMazeState>(*base_state);
+            
             auto& first_player = (j == 0) ? ai1 : ai2;
             auto& second_player = (j == 0) ? ai2 : ai1;
             
-            while (!state.isDone()) {
-                state.progress(first_player.second(state));
-                if (state.isDone()) break;
+            while (!state->isDone()) {
+                state->progress(first_player->selectAction(*state));
+                if (state->isDone()) break;
                 
-                state.progress(second_player.second(state));
-                if (state.isDone()) break;
+                state->progress(second_player->selectAction(*state));
+                if (state->isDone()) break;
             }
             
-            WinningStatus status = state.getWinningStatus();
+            WinningStatus status = state->getWinningStatus();
             bool is_first_player_win = (status == WinningStatus::WIN);
             bool is_draw = (status == WinningStatus::DRAW);
             
@@ -66,10 +71,23 @@ void compareAlgorithms(const StringAIPair& ai1, const StringAIPair& ai2, int gam
     
     ai1_win_rate /= total_games;
     std::cout << std::endl;
-    std::cout << ai1.first << " 승률: " << std::fixed << std::setprecision(2) 
+    std::cout << ai1->getName() << " 승률: " << std::fixed << std::setprecision(2) 
               << (ai1_win_rate * 100) << "%" << std::endl;
-    std::cout << ai2.first << " 승률: " << std::fixed << std::setprecision(2) 
+    std::cout << ai2->getName() << " 승률: " << std::fixed << std::setprecision(2) 
               << ((1.0 - ai1_win_rate) * 100) << "%" << std::endl;
+}
+
+// 알고리즘별 적절한 파라미터 설정 유틸리티 함수 (설정)
+void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& params) {
+    if (algo_name == "Minimax" || algo_name == "AlphaBeta") {
+        params.searchDepth = 4;
+    } else if (algo_name == "IterativeDeepening") {
+        params.timeThreshold = 100; // 100ms
+    } else if (algo_name == "MonteCarlo" || algo_name == "MCTS" || algo_name == "Thunder") {
+        params.playoutNumber = 1000;
+    } else if (algo_name == "ThunderTime") {
+        params.timeThreshold = 100; // 100ms
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -79,13 +97,25 @@ int main(int argc, char* argv[]) {
     int simulation_count = 1000;
     int64_t time_ms = 100;
     
+    // 알고리즘 매핑 (커맨드라인 -> 내부 이름)
+    std::map<std::string, std::string> algorithm_map = {
+        {"random", "TwoMazeRandom"},
+        {"minimax", "Minimax"},
+        {"alphabeta", "AlphaBeta"},
+        {"deepening", "IterativeDeepening"},
+        {"mc", "MonteCarlo"},
+        {"mcts", "MCTS"},
+        {"thunder", "Thunder"},
+        {"thunder_time", "ThunderTime"}
+    };
+    
     // 명령줄 인자 처리
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "--algo1" && i + 1 < argc) {
-            algo1_name = argv[++i];
+            algo1_name = algorithm_map[argv[++i]];
         } else if (arg == "--algo2" && i + 1 < argc) {
-            algo2_name = argv[++i];
+            algo2_name = algorithm_map[argv[++i]];
         } else if (arg == "--games" && i + 1 < argc) {
             game_count = std::stoi(argv[++i]);
         } else if (arg == "--sims" && i + 1 < argc) {
@@ -106,44 +136,21 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    std::map<std::string, AIFunction> algorithms = {
-        {"Random", randomAction},
-        {"Minimax", [](const TwoMazeState& state) { 
-            return miniMaxSearchAction(state, 4); 
-        }},
-        {"AlphaBeta", [](const TwoMazeState& state) { 
-            return alphaBetaSearchAction(state, 4); 
-        }},
-        {"Deepening", [time_ms](const TwoMazeState& state) { 
-            return iterativeDeepeningSearchAction(state, time_ms); 
-        }},
-        {"MonteCarlo", [simulation_count](const TwoMazeState& state) { 
-            return monteCarloSearchAction(state, simulation_count); 
-        }},
-        {"MCTS", [simulation_count](const TwoMazeState& state) { 
-            return mctsSearchAction(state, simulation_count); 
-        }},
-        {"Thunder", [simulation_count](const TwoMazeState& state) { 
-            return thunderSearchAction(state, simulation_count); 
-        }},
-        {"Thunder_Time", [time_ms](const TwoMazeState& state) { 
-            return thunderSearchActionWithTime(state, time_ms); 
-        }}
-    };
-    
-    if (algorithms.find(algo1_name) == algorithms.end() || 
-        algorithms.find(algo2_name) == algorithms.end()) {
-        std::cout << "오류: 알고리즘을 찾을 수 없습니다. 사용 가능한 알고리즘:\n";
-        for (const auto& pair : algorithms) {
-            std::cout << "  " << pair.first << "\n";
+    try {
+        AlgorithmParams testParams;
+        auto test1 = AlgorithmFactory::createAlgorithm(algo1_name, testParams);
+        auto test2 = AlgorithmFactory::createAlgorithm(algo2_name, testParams);
+        
+        compareAlgorithms(algo1_name, algo2_name, game_count);
+    } catch (const std::invalid_argument& e) {
+        std::cout << "오류: " << e.what() << std::endl;
+        std::cout << "사용 가능한 알고리즘: ";
+        for (const auto& pair : algorithm_map) {
+            std::cout << pair.first << " ";
         }
+        std::cout << std::endl;
         return 1;
     }
-    
-    StringAIPair ai1(algo1_name, algorithms[algo1_name]);
-    StringAIPair ai2(algo2_name, algorithms[algo2_name]);
-    
-    compareAlgorithms(ai1, ai2, game_count);
     
     return 0;
 }
