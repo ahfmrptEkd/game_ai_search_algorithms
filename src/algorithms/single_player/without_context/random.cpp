@@ -18,7 +18,7 @@ AutoMazeState randomPlacement(const AutoMazeState& state)
 }
 
 // 게임을 1회 플레이해서 게임 상황을 표시하는 함수
-void playAutoMazeGame(AutoMazeState (*ai_func)(const AutoMazeState &), const int seed)
+void playAutoMazeGame(const std::string &ai_name, AutoMazeState (*ai_func)(const AutoMazeState &), const int seed) 
 {
     auto state = AutoMazeState(seed);
     state = ai_func(state);

@@ -7,11 +7,11 @@
 AutoMazeState randomPlacement(const AutoMazeState &state);
 
 // 게임 실행 함수
-void playAutoMazeGame(AutoMazeState (*ai_func)(const AutoMazeState &), const int seed);
+void playAutoMazeGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState &), const int seed);
 
 // 랜덤 AI 게임 플레이 함수
 inline void playAutoMazeGameRandom(const int seed) {
-    playAutoMazeGame(randomPlacement, seed);
+    playAutoMazeGame("RandomPlacement", randomPlacement, seed);
 }
 
 #endif // RANDOM_ALGORITHM_WITHOUT_CONTEXT_H
