@@ -42,9 +42,9 @@ int main(int argc, char* argv[]) {
     // 사용 가능한 알고리즘 목록
     std::map<std::string, std::string> algorithms = {
         {"random", "MazeRandom"},
-        {"greedy", "Greedy"},
-        {"beam", "BeamSearch"},
-        {"chokudai", "Chokudai"}
+        {"greedy", "MazeGreedy"},
+        {"beam", "MazeBeam"},
+        {"chokudai", "MazeChokudai"}
     };
     
     std::string algorithm = "random";

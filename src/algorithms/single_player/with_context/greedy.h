@@ -1,3 +1,4 @@
+// src/algorithms/single_player/with_context/greedy.h
 #ifndef GREEDY_ALGORITHM_H
 #define GREEDY_ALGORITHM_H
 
@@ -8,7 +9,7 @@
 int greedyAction(const MazeState& state);
 
 // 시드를 지정해서 게임을 탐욕법 알고리즘으로 진행
-inline void playGameGreedy(const int seed) {
+inline void playMazeGameGreedy(const int seed) {
     playGameWithStrategy<MazeState>(seed, greedyAction);
 }
 
