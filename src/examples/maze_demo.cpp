@@ -13,7 +13,7 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     
     // 게임 설정
     params.searchWidth = 5;
-    params.searchDepth = 5;
+    params.searchDepth = 5; // 최대 미로 깊이 - 1 : 현재 5x5 미로
     params.searchNumber = 100;
 
     if (algorithm_name == "BeamSearch" || algorithm_name == "Chokudai") {
