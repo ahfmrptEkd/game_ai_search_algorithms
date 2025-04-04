@@ -50,11 +50,11 @@ twomaze_battle: $(BINDIR)/twomaze_battle
 simmaze: $(BINDIR)/simmaze_demo
 
 # 벤치마크 타겟
-benchmark: maze_benchmark automaze_benchmark twomaze_benchmark
+benchmark: maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark
 maze_benchmark: $(BINDIR)/maze_benchmark
 automaze_benchmark: $(BINDIR)/automaze_benchmark
 twomaze_benchmark: $(BINDIR)/twomaze_benchmark
-
+simmaze_benchmark: $(BINDIR)/simmaze_benchmark
 # 클린 타겟
 clean:
 	@echo "Cleaning binaries..."
@@ -118,14 +118,20 @@ $(BINDIR)/twomaze_battle: $(EXAMPLES_DIR)/twomaze_battle.cpp $(ALL_SOURCES)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "TwoMaze AI battle built successfully!"
 
+$(BINDIR)/simmaze_benchmark: $(EXAMPLES_DIR)/simmaze_benchmark.cpp $(ALL_SOURCES)
+	@echo "Building SimMaze benchmark..."
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	@echo "SimMaze benchmark built successfully!"
+
 # 도움말
 help:
 	@echo "사용 가능한 타겟:"
-	@echo "  make all         - 모든 게임 빌드"
-	@echo "  make benchmark   - 모든 벤치마크 프로그램 빌드"
-	@echo "  make test        - 기본 테스트 실행"
-	@echo "  make clean       - 생성된 바이너리 파일 삭제"
-	@echo "  make help        - 도움말 표시"
+	@echo "  make all            - 모든 게임 빌드"
+	@echo "  make benchmark      - 모든 벤치마크 프로그램 빌드"
+	@echo "  make test           - 기본 테스트 실행"
+	@echo "  make clean          - 생성된 바이너리 파일 삭제"
+	@echo "  make help           - 도움말 표시"
 	@echo ""
 	@echo "게임별 타겟:"
 	@for game in $(GAMES); do \
@@ -133,8 +139,9 @@ help:
 	done
 	@echo ""
 	@echo "벤치마크 타겟:"
-	@echo "  make maze_benchmark     - 미로 벤치마크 빌드"
-	@echo "  make automaze_benchmark - 자동 미로 벤치마크 빌드"
-	@echo "  make twomaze_benchmark  - 2인 미로 벤치마크 빌드"
+	@echo "  make maze_benchmark      - 미로 벤치마크 빌드"
+	@echo "  make automaze_benchmark  - 자동 미로 벤치마크 빌드"
+	@echo "  make twomaze_benchmark   - 2인 미로 벤치마크 빌드"
+	@echo "  make simmaze_benchmark   - 동시 미로 벤치마크 빌드"
 
-.PHONY: all $(GAMES) benchmark maze_benchmark automaze_benchmark twomaze_benchmark clean help test twomaze_battle
+.PHONY: all $(GAMES) benchmark maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark clean help test twomaze_battle
