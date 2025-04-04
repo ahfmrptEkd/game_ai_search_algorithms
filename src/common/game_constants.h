@@ -34,6 +34,8 @@ namespace GameConstants {
         constexpr const int SEARCH_DEPTH = GameConstants::Board::H - 1;
         constexpr const int SEARCH_NUMBER = 2;
         constexpr const int64_t TIME_THRESHOLD = 1;
+        constexpr const double START_TEMPERATURE = 500.0;
+        constexpr const double END_TEMPERATURE = 10.0;
     }
 }
 
