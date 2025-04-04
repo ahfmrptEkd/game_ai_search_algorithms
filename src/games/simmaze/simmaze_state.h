@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <array>
 
 using ScoreType = GameConstants::ScoreType;
 
@@ -28,7 +29,7 @@ private:
     int turn_ = 0;
     SimMazePlayer players_[GameConstants::TwoMaze::PLAYER_N];
 
-    // 마지막 수행된 액션 저장 - 디버깅
+    // 마지막으로 수행된 액션 저장 (검증 및 디버깅용)
     int last_actions_[GameConstants::TwoMaze::PLAYER_N] = {-1, -1};
 
 public:
@@ -55,7 +56,7 @@ public:
         return this->evaluated_score_ < maze_other.evaluated_score_;
     }
     
-    // 추가 메서드
+    // 동시 게임 전용 메서드
     // 두 플레이어의 액션을 각각 받아 게임을 진행
     void advance(const int action0, const int action1);
     
@@ -63,8 +64,8 @@ public:
     std::vector<int> legalActions(const int player_id) const;
     
     WinningStatus getWinningStatus() const;
-    int getPlayerScore(int player_id) const;
-    bool operator<(const SimMazeState& other) const;
+    int getPlayerScore(int player_id) const { return players_[player_id].game_score_; }
+    bool operator<(const SimMazeState& other) const;    
     double getScoreRate() const;
     
     // 액션 인코딩/디코딩 유틸리티
@@ -76,7 +77,6 @@ public:
     int getPoint(int y, int x) const { return points_[y][x]; }
     int getPlayerX(int player_id) const { return players_[player_id].coord_.x_; }
     int getPlayerY(int player_id) const { return players_[player_id].coord_.y_; }
-    int getPlayerScore(int player_id) const { return players_[player_id].game_score_; }
     int getLastAction(int player_id) const { return last_actions_[player_id]; }
 };
 
