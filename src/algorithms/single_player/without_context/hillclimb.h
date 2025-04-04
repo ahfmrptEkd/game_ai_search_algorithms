@@ -2,13 +2,14 @@
 #define HILLCLIMB_ALGORITHM_H
 
 #include "../../../games/automaze/automaze_state.h"
+#include "random.h"
 
 AutoMazeState hillClimbPlacement(const AutoMazeState &state, int number);
 
-void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState &, int), const int seed);
-
-inline void playGameHillClimb(const int seed) {
-    playGame("HillClimbPlacement", hillClimbPlacement, seed);
+inline void playGameHillClimb(const int seed, int number = GameConstants::AlgorithmParams::SEARCH_NUMBER) {
+    playAutoMazeGame([number](const AutoMazeState& state) { 
+        return hillClimbPlacement(state, number); 
+        }, seed);
 }
 
 #endif // HILLCLIMB_ALGORITHM_H

@@ -37,9 +37,9 @@ AutoMazeState hillClimbPlacement(const AutoMazeState &state, int number)
     return now_state;
 }
 
-void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState&, int), const int seed) 
-{
-    auto state = AutoMazeState(seed);
-    state = ai_func(state, 1000); // 1000번 반복
-    auto score = state.getScore(true);
-}
+// void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState&, int), const int seed) 
+// {
+//     auto state = AutoMazeState(seed);
+//     state = ai_func(state, 1000); // 1000번 반복
+//     auto score = state.getScore(true);
+// }
