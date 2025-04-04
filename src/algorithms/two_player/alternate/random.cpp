@@ -5,7 +5,7 @@
 #include <random>
 
 // 무작위 행동 알고리즘
-int randomAction(const TwoMazeState& state)
+int twoMazeRandomAction(const TwoMazeState& state)
 {
     auto legal_actions = state.legalActions();
     if (legal_actions.empty())

@@ -1,4 +1,5 @@
 #include "mc.h"
+#include "random.h"
 #include "../../../common/game_util.h"
 #include <iostream>
 
@@ -15,7 +16,7 @@ namespace monte_carlo {
         }
 
         // 랜덤 플레이 아웃
-        int action = randomAction(state);
+        int action = twoMazeRandomAction(state);
         state.progress(action);
 
         // 재귀적으로 다음 상태에서 플레이아웃 진행 (상대방 시점이므로 1-value 반환)

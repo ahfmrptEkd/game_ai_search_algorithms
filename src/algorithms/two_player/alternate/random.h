@@ -5,13 +5,14 @@
 #include "../../../games/twomaze/twomaze_state.h"
 #include "../../../common/game_util.h"
 
-// 무작위 행동 알고리즘 
-int randomAction(const TwoMazeState& state);
+int twoMazeRandomAction(const TwoMazeState& state);
 
 void playTwoMazeGame(const std::function<int(const TwoMazeState&)>& action_func, const int seed);
 
 // 시드를 고정해서 게임을 무작위 알고리즘으로 진행
 inline void playTwoMazeGameRandom(const int seed) {
-    playTwoMazeGame(randomAction, seed);
+    playTwoMazeGame([](const TwoMazeState& state) {
+        return twoMazeRandomAction(state);
+    }, seed);
 }
 #endif // TWOPLAYER_RANDOM_H
