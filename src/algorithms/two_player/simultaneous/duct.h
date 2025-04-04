@@ -16,11 +16,13 @@ namespace sim_duct {
     class Node {
     private:
         SimMazeState state_;
-        double w_; 
+        double w_;
         
     public:
         std::vector<std::vector<Node>> child_nodeses_; // [action0][action1] 형태의 자식 노드 배열
-        double n_; 
+        double n_;
+        
+        Node() : w_(0), n_(0) {}
         
         Node(const SimMazeState& state);
         

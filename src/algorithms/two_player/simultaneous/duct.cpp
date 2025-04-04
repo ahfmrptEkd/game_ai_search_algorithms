@@ -1,13 +1,12 @@
 #include "duct.h"
-#include "../../games/simmaze/simmaze_state.h"
+#include "../../../common/game_util.h"
 #include <vector>
+#include <cmath>
 #include <iostream>
 #include <cassert>
 #include <algorithm>
 
-
 namespace sim_duct {
-    // 플레이어 0 시점에서 노드 평가
     double playout(SimMazeState* state) {
         if (state->isDone()) {
             WinningStatus status = state->getWinningStatus();
@@ -22,11 +21,9 @@ namespace sim_duct {
                     return 0.5;
             }
         }
-
         int action0 = simMazeRandomAction(*state, 0);
         int action1 = simMazeRandomAction(*state, 1);
         state->advance(action0, action1);
-
         return playout(state);
     }
     
@@ -52,7 +49,6 @@ namespace sim_duct {
             n_++;
             return value;
         }
-
         if (child_nodeses_.empty()) {
             SimMazeState state_copy = state_;
             double value = playout(&state_copy);
@@ -81,22 +77,19 @@ namespace sim_duct {
         auto legal_actions1 = state_.legalActions(1);
         
         child_nodeses_.clear();
-        child_nodeses_.resize(legal_actions0.size());
         
-        // 모든 가능한 액션 조합에 대해 자식 노드 생성
         for (size_t i = 0; i < legal_actions0.size(); i++) {
-            child_nodeses_[i].resize(legal_actions1.size());
+            child_nodeses_.push_back(std::vector<Node>());
             
             for (size_t j = 0; j < legal_actions1.size(); j++) {
-                child_nodeses_[i][j] = Node(state_);
-                auto& child_node = child_nodeses_[i][j];
+                SimMazeState next_state = state_;
+                next_state.advance(legal_actions0[i], legal_actions1[j]);
                 
-                // 이 액션 조합으로 게임 진행
-                child_node.state_.advance(legal_actions0[i], legal_actions1[j]);
+                child_nodeses_[i].push_back(Node(next_state));
             }
         }
     }
-
+    
     Node& Node::nextChildNode() {
         // 방문하지 않은 노드가 있으면 그 노드 선택
         for (auto& child_nodes : child_nodeses_) {
@@ -106,8 +99,8 @@ namespace sim_duct {
                 }
             }
         }
-
-        // 모든 노드 방문 시 DUCT 전략으로 선택
+        
+        // 모든 노드를 방문했으면 DUCT 전략으로 선택
         double t = 0;
         for (auto& child_nodes : child_nodeses_) {
             for (auto& child_node : child_nodes) {
@@ -115,46 +108,48 @@ namespace sim_duct {
             }
         }
         
-        // 플레이어 0의 최적 행동 인덱스
+        // 플레이어별 최적 행동 인덱스
         int best_is[2] = {-1, -1};
-
+        
+        // 플레이어 0의 행동 선택
         double best_value = -GameConstants::INF;
         for (size_t i = 0; i < child_nodeses_.size(); i++) {
             const auto& child_nodes = child_nodeses_[i];
             double w = 0;
             double n = 0;
-
-            // i 번째 행동의 모든 결과값 합산
+            
+            // i번째 행동의 모든 결과 값 합산
             for (size_t j = 0; j < child_nodes.size(); j++) {
-                const auto& child_node = child_nodes[j];    // 행 의 원소
+                const auto& child_node = child_nodes[j];    // 행의 원소
                 w += child_node.w_;
                 n += child_node.n_;
             }
-
-            //UCB1 값 계산
-            double ucb1_value = w / n + C * std::sqrt(2.0 * std::log(t) / n );
+            
+            // UCB1 값 계산
+            double ucb1_value = w / n + C * std::sqrt(2.0 * std::log(t) / n);
             if (ucb1_value > best_value) {
                 best_is[0] = i;
                 best_value = ucb1_value;
             }
         }
-
-        // 플레이어 1의 최적 행동 인덱스
+        
+        // 플레이어 1의 행동 선택
         best_value = -GameConstants::INF;
         for (size_t j = 0; j < child_nodeses_[0].size(); j++) {
             double w = 0;
             double n = 0;
-
-            // j 번째 행동의 모든 결과값 합산
+            
+            // j번째 행동의 모든 결과 값 합산
             for (size_t i = 0; i < child_nodeses_.size(); i++) {
-                const auto& child_node = child_nodeses_[i][j];
+                const auto& child_node = child_nodeses_[i][j];   // 열의 원소
                 w += child_node.w_;
                 n += child_node.n_;
             }
-
+            
             // 플레이어 1은 목표가 반대이므로 승률 반전
             w = n - w;
-
+            
+            // UCB1 값 계산
             double ucb1_value = w / n + C * std::sqrt(2.0 * std::log(t) / n);
             if (ucb1_value > best_value) {
                 best_is[1] = j;
@@ -163,12 +158,11 @@ namespace sim_duct {
         }
         return child_nodeses_[best_is[0]][best_is[1]];
     }
-
+    
     int ductAction(const SimMazeState& state, const int player_id, const int simulation_number) {
         Node root_node = Node(state);
         root_node.expand();
         
-        // 지정된 횟수만큼 시뮬레이션
         for (int i = 0; i < simulation_number; i++) {
             root_node.evaluate();
         }
@@ -177,7 +171,6 @@ namespace sim_duct {
         int i_size = root_node.child_nodeses_.size();
         int j_size = root_node.child_nodeses_[0].size();
         
-        // 플레이어별 최적 행동 선택
         if (player_id == 0) {
             int best_action_searched_number = -1;
             int best_action_index = -1;
