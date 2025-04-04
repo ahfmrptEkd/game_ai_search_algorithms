@@ -18,7 +18,7 @@ namespace minimax {
 int miniMaxSearchAction(const TwoMazeState& state, const int depth);
 
 inline void playGameMinimax(const int seed, int depth = GameConstants::AlgorithmParams::SEARCH_DEPTH) {
-    playGame([depth] (const TwoMazeState& state) {
+    playTwoMazeGame([depth] (const TwoMazeState& state) {
         return miniMaxSearchAction(state, depth);
     }, seed);
 }

@@ -10,7 +10,7 @@ AutoMazeState randomPlacement(const AutoMazeState &state);
 void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState &), const int seed);
 
 // 랜덤 AI 게임 플레이 함수
-inline void playGameRandom(const int seed) {
+inline void playAutoMazeGameRandom(const int seed) {
     playGame("RandomPlacement", randomPlacement, seed);
 }
 

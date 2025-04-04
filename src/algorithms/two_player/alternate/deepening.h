@@ -20,7 +20,7 @@ int iterativeDeepeningSearchAction(const TwoMazeState& state, const int64_t time
 
 
 inline void playGameIterativeDeepening(const int seed, const int64_t time_threshold = 100) {
-    playGame([time_threshold](const TwoMazeState& state) {
+    playTwoMazeGame([time_threshold](const TwoMazeState& state) {
         return iterativeDeepeningSearchAction(state, time_threshold);
     }, seed);
 }

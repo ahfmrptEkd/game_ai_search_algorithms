@@ -36,7 +36,7 @@ namespace mcts {
 int mctsSearchAction(const TwoMazeState& state, const int playout_number);
 
 inline void playGameMCTS(const int seed, int playout_number = GameConstants::TwoMaze::PLAYOUT_NUMBER) {
-    playGame([playout_number](const TwoMazeState& state) {
+    playTwoMazeGame([playout_number](const TwoMazeState& state) {
         return mctsSearchAction(state, playout_number);
     }, seed);
 }

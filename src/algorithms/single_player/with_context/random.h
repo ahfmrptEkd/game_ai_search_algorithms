@@ -8,7 +8,7 @@
 int randomAction(const MazeState& state);
 
 // 시드를 고정해서 게임을 무작위 알고리즘으로 진행
-inline void playGameRandom(const int seed) {
+inline void playMazeGameRandom(const int seed) {
     playGameWithStrategy<MazeState>(seed, randomAction);
 }
 

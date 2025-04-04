@@ -16,7 +16,7 @@ namespace alphabeta {
 int alphaBetaSearchAction(const TwoMazeState& state, const int depth);
 
 inline void playGameAlphaBeta(const int seed, int depth = GameConstants::AlgorithmParams::SEARCH_DEPTH) {
-    playGame([depth](const TwoMazeState& state){
+    playTwoMazeGame([depth](const TwoMazeState& state){
         return alphaBetaSearchAction(state, depth);
     }, seed);
 }

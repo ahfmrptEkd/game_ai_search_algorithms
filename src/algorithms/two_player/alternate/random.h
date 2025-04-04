@@ -8,10 +8,10 @@
 // 무작위 행동 알고리즘 
 int randomAction(const TwoMazeState& state);
 
-void playGame(const std::function<int(const TwoMazeState&)>& action_func, const int seed);
+void playTwoMazeGame(const std::function<int(const TwoMazeState&)>& action_func, const int seed);
 
 // 시드를 고정해서 게임을 무작위 알고리즘으로 진행
-inline void playGameRandom(const int seed) {
-    playGame(randomAction, seed);
+inline void playTwoMazeGameRandom(const int seed) {
+    playTwoMazeGame(randomAction, seed);
 }
 #endif // TWOPLAYER_RANDOM_H

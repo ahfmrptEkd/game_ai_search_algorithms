@@ -15,7 +15,7 @@ namespace monte_carlo {
 int monteCarloSearchAction(const TwoMazeState& state, const int playout_number);
 
 inline void playGameMonteCarlo(const int seed, int playout_number = GameConstants::TwoMaze::PLAYOUT_NUMBER) {
-    playGame([playout_number](const TwoMazeState& state) {
+    playTwoMazeGame([playout_number](const TwoMazeState& state) {
         return monteCarloSearchAction(state, playout_number);
     }, seed);
 }
