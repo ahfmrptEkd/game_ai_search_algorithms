@@ -15,9 +15,12 @@
 #include "two_player/alternate/mcts.h"
 #include "two_player/alternate/thunder.h"
 
+#include "two_player/simultaneous/random.h"
+
 #include "../games/maze/maze_state.h"
 #include "../games/automaze/automaze_state.h"
 #include "../games/twomaze/twomaze_state.h"
+#include "../games/simmaze/simmaze_state.h"
 
 #include "../common/game_util.h"
 #include <stdexcept>
@@ -445,6 +448,48 @@ public:
     }
 };
 
+// ----- two player, simultaneous -----
+// SimMazeRandom 알고리즘 클래스
+class SimMazeRandomAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    int player_id_ = 0;
+    
+public:
+    int selectAction(const GameState& state) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            return simMazeRandomAction(maze_state, player_id_);
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("SimMazeRandomAlgorithm expects SimMazeState");
+        }
+    }
+    
+    std::string getName() const override {
+        return "Random (SimMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+        player_id_ = params.playerId;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int encoded_action) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            auto next_state = std::make_unique<SimMazeState>(maze_state);
+            
+            // encoded_action을 두 플레이어의 액션으로 디코딩
+            auto actions = SimMazeState::decodeActions(encoded_action);
+            next_state->advance(actions.first, actions.second);
+            
+            return next_state;
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("SimMazeRandomAlgorithm expects SimMazeState");
+        }
+    }
+};
+
 // 알고리즘 팩토리 구현
 std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     const std::string& algorithmName, const AlgorithmParams& params) {
@@ -486,7 +531,12 @@ std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
         algorithm = std::make_unique<ThunderAlgorithm>();
     } else if (algorithmName == "ThunderTime") {
         algorithm = std::make_unique<ThunderTimeAlgorithm>();
-    } else {
+    }
+    // 두 플레이어 (동시 게임)
+    else if (algorithmName == "SimMazeRandom") {
+        algorithm = std::make_unique<SimMazeRandomAlgorithm>();
+    }
+    else {
         throw std::invalid_argument("Unknown algorithm: " + algorithmName);
     }
     
