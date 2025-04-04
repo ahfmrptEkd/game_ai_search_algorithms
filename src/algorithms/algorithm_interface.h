@@ -13,6 +13,8 @@ struct AlgorithmParams {
     
     // 추가 필요한 파라미터들
     int playoutNumber = GameConstants::TwoMaze::PLAYOUT_NUMBER;  // monte carlo
+    int startTemperature = GameConstants::AlgorithmParams::START_TEMPERATURE;
+    int endTemperature = GameConstants::AlgorithmParams::END_TEMPERATURE;
 };
 
 // 알고리즘 인터페이스

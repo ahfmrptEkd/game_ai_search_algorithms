@@ -107,8 +107,8 @@ public:
         return std::make_unique<AutoMazeState>(
             simulatedAnnealingPlacement(maze_state, 
                                         params_.searchNumber, 
-                                        GameConstants::AlgorithmParams::START_TEMPERATURE,
-                                        GameConstants::AlgorithmParams::END_TEMPERATURE));
+                                        params_.startTemperature,
+                                        params_.endTemperature));
     }
 };
 
