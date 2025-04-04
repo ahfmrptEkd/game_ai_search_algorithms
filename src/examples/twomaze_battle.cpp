@@ -10,6 +10,19 @@
 #include <memory>
 #include <functional>
 
+// 알고리즘별 적절한 파라미터 설정 유틸리티 함수 
+void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& params, int simulation_count, int search_depth, int64_t time_ms) {
+    if (algo_name == "Minimax" || algo_name == "AlphaBeta") {
+        params.searchDepth = search_depth;
+    } else if (algo_name == "IterativeDeepening") {
+        params.timeThreshold = time_ms; // 100ms
+    } else if (algo_name == "MonteCarlo" || algo_name == "MCTS" || algo_name == "Thunder") {
+        params.playoutNumber = simulation_count;
+    } else if (algo_name == "ThunderTime") {
+        params.timeThreshold = time_ms; // 100ms
+    }
+}
+
 // 두 알고리즘의 승률 비교
 void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name, int game_count, int simulation_count, int search_depth, int64_t time_ms) {
     // 알고리즘 1의 파라미터 설정
@@ -74,19 +87,6 @@ void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name,
               << (ai1_win_rate * 100) << "%" << std::endl;
     std::cout << ai2->getName() << " 승률: " << std::fixed << std::setprecision(2) 
               << ((1.0 - ai1_win_rate) * 100) << "%" << std::endl;
-}
-
-// 알고리즘별 적절한 파라미터 설정 유틸리티 함수 
-void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& params, int simulation_count, int search_depth, int64_t time_ms) {
-    if (algo_name == "Minimax" || algo_name == "AlphaBeta") {
-        params.searchDepth = search_depth;
-    } else if (algo_name == "IterativeDeepening") {
-        params.timeThreshold = time_ms; // 100ms
-    } else if (algo_name == "MonteCarlo" || algo_name == "MCTS" || algo_name == "Thunder") {
-        params.playoutNumber = simulation_count;
-    } else if (algo_name == "ThunderTime") {
-        params.timeThreshold = time_ms; // 100ms
-    }
 }
 
 int main(int argc, char* argv[]) {
