@@ -12,7 +12,6 @@ struct AlgorithmParams {
     int64_t timeThreshold = GameConstants::AlgorithmParams::TIME_THRESHOLD;
     
     // 추가 필요한 파라미터들
-    double temperature = 1.0;  // simulated annealing
     int playoutNumber = GameConstants::TwoMaze::PLAYOUT_NUMBER;  // monte carlo
 };
 
