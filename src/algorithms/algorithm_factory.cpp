@@ -2,18 +2,72 @@
 #include "single_player/without_context/hillclimb.h"
 #include "single_player/without_context/simulated_annealing.h"
 #include "single_player/without_context/random.h"
-#include <stdexcept>
 
-// 힐클라임 알고리즘 구현
+#include "single_player/with_context/random.h"
+#include "single_player/with_context/greedy.h"
+#include "single_player/with_context/beam.h"
+#include "single_player/with_context/chokudai.h"
+
+#include "two_player/alternate/minimax.h"
+#include "two_player/alternate/alphabeta.h"
+#include "two_player/alternate/deepening.h"
+#include "two_player/alternate/mc.h"
+#include "two_player/alternate/mcts.h"
+#include "two_player/alternate/thunder.h"
+
+#include "../games/maze/maze_state.h"
+#include "../games/automaze/automaze_state.h"
+#include "../games/twomaze/twomaze_state.h"
+
+#include "../common/game_util.h"
+#include <stdexcept>
+#include <random>
+
+
+// ----- single player, without context -----
+
+// 랜덤 알고리즘 구현 (AutoMaze 용)
+class AutoMazeRandomAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        // AutoMaze에서는 action이 없으므로 0을 반환
+        return 0;
+    }
+    
+    std::string getName() const override {
+        return "Random (AutoMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        // 상태를 복제하고 AutoMazeState로 캐스팅
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        auto next_state = std::make_unique<AutoMazeState>(maze_state);
+        
+        // 랜덤 위치에 캐릭터 배치
+        for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++) {
+            int y = GameUtil::mt_for_action() % GameConstants::Board::H;
+            int x = GameUtil::mt_for_action() % GameConstants::Board::W;
+            next_state->setCharacter(character_id, y, x);
+        }
+        
+        return next_state;
+    }
+};
+
 class HillClimbAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;
     
 public:
     int selectAction(const GameState& state) override {
-        // 기존 힐클라임 알고리즘을 인터페이스에 맞게 래핑
-        // 실제 구현에서는 구체적인 상태 타입으로 캐스팅 필요
-        return 0; // 임시 구현
+        return 0;
     }
     
     std::string getName() const override {
@@ -25,21 +79,19 @@ public:
     }
     
     std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        auto cloned_state = state.clone();
-        cloned_state->progress(action);
-        return cloned_state;
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        return std::make_unique<AutoMazeState>(
+            hillClimbPlacement(maze_state, params_.searchNumber));
     }
 };
 
-// 시뮬레이티드 어닐링 알고리즘 구현
 class SimulatedAnnealingAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;
     
 public:
     int selectAction(const GameState& state) override {
-        // 기존 시뮬레이티드 어닐링 알고리즘을 인터페이스에 맞게 래핑
-        return 0; // 임시 구현
+        return 0;
     }
     
     std::string getName() const override {
@@ -51,29 +103,30 @@ public:
     }
     
     std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        auto cloned_state = state.clone();
-        cloned_state->progress(action);
-        return cloned_state;
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        return std::make_unique<AutoMazeState>(
+            simulatedAnnealingPlacement(maze_state, 
+                                        params_.searchNumber, 
+                                        GameConstants::AlgorithmParams::START_TEMPERATURE,
+                                        GameConstants::AlgorithmParams::END_TEMPERATURE));
     }
 };
 
-// 랜덤 알고리즘 구현
-class RandomAlgorithm : public Algorithm {
+
+// ----- single player, with context -----
+
+class MazeRandomAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;
     
 public:
     int selectAction(const GameState& state) override {
-        // 기존 랜덤 알고리즘을 인터페이스에 맞게 래핑
-        auto actions = state.legalActions();
-        if (actions.empty()) {
-            return -1; // 유효한 행동이 없는 경우
-        }
-        return actions[rand() % actions.size()];
+        auto maze_state = static_cast<const MazeState&>(state);
+        return randomAction(maze_state);
     }
     
     std::string getName() const override {
-        return "Random";
+        return "Random (Maze)";
     }
     
     void setParams(const AlgorithmParams& params) override {
@@ -81,9 +134,314 @@ public:
     }
     
     std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        auto cloned_state = state.clone();
-        cloned_state->progress(action);
-        return cloned_state;
+        auto maze_state = static_cast<const MazeState&>(state);
+        auto next_state = std::make_unique<MazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class GreedyAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        return greedyAction(maze_state);
+    }
+    
+    std::string getName() const override {
+        return "Greedy";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        auto next_state = std::make_unique<MazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class BeamSearchAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        
+        BeamConfig config;
+        config.search_width = params_.searchWidth;
+        config.search_depth = params_.searchDepth;
+        config.time_threshold = params_.timeThreshold;
+        
+        return beamSearchAction(maze_state, config);
+    }
+    
+    std::string getName() const override {
+        return "BeamSearch";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        auto next_state = std::make_unique<MazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class ChokudaiAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        
+        ChokudaiConfig config;
+        config.search_width = params_.searchWidth;
+        config.search_depth = params_.searchDepth;
+        config.search_number = params_.searchNumber;
+        config.time_threshold = params_.timeThreshold;
+        
+        return chokudaiSearchAction(maze_state, config);
+    }
+    
+    std::string getName() const override {
+        return "Chokudai";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const MazeState&>(state);
+        auto next_state = std::make_unique<MazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+// ----- two player, alternate -----
+class TwoMazeRandomAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto legal_actions = maze_state.legalActions();
+        if (legal_actions.empty()) {
+            return -1;
+        }
+        return legal_actions[GameUtil::mt_for_action() % legal_actions.size()];
+    }
+    
+    std::string getName() const override {
+        return "Random (TwoMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class MinimaxAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return miniMaxSearchAction(maze_state, params_.searchDepth);
+    }
+    
+    std::string getName() const override {
+        return "Minimax";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class AlphaBetaAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return alphaBetaSearchAction(maze_state, params_.searchDepth);
+    }
+    
+    std::string getName() const override {
+        return "AlphaBeta";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class IterativeDeepeningAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return iterativeDeepeningSearchAction(maze_state, params_.timeThreshold);
+    }
+    
+    std::string getName() const override {
+        return "IterativeDeepening";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class MonteCarloAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return monteCarloSearchAction(maze_state, params_.playoutNumber);
+    }
+    
+    std::string getName() const override {
+        return "MonteCarlo";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class MCTSAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return mctsSearchAction(maze_state, params_.playoutNumber);
+    }
+    
+    std::string getName() const override {
+        return "MCTS";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class ThunderAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return thunderSearchAction(maze_state, params_.playoutNumber);
+    }
+    
+    std::string getName() const override {
+        return "Thunder";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+class ThunderTimeAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        return thunderSearchActionWithTime(maze_state, params_.timeThreshold);
+    }
+    
+    std::string getName() const override {
+        return "ThunderTime";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const TwoMazeState&>(state);
+        auto next_state = std::make_unique<TwoMazeState>(maze_state);
+        next_state->progress(action);
+        return next_state;
     }
 };
 
@@ -93,16 +451,45 @@ std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     
     std::unique_ptr<Algorithm> algorithm;
     
-    if (algorithmName == "HillClimb") {
+    // 단일 플레이어 (컨텍스트 없음)
+    if (algorithmName == "AutoMazeRandom") {
+        algorithm = std::make_unique<AutoMazeRandomAlgorithm>();
+    } else if (algorithmName == "HillClimb") {
         algorithm = std::make_unique<HillClimbAlgorithm>();
     } else if (algorithmName == "SimulatedAnnealing") {
         algorithm = std::make_unique<SimulatedAnnealingAlgorithm>();
-    } else if (algorithmName == "Random") {
-        algorithm = std::make_unique<RandomAlgorithm>();
+    } 
+    // 단일 플레이어 (컨텍스트 있음)
+    else if (algorithmName == "MazeRandom") {
+        algorithm = std::make_unique<MazeRandomAlgorithm>();
+    } else if (algorithmName == "Greedy") {
+        algorithm = std::make_unique<GreedyAlgorithm>();
+    } else if (algorithmName == "BeamSearch") {
+        algorithm = std::make_unique<BeamSearchAlgorithm>();
+    } else if (algorithmName == "Chokudai") {
+        algorithm = std::make_unique<ChokudaiAlgorithm>();
+    } 
+    // 두 플레이어 (교대 플레이)
+    else if (algorithmName == "TwoMazeRandom") {
+        algorithm = std::make_unique<TwoMazeRandomAlgorithm>();
+    } else if (algorithmName == "Minimax") {
+        algorithm = std::make_unique<MinimaxAlgorithm>();
+    } else if (algorithmName == "AlphaBeta") {
+        algorithm = std::make_unique<AlphaBetaAlgorithm>();
+    } else if (algorithmName == "IterativeDeepening") {
+        algorithm = std::make_unique<IterativeDeepeningAlgorithm>();
+    } else if (algorithmName == "MonteCarlo") {
+        algorithm = std::make_unique<MonteCarloAlgorithm>();
+    } else if (algorithmName == "MCTS") {
+        algorithm = std::make_unique<MCTSAlgorithm>();
+    } else if (algorithmName == "Thunder") {
+        algorithm = std::make_unique<ThunderAlgorithm>();
+    } else if (algorithmName == "ThunderTime") {
+        algorithm = std::make_unique<ThunderTimeAlgorithm>();
     } else {
         throw std::invalid_argument("Unknown algorithm: " + algorithmName);
     }
     
     algorithm->setParams(params);
     return algorithm;
-} 
+}
