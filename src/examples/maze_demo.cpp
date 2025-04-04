@@ -1,25 +1,47 @@
-#include "../algorithms/single_player/with_context/random.h"
-#include "../algorithms/single_player/with_context/greedy.h"
-#include "../algorithms/single_player/with_context/beam.h"
-#include "../algorithms/single_player/with_context/chokudai.h"
+#include "../algorithms/algorithm_interface.h"
+#include "../games/maze/maze_state.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 #include <functional>
 
-int main(int argc, char* argv[]) 
-{
+void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
+    AlgorithmParams params;
+    
+    if (algorithm_name == "BeamSearch" || algorithm_name == "Chokudai") {
+        params.timeThreshold = 1; // 1ms 시간 제한
+    }
+    
+    // 알고리즘 인스턴스 생성
+    auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
+    
+    // 게임 상태 초기화
+    auto state = std::make_unique<MazeState>(seed);
+    
+    // 게임 진행
+    std::cout << state->toString() << std::endl;
+    
+    while (!state->isDone()) {
+        int action = algorithm->selectAction(*state);
+        state->progress(action);
+        std::cout << state->toString() << std::endl;
+    }
+    
+    std::cout << "Final score: " << static_cast<MazeState*>(state.get())->game_score_ << std::endl;
+}
+
+int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘을 맵으로 관리 (이름 -> 함수 포인터)
-    std::map<std::string, std::function<void(int)>> algorithms = 
-    {
-        {"random", playGameRandom},
-        {"greedy", playGameGreedy},
-        {"beam", [](int seed){ playGameBeam(seed, 1); }},        
-        {"chokudai", [](int seed){ playGameChokudai(seed, 1); }} 
+    // 사용 가능한 알고리즘 목록
+    std::map<std::string, std::string> algorithms = {
+        {"random", "MazeRandom"},
+        {"greedy", "Greedy"},
+        {"beam", "BeamSearch"},
+        {"chokudai", "Chokudai"}
     };
     
     std::string algorithm = "random";
@@ -28,15 +50,11 @@ int main(int argc, char* argv[])
         algorithm = argv[1];
     }
     
-    // 알고리즘 존재 여부 확인 후 실행
     auto it = algorithms.find(algorithm);
-    if (it != algorithms.end()) 
-    {
+    if (it != algorithms.end()) {
         std::cout << "Running " << algorithm << " algorithm...\n";
-        it->second(GameUtil::mt_for_action());
-    } 
-    else 
-    {
+        playGameWithAlgorithm(it->second, GameUtil::mt_for_action());
+    } else {
         std::cout << "Unknown algorithm: " << algorithm << "\n";
         std::cout << "Available algorithms:";
         for (const auto& pair : algorithms) {
