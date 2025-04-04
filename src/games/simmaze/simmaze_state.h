@@ -29,7 +29,7 @@ private:
     int turn_ = 0;
     SimMazePlayer players_[GameConstants::TwoMaze::PLAYER_N];
 
-    // 마지막으로 수행된 액션 저장 (검증 및 디버깅용)
+    // 마지막 수행된 액션 저장 - 디버깅
     int last_actions_[GameConstants::TwoMaze::PLAYER_N] = {-1, -1};
 
 public:
@@ -56,7 +56,7 @@ public:
         return this->evaluated_score_ < maze_other.evaluated_score_;
     }
     
-    // 동시 게임 전용 메서드
+    // 추가 메서드
     // 두 플레이어의 액션을 각각 받아 게임을 진행
     void advance(const int action0, const int action1);
     
