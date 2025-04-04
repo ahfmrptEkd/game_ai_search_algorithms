@@ -70,6 +70,14 @@ public:
     // 액션 인코딩/디코딩 유틸리티
     static int encodeActions(int action0, int action1);
     static std::pair<int, int> decodeActions(int encoded_action);
+
+    // MCTS 알고리즘 support methods
+    int getTurn() const { return turn_; }
+    int getPoint(int y, int x) const { return points_[y][x]; }
+    int getPlayerX(int player_id) const { return players_[player_id].coord_.x_; }
+    int getPlayerY(int player_id) const { return players_[player_id].coord_.y_; }
+    int getPlayerScore(int player_id) const { return players_[player_id].game_score_; }
+    int getLastAction(int player_id) const { return last_actions_[player_id]; }
 };
 
 #endif // SIMMAZE_STATE_H
