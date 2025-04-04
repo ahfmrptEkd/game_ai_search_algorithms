@@ -1,20 +1,45 @@
-#include "../algorithms/single_player/without_context/random.h"
-#include "../algorithms/single_player/without_context/hillclimb.h"
-#include "../algorithms/single_player/without_context/simulated_annealing.h"
+#include "../algorithms/algorithm_interface.h"
+#include "../games/automaze/automaze_state.h"
+#include "../common/coord.h"
 #include "../common/game_util.h"
+#include "../common/game_constants.h"
 #include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 #include <functional>
 
-int main(int argc, char* argv[]) 
-{
+void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
+    AlgorithmParams params;
+    
+        // 게임 설정
+    params.searchWidth = 5;
+    params.searchDepth = 5; // 최대 미로 깊이 - 1 : 현재 5x5 미로
+
+    if (algorithm_name == "HillClimb" || algorithm_name == "SimulatedAnnealing") {
+        params.searchNumber = 1000; // 1000번 반복
+    }
+    
+    auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
+    
+    auto state = std::make_unique<AutoMazeState>(seed);
+    
+    auto result_state = algorithm->runAndEvaluate(*state, 0);
+    
+    std::cout << result_state->toString() << std::endl;
+    
+    auto final_score = static_cast<AutoMazeState*>(result_state.get())->getScore(true);
+    std::cout << "Final score: " << final_score << std::endl;
+}
+
+int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
-    std::map<std::string, std::function<void(int)>> algorithms = 
-    {
-        {"random", playGameRandom},
-        {"hillclimb", playGameHillClimb},
-        {"annealing", playGameSimulatedAnnealing}
+    
+    // 사용 가능한 알고리즘 목록
+    std::map<std::string, std::string> algorithms = {
+        {"random", "AutoMazeRandom"},
+        {"hillclimb", "HillClimb"},
+        {"annealing", "SimulatedAnnealing"}
     };
     
     std::string algorithm = "random";
@@ -23,15 +48,11 @@ int main(int argc, char* argv[])
         algorithm = argv[1];
     }
     
-    // 알고리즘 존재 여부 확인 후 실행
     auto it = algorithms.find(algorithm);
-    if (it != algorithms.end()) 
-    {
+    if (it != algorithms.end()) {
         std::cout << "Running " << algorithm << " algorithm...\n";
-        it->second(GameUtil::mt_for_action());
-    } 
-    else 
-    {
+        playGameWithAlgorithm(it->second, GameUtil::mt_for_action());
+    } else {
         std::cout << "Unknown algorithm: " << algorithm << "\n";
         std::cout << "Available algorithms:";
         for (const auto& pair : algorithms) {
