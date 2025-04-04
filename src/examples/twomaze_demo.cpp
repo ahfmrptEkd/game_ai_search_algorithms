@@ -1,33 +1,62 @@
-// src/examples/twomaze_demo.cpp
-#include "../algorithms/two_player/alternate/random.h"
-#include "../algorithms/two_player/alternate/minimax.h"
-#include "../algorithms/two_player/alternate/alphabeta.h"
-#include "../algorithms/two_player/alternate/deepening.h"
-#include "../algorithms/two_player/alternate/mc.h"
-#include "../algorithms/two_player/alternate/mcts.h"
-#include "../algorithms/two_player/alternate/thunder.h"
+#include "../algorithms/algorithm_interface.h"
+#include "../games/twomaze/twomaze_state.h"
+#include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 #include <functional>
 
-int main(int argc, char* argv[]) 
-{
+// 알고리즘을 사용해 TwoMaze 게임을 플레이하는 함수
+void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
+    // 알고리즘 파라미터 설정
+    AlgorithmParams params;
+
+        // 게임 설정
+    params.searchWidth = 5; 
+    params.searchDepth = 4; // 최대 미로 깊이 - 1 : 현재 4x4 미로
+    
+    // 알고리즘별 파라미터 조정
+    if (algorithm_name == "Minimax" || algorithm_name == "AlphaBeta") {
+        params.searchDepth = 4;
+    } else if (algorithm_name == "IterativeDeepening") {
+        params.timeThreshold = 100; // 100ms
+    } else if (algorithm_name == "MonteCarlo" || algorithm_name == "MCTS" || algorithm_name == "Thunder") {
+        params.playoutNumber = 1000;
+    } else if (algorithm_name == "ThunderTime") {
+        params.timeThreshold = 100; // 100ms
+    }
+    
+    auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
+    
+    auto state = std::make_unique<TwoMazeState>(seed);
+    
+    std::cout << state->toString() << std::endl;
+    
+    while (!state->isDone()) {
+        int action = algorithm->selectAction(*state);
+        state->progress(action);
+        std::cout << state->toString() << std::endl;
+    }
+    
+    WinningStatus status = state->getWinningStatus();
+    printGameResult(status);
+}
+
+int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘을 맵으로 관리 (이름 -> 함수 포인터)
-    std::map<std::string, std::function<void(int)>> algorithms = 
-    {
-        {"random", [](int seed) { playGameRandom(seed); }},
-        {"minimax", [](int seed) { playGameMinimax(seed); }},
-        {"alphabeta", [](int seed) {playGameAlphaBeta(seed);}},
-        {"deepening", [](int seed) {playGameIterativeDeepening(seed);}},
-        {"mc", [](int seed) {playGameMonteCarlo(seed);}},
-        {"mcts", [](int seed) {playGameMCTS(seed);}},
-        {"thunder", [](int seed) {playGameThunder(seed, 1000);}},
-        {"thunder_time", [](int seed) {playGameThunderWithTime(seed, 100);}}
-        // 다른 알고리즘 추가
+    // 사용 가능한 알고리즘 목록
+    std::map<std::string, std::string> algorithms = {
+        {"random", "TwoMazeRandom"},
+        {"minimax", "Minimax"},
+        {"alphabeta", "AlphaBeta"},
+        {"deepening", "IterativeDeepening"},
+        {"mc", "MonteCarlo"},
+        {"mcts", "MCTS"},
+        {"thunder", "Thunder"},
+        {"thunder_time", "ThunderTime"}
     };
     
     std::string algorithm = "random";
@@ -37,13 +66,10 @@ int main(int argc, char* argv[])
     }
     
     auto it = algorithms.find(algorithm);
-    if (it != algorithms.end()) 
-    {
+    if (it != algorithms.end()) {
         std::cout << "Running " << algorithm << " algorithm...\n";
-        it->second(GameUtil::mt_for_action());
-    } 
-    else 
-    {
+        playGameWithAlgorithm(it->second, GameUtil::mt_for_action());
+    } else {
         std::cout << "Unknown algorithm: " << algorithm << "\n";
         std::cout << "Available algorithms:";
         for (const auto& pair : algorithms) {
