@@ -41,12 +41,12 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘 목록
+    // 사용 가능한 알고리즘 목록 
     std::map<std::string, std::string> algorithms = {
         {"random", "MazeRandom"},
-        {"greedy", "MazeGreedy"},
-        {"beam", "MazeBeam"},
-        {"chokudai", "MazeChokudai"}
+        {"greedy", "Greedy"},          
+        {"beam", "BeamSearch"},      
+        {"chokudai", "Chokudai"}  
     };
     
     std::string algorithm = "random";
