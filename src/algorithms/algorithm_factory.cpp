@@ -16,6 +16,9 @@
 #include "two_player/alternate/thunder.h"
 
 #include "two_player/simultaneous/random.h"
+#include "two_player/simultaneous/pmc.h"
+#include "two_player/simultaneous/mcts_sim.h"
+#include "two_player/simultaneous/duct.h"
 
 #include "../games/maze/maze_state.h"
 #include "../games/automaze/automaze_state.h"
@@ -490,6 +493,126 @@ public:
     }
 };
 
+// DUCT 알고리즘 클래스
+class DuctAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    int player_id_ = 0;
+    
+public:
+    int selectAction(const GameState& state) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            return ductSearchAction(maze_state, player_id_, params_.playoutNumber);
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("DuctAlgorithm expects SimMazeState");
+        }
+    }
+    
+    std::string getName() const override {
+        return "DUCT (SimMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+        player_id_ = params.playerId;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int encoded_action) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            auto next_state = std::make_unique<SimMazeState>(maze_state);
+            
+            auto actions = SimMazeState::decodeActions(encoded_action);
+            next_state->advance(actions.first, actions.second);
+            
+            return next_state;
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("DuctAlgorithm expects SimMazeState");
+        }
+    }
+};
+
+// Primitive Monte Carlo 알고리즘 클래스
+class PMCAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    int player_id_ = 0;
+    
+public:
+    int selectAction(const GameState& state) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            return pmcSearchAction(maze_state, player_id_, params_.playoutNumber);
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("PMCAlgorithm expects SimMazeState");
+        }
+    }
+    
+    std::string getName() const override {
+        return "Primitive Monte Carlo (SimMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+        player_id_ = params.playerId;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int encoded_action) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            auto next_state = std::make_unique<SimMazeState>(maze_state);
+            
+            auto actions = SimMazeState::decodeActions(encoded_action);
+            next_state->advance(actions.first, actions.second);
+            
+            return next_state;
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("PMCAlgorithm expects SimMazeState");
+        }
+    }
+};
+
+// MCTS Simulation 알고리즘 클래스
+class MCTSSimAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    int player_id_ = 0;
+    
+public:
+    int selectAction(const GameState& state) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            return mctsSimSearchAction(maze_state, player_id_, params_.playoutNumber);
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("MCTSSimAlgorithm expects SimMazeState");
+        }
+    }
+    
+    std::string getName() const override {
+        return "MCTS Simulation (SimMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+        player_id_ = params.playerId;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int encoded_action) override {
+        try {
+            auto& maze_state = static_cast<const SimMazeState&>(state);
+            auto next_state = std::make_unique<SimMazeState>(maze_state);
+            
+            auto actions = SimMazeState::decodeActions(encoded_action);
+            next_state->advance(actions.first, actions.second);
+            
+            return next_state;
+        } catch (const std::bad_cast&) {
+            throw std::runtime_error("MCTSSimAlgorithm expects SimMazeState");
+        }
+    }
+};
+
 // 알고리즘 팩토리 구현
 std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     const std::string& algorithmName, const AlgorithmParams& params) {
@@ -535,6 +658,12 @@ std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     // 두 플레이어 (동시 게임)
     else if (algorithmName == "SimMazeRandom") {
         algorithm = std::make_unique<SimMazeRandomAlgorithm>();
+    } else if (algorithmName == "SimMazeDUCT") {
+        algorithm = std::make_unique<DuctAlgorithm>();
+    } else if (algorithmName == "SimMazePMC") {
+        algorithm = std::make_unique<PMCAlgorithm>();
+    } else if (algorithmName == "SimMazeMCTS") {
+        algorithm = std::make_unique<MCTSSimAlgorithm>();
     }
     else {
         throw std::invalid_argument("Unknown algorithm: " + algorithmName);
