@@ -21,4 +21,4 @@ $(BINDIR)/maze_benchmark: $(EXAMPLES_DIR)/maze_benchmark.cpp $(MAZE_SRC) $(MAZE_
 	@echo "Building maze benchmark..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
-	@echo "Maze benchmark built successfully!" 
+	@echo "Maze benchmark built successfully!"
