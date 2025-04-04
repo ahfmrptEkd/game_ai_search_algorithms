@@ -22,6 +22,7 @@ ALGO_FACTORY_SRC = $(ALGO_BASE_DIR)/algorithm_factory.cpp
 include $(GAMES_DIR)/maze/Makefile.inc
 include $(GAMES_DIR)/automaze/Makefile.inc
 include $(GAMES_DIR)/twomaze/Makefile.inc
+include $(GAMES_DIR)/simmaze/Makefile.inc
 
 # 단일 플레이어 알고리즘 소스
 SINGLE_PLAYER_ALGOS = $(wildcard $(ALGO_DIR)/with_context/*.cpp) \
@@ -31,12 +32,12 @@ SINGLE_PLAYER_ALGOS = $(wildcard $(ALGO_DIR)/with_context/*.cpp) \
 TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp)
 
 # 전체 소스 파일들
-ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) \
-              $(MAZE_ALGO) $(AUTOMAZE_ALGO) $(TWOMAZE_ALGO) \
+ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) $(SIMMAZE_SRC) \
+              $(MAZE_ALGO) $(AUTOMAZE_ALGO) $(TWOMAZE_ALGO) $(SIMMAZE_ALGO) \
               $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 
 # 사용 가능한 게임 목록
-GAMES = maze automaze twomaze
+GAMES = maze automaze twomaze simmaze
 
 # 기본 타겟: 모든 게임 빌드
 all: $(GAMES) twomaze_battle
@@ -46,6 +47,7 @@ maze: $(BINDIR)/maze_demo
 automaze: $(BINDIR)/automaze_demo
 twomaze: $(BINDIR)/twomaze_demo
 twomaze_battle: $(BINDIR)/twomaze_battle
+simmaze: $(BINDIR)/simmaze_demo
 
 # 벤치마크 타겟
 benchmark: maze_benchmark automaze_benchmark twomaze_benchmark
@@ -85,6 +87,12 @@ $(BINDIR)/twomaze_demo: $(EXAMPLES_DIR)/twomaze_demo.cpp $(ALL_SOURCES)
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "TwoMaze game built successfully!"
+
+$(BINDIR)/simmaze_demo: $(EXAMPLES_DIR)/simmaze_demo.cpp $(ALL_SOURCES)
+	@echo "Building SimMaze game..."
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	@echo "SimMaze game built successfully!"
 
 $(BINDIR)/maze_benchmark: $(EXAMPLES_DIR)/maze_benchmark.cpp $(ALL_SOURCES)
 	@echo "Building maze benchmark..."
