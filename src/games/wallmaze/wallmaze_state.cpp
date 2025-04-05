@@ -1,6 +1,7 @@
 #include "wallmaze_state.h"
 #include "zobrist_hash.h"
 #include "../../common/game_util.h"
+#include "../../algorithms/pathfinding/pathfinding.h"
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -150,6 +151,7 @@ std::string WallMazeState::toString() const
     return ss.str();
 }
 
+// 기존 BFS 기반 최단 거리 계산 (이전 코드와 호환성 유지)
 int WallMazeState::getDistanceToNearestPoint() const
 {
     struct DistanceCoord
@@ -201,4 +203,112 @@ GameConstants::ScoreType WallMazeState::evaluateScore()
 bool WallMazeState::operator<(const WallMazeState& other) const
 {
     return this->evaluated_score_ < other.evaluated_score_;
+}
+
+int WallMazeState::calculateDistance(const Coord& start, const Coord& goal) const {
+    return getDistanceToPoint(goal, pathAlgorithmType_);
+}
+
+int WallMazeState::getDistanceToPoint(const Coord& target, PathfindingConstants::Algorithm algo) const {
+    auto pathfinder = createPathfindingAlgorithm(algo);
+    
+    auto isWalkableFunc = [this](int y, int x) -> bool {
+        return this->isWalkable(y, x);
+    };
+    
+    PathfindingResult result = pathfinder->findPath(this->character_, target, isWalkableFunc);
+    
+    return result.pathFound ? result.distance : GameConstants::INF;
+}
+
+int WallMazeState::getNextActionTowards(const Coord& target, PathfindingConstants::Algorithm algo) const {
+    auto pathfinder = createPathfindingAlgorithm(algo);
+    
+    auto isWalkableFunc = [this](int y, int x) -> bool {
+        return this->isWalkable(y, x);
+    };
+    
+    PathfindingResult result = pathfinder->findPath(this->character_, target, isWalkableFunc);
+    
+    if (!result.pathFound || result.path.size() < 2) {
+        // 경로를 찾지 못했거나, 이미 목표 위치에 있는 경우
+        return -1;
+    }
+    
+    // 다음 이동할 위치 (경로의 두 번째 노드, 첫 번째는 현재 위치)
+    Coord nextPos = result.path[1];
+    
+    for (int dir = 0; dir < 4; dir++) {
+        int ny = this->character_.y_ + GameConstants::DY[dir];
+        int nx = this->character_.x_ + GameConstants::DX[dir];
+        
+        if (ny == nextPos.y_ && nx == nextPos.x_) {
+            return dir;
+        }
+    }
+    
+    return -1;
+}
+
+Coord WallMazeState::findNearestPoint(PathfindingConstants::Algorithm algo) const {
+    Coord nearestPoint(-1, -1);
+    int minDistance = GameConstants::INF;
+    
+    for (int y = 0; y < GameConstants::Board::H; y++) {
+        for (int x = 0; x < GameConstants::Board::W; x++) {
+            if (this->points_[y][x] > 0) {
+                Coord pointPos(y, x);
+                int distance = getDistanceToPoint(pointPos, algo);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestPoint = pointPos;
+                }
+            }
+        }
+    }
+    
+    return nearestPoint;
+}
+
+Coord WallMazeState::findHighestValuePoint(PathfindingConstants::Algorithm algo) const {
+    Coord bestPoint(-1, -1);
+    double bestValue = -1;
+    
+    for (int y = 0; y < GameConstants::Board::H; y++) {
+        for (int x = 0; x < GameConstants::Board::W; x++) {
+            if (this->points_[y][x] > 0) {
+                Coord pointPos(y, x);
+                int distance = getDistanceToPoint(pointPos, algo);
+                
+                if (distance < GameConstants::INF) {
+                    // 점수/거리 비율 계산 (거리당 얻는 점수)
+                    double value = static_cast<double>(this->points_[y][x]) / distance;
+                    
+                    if (value > bestValue) {
+                        bestValue = value;
+                        bestPoint = pointPos;
+                    }
+                }
+            }
+        }
+    }
+    
+    return bestPoint;
+}
+
+// 경로 탐색 알고리즘 벤치마크 실행
+PathfindingResult WallMazeState::benchmarkPathfinding(
+    const WallMazeState& state,
+    const Coord& start,
+    const Coord& goal,
+    PathfindingConstants::Algorithm algo
+) {
+    auto pathfinder = createPathfindingAlgorithm(algo);
+    
+    auto isWalkableFunc = [&state](int y, int x) -> bool {
+        return state.isWalkable(y, x);
+    };
+    
+    return pathfinder->findPath(start, goal, isWalkableFunc);
 }

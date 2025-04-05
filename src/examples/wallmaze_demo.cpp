@@ -1,6 +1,7 @@
 #include "../algorithms/algorithm_interface.h"
 #include "../games/wallmaze/wallmaze_state.h"
 #include "../games/wallmaze/zobrist_hash.h"
+#include "../algorithms/pathfinding/pathfinding.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
@@ -104,6 +105,49 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int search_dept
     return best_state.first_action_ != -1 ? best_state.first_action_ : randomAction(state);
 }
 
+int pathfindingAction(const WallMazeState& state, PathfindingConstants::Algorithm algo)
+{
+    // 가장 가까운 점수 위치 찾기
+    Coord nearestPoint = state.findNearestPoint(algo);
+    
+    // 적절한 점수 위치를 찾지 못했다면 랜덤 행동
+    if (nearestPoint.x_ == -1 || nearestPoint.y_ == -1) {
+        return randomAction(state);
+    }
+    
+    // 해당 위치로 이동하기 위한 다음 행동 반환
+    int action = state.getNextActionTowards(nearestPoint, algo);
+    
+    // 경로를 찾지 못했거나 다음 행동이 없는 경우 랜덤 행동
+    if (action == -1) {
+        return randomAction(state);
+    }
+    
+    return action;
+}
+
+// 가치 기반 경로 찾기 (점수/거리 비율 최적화)
+int valueBasedPathfindingAction(const WallMazeState& state, PathfindingConstants::Algorithm algo)
+{
+    // 가치가 가장 높은 점수 위치 찾기
+    Coord bestPoint = state.findHighestValuePoint(algo);
+    
+    // 적절한 점수 위치를 찾지 못했다면 랜덤 행동
+    if (bestPoint.x_ == -1 || bestPoint.y_ == -1) {
+        return randomAction(state);
+    }
+    
+    // 해당 위치로 이동하기 위한 다음 행동 반환
+    int action = state.getNextActionTowards(bestPoint, algo);
+    
+    // 경로를 찾지 못했거나 다음 행동이 없는 경우 랜덤 행동
+    if (action == -1) {
+        return randomAction(state);
+    }
+    
+    return action;
+}
+
 void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
     
@@ -111,27 +155,55 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     params.searchWidth = 100;
     params.searchDepth = 10;
     
+    zobrist_hash::init(); 
     std::function<int(const WallMazeState&)> algorithm;
+    std::string algoDescription;
     
     if (algorithm_name == "random") {
         algorithm = randomAction;
+        algoDescription = "Random";
     } else if (algorithm_name == "greedy") {
         algorithm = greedyAction;
+        algoDescription = "Greedy";
     } else if (algorithm_name == "beam") {
         algorithm = [&params](const WallMazeState& state) {
             return beamSearchAction(state, params.searchWidth, params.searchDepth);
         };
+        algoDescription = "Beam Search";
+    } else if (algorithm_name == "bfs") {
+        algorithm = [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::BFS);
+        };
+        algoDescription = "BFS Pathfinding";
+    } else if (algorithm_name == "dfs") {
+        algorithm = [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DFS);
+        };
+        algoDescription = "DFS Pathfinding";
+    } else if (algorithm_name == "astar") {
+        algorithm = [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        };
+        algoDescription = "A* Pathfinding";
+    } else if (algorithm_name == "dijkstra") {
+        algorithm = [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DIJKSTRA);
+        };
+        algoDescription = "Dijkstra Pathfinding";
+    } else if (algorithm_name == "value") {
+        algorithm = [](const WallMazeState& state) {
+            return valueBasedPathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        };
+        algoDescription = "Value-Based A* Pathfinding";
     } else {
         std::cout << "Unknown algorithm: " << algorithm_name << ". Using random instead." << std::endl;
         algorithm = randomAction;
+        algoDescription = "Random (fallback)";
     }
-    
-    // Zobrist 해시 초기화
-    zobrist_hash::init();
     
     auto state = WallMazeState(seed);
     
-    std::cout << "Starting game with " << algorithm_name << " algorithm..." << std::endl;
+    std::cout << "Starting game with " << algoDescription << " algorithm..." << std::endl;
     std::cout << state.toString() << std::endl;
     
     while (!state.isDone()) {
@@ -154,6 +226,15 @@ void benchmarkAlgorithms(int num_games) {
         }},
         {"Beam Search + Hash", [](const WallMazeState& state) {
             return beamSearchAction(state, 100, 10); // 해시 제거 기능 자동 포함
+        }},
+        {"BFS Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::BFS);
+        }},
+        {"A* Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        }},
+        {"Value-Based A*", [](const WallMazeState& state) {
+            return valueBasedPathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
         }}
     };
     
@@ -287,11 +368,15 @@ void analyzeHashEffect(int num_games) {
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘 목록
     std::map<std::string, std::string> algorithms = {
         {"random", "Random"},
         {"greedy", "Greedy"},
-        {"beam", "Beam Search"}
+        {"beam", "Beam Search"},
+        {"bfs", "BFS Pathfinding"},
+        {"dfs", "DFS Pathfinding"},
+        {"astar", "A* Pathfinding"},
+        {"dijkstra", "Dijkstra Pathfinding"},
+        {"value", "Value-Based A* Pathfinding"}
     };
     
     std::string mode = "play";
@@ -313,7 +398,7 @@ int main(int argc, char* argv[]) {
             std::cout << "사용법: wallmaze_demo [옵션]" << std::endl
                       << "옵션:" << std::endl
                       << "  --mode MODE      실행 모드 (play, benchmark, hash-analysis)" << std::endl
-                      << "  --algo ALGO      알고리즘 (random, greedy, beam)" << std::endl
+                      << "  --algo ALGO      알고리즘 (random, greedy, beam, bfs, dfs, astar, dijkstra, value)" << std::endl
                       << "  --games N        벤치마크 모드에서 실행할 게임 수" << std::endl
                       << "  --seed N         게임 초기화를 위한 시드" << std::endl
                       << "  --help           이 도움말 메시지 표시" << std::endl;

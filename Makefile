@@ -35,7 +35,7 @@ TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp)
 # 전체 소스 파일들
 ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) $(SIMMAZE_SRC) $(WALLMAZE_SRC) \
               $(MAZE_ALGO) $(AUTOMAZE_ALGO) $(TWOMAZE_ALGO) $(SIMMAZE_ALGO) $(WALLMAZE_ALGO) \
-              $(COMMON_SRC) $(ALGO_FACTORY_SRC)
+              $(PATHFINDING_SRC) $(COMMON_SRC) $(ALGO_FACTORY_SRC)
 
 # 사용 가능한 게임 목록
 GAMES = maze automaze twomaze simmaze wallmaze
@@ -51,12 +51,14 @@ simmaze: $(BINDIR)/simmaze_demo
 wallmaze: $(BINDIR)/wallmaze_demo
 
 # 벤치마크 타겟
-benchmark: maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark 
+BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark pathfinding_benchmark
+benchmark: $(BENCHMARK_TARGETS)
 maze_benchmark: $(BINDIR)/maze_benchmark
 automaze_benchmark: $(BINDIR)/automaze_benchmark
 twomaze_benchmark: $(BINDIR)/twomaze_benchmark
 simmaze_benchmark: $(BINDIR)/simmaze_benchmark
-wallmaze_benchmark: $(BINDIR)/wallmaze_benchmark 
+wallmaze_benchmark: $(BINDIR)/wallmaze_benchmark
+pathfinding_benchmark: $(BINDIR)/pathfinding_benchmark
 
 # 클린 타겟
 clean:
@@ -141,6 +143,12 @@ $(BINDIR)/wallmaze_benchmark: $(EXAMPLES_DIR)/wallmaze_benchmark.cpp $(ALL_SOURC
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "WallMaze benchmark built successfully!"
 
+$(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL_SOURCES)
+	@echo "Building pathfinding benchmark..."
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	@echo "Pathfinding benchmark built successfully!"
+
 # 도움말
 help:
 	@echo "사용 가능한 타겟:"
@@ -161,5 +169,6 @@ help:
 	@echo "  make twomaze_benchmark   - 2인 미로 벤치마크 빌드"
 	@echo "  make simmaze_benchmark   - 동시 미로 벤치마크 빌드"
 	@echo "  make wallmaze_benchmark  - 벽이 있는 미로 벤치마크 빌드"
+	@echo "  make pathfinding_benchmark - 경로 탐색 알고리즘 벤치마크 빌드"
 
-.PHONY: all $(GAMES) benchmark maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark clean help test twomaze_battle
+.PHONY: all $(GAMES) benchmark $(BENCHMARK_TARGETS) clean help test twomaze_battle

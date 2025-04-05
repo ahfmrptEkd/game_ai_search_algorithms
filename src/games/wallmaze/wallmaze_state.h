@@ -4,6 +4,7 @@
 #include "../../common/game_state.h"
 #include "../../common/game_util.h"
 #include "../../common/coord.h"
+#include "../../algorithms/pathfinding/pathfinding.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -18,17 +19,23 @@ private:
     int walls_[GameConstants::Board::H][GameConstants::Board::W] = {};
     int turn_ = 0;
 
-    // BFS로 시작점에서 목표까지 최단 거리 계산
+    // 사용하는 경로 찾기 알고리즘 타입
+    PathfindingConstants::Algorithm pathAlgorithmType_ = PathfindingConstants::Algorithm::BFS;
+
     int getDistanceToNearestPoint() const;
-    
+
     void initHash();
+
+    int calculateDistance(const Coord& start, const Coord& goal) const;
+    
+    ScoreType evaluatePotentialScore() const;
 
 public:
     Coord character_ = Coord();
     int game_score_ = 0;
     int first_action_ = -1;
     ScoreType evaluated_score_ = 0;
-    uint64_t hash_ = 0;
+    uint64_t hash_ = 0;  // Zobrist 해시 값
 
     WallMazeState();
     WallMazeState(const int seed);
@@ -47,10 +54,25 @@ public:
         return this->evaluated_score_ < maze_other.evaluated_score_;
     }
     
+    // 추가 메서드
     // 특정 게임에만 필요한 비교 연산자
     bool operator<(const WallMazeState& other) const;
 
     bool hasWall(int y, int x) const { return walls_[y][x] == 1; }
+    bool isWalkable(int y, int x) const { return !hasWall(y, x); }
+    void setPathAlgorithm(PathfindingConstants::Algorithm type) { pathAlgorithmType_ = type; }
+    PathfindingConstants::Algorithm getPathAlgorithm() const { return pathAlgorithmType_; }
+    int getDistanceToPoint(const Coord& target, PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
+    int getNextActionTowards(const Coord& target, PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
+    Coord findNearestPoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
+    Coord findHighestValuePoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
+
+    static PathfindingResult benchmarkPathfinding(
+        const WallMazeState& state,
+        const Coord& start,
+        const Coord& goal,
+        PathfindingConstants::Algorithm algo
+    );
 };
 
 #endif // WALLMAZE_STATE_H
