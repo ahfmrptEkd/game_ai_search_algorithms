@@ -16,6 +16,10 @@ private:
     int walls_[GameConstants::Board::H][GameConstants::Board::W] = {};
     int turn_ = 0;
 
+    // BFS로 시작점에서 목표까지 최단 거리 계산
+    int bfsDistance(const Coord& start, const Coord& goal) const;
+    ScoreType evaluatePotentialScore() const;
+
 public:
     Coord character_ = Coord();
     int game_score_ = 0;
