@@ -13,10 +13,12 @@
 namespace PathfindingConstants {
     enum class Algorithm {
         BFS,
+        DFS,
     };
 
     const std::unordered_map<Algorithm, std::string> AlgorithmNames = {
         {Algorithm::BFS, "BFS"},
+        {Algorithm::DFS, "DFS"},
     };
 }
 
