@@ -15,12 +15,14 @@ namespace PathfindingConstants {
         BFS,
         DFS,
         DIJKSTRA,
+        ASTAR,
     };
 
     const std::unordered_map<Algorithm, std::string> AlgorithmNames = {
         {Algorithm::BFS, "BFS"},
         {Algorithm::DFS, "DFS"},
         {Algorithm::DIJKSTRA, "Dijkstra"},
+        {Algorithm::ASTAR, "A*"},
     };
 }
 
