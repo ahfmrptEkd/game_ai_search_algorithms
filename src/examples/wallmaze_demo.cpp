@@ -1,5 +1,6 @@
 #include "../algorithms/algorithm_interface.h"
 #include "../games/wallmaze/wallmaze_state.h"
+#include "../games/wallmaze/zobrist_hash.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
@@ -9,7 +10,7 @@
 #include <functional>
 #include <chrono>
 #include <iomanip>
-#include <queue>
+#include <unordered_set>
 
 int randomAction(const WallMazeState& state)
 {
@@ -49,13 +50,15 @@ int greedyAction(const WallMazeState& state)
     return best_action;
 }
 
-// 빔 탐색 알고리즘 (향상된 BFS 평가 함수 사용)
+// 빔 탐색 알고리즘 (향상된 BFS 평가 함수 사용 + Zobrist 해시로 중복 상태 제거)
 int beamSearchAction(const WallMazeState& state, int beam_width, int search_depth)
 {
     std::priority_queue<WallMazeState> now_beam;
     WallMazeState best_state;
     
     now_beam.push(state);
+    auto hash_check = std::unordered_set<uint64_t>();  // 중복 상태 체크용 해시 세트
+    
     for (int t = 0; t < search_depth; t++) {
         std::priority_queue<WallMazeState> next_beam;
         for (int i = 0; i < beam_width; i++) {
@@ -69,7 +72,13 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int search_dept
             for (const auto& action : now_state.legalActions()) {
                 WallMazeState next_state = now_state;
                 next_state.progress(action);
-                next_state.evaluateScore();  // BFS 기반 향상된 평가 함수 사용
+                
+                if (t >= 1 && hash_check.count(next_state.hash_) > 0) {
+                    continue;  // 이미 탐색한 상태는 건너뛰기
+                }
+                
+                hash_check.insert(next_state.hash_);
+                next_state.evaluateScore();
                 
                 if (t == 0) {
                     next_state.first_action_ = action;
@@ -117,6 +126,9 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
         algorithm = randomAction;
     }
     
+    // Zobrist 해시 초기화
+    zobrist_hash::init();
+    
     auto state = WallMazeState(seed);
     
     std::cout << "Starting game with " << algorithm_name << " algorithm..." << std::endl;
@@ -132,11 +144,16 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
 }
 
 void benchmarkAlgorithms(int num_games) {
+    zobrist_hash::init();
+    
     std::map<std::string, std::function<int(const WallMazeState&)>> algorithms = {
         {"Random", randomAction},
         {"Greedy", greedyAction},
         {"Beam Search", [](const WallMazeState& state) {
             return beamSearchAction(state, 100, 10);
+        }},
+        {"Beam Search + Hash", [](const WallMazeState& state) {
+            return beamSearchAction(state, 100, 10); // 해시 제거 기능 자동 포함
         }}
     };
     
@@ -184,9 +201,93 @@ void benchmarkAlgorithms(int num_games) {
     }
 }
 
+// 해시 테이블 효과 분석 - 탐색된 상태 수 측정
+void analyzeHashEffect(int num_games) {
+    zobrist_hash::init();
+    
+    std::cout << "\n===== 해시 테이블 효과 분석 =====" << std::endl;
+    std::cout << "테스트 게임 수: " << num_games << std::endl;
+    
+    double avg_states_with_hash = 0;
+    double avg_states_without_hash = 0;
+    
+    for (int seed = 0; seed < num_games; seed++) {
+        auto state = WallMazeState(seed);
+        
+        // 해시 테이블 없이 탐색
+        std::priority_queue<WallMazeState> beam1;
+        beam1.push(state);
+        int states_explored_without_hash = 0;
+        
+        for (int t = 0; t < 10; t++) {
+            std::priority_queue<WallMazeState> next_beam;
+            for (int i = 0; i < 100 && !beam1.empty(); i++) {
+                auto now_state = beam1.top();
+                beam1.pop();
+                
+                for (const auto& action : now_state.legalActions()) {
+                    WallMazeState next_state = now_state;
+                    next_state.progress(action);
+                    next_state.evaluateScore();
+                    next_beam.push(next_state);
+                    states_explored_without_hash++;
+                }
+            }
+            beam1 = next_beam;
+        }
+        
+        // 해시 테이블 사용하여 탐색
+        std::priority_queue<WallMazeState> beam2;
+        beam2.push(state);
+        std::unordered_set<uint64_t> hash_check;
+        int states_explored_with_hash = 0;
+        
+        for (int t = 0; t < 10; t++) {
+            std::priority_queue<WallMazeState> next_beam;
+            for (int i = 0; i < 100 && !beam2.empty(); i++) {
+                auto now_state = beam2.top();
+                beam2.pop();
+                
+                for (const auto& action : now_state.legalActions()) {
+                    WallMazeState next_state = now_state;
+                    next_state.progress(action);
+                    
+                    if (hash_check.count(next_state.hash_) > 0) {
+                        continue;
+                    }
+                    
+                    hash_check.insert(next_state.hash_);
+                    next_state.evaluateScore();
+                    next_beam.push(next_state);
+                    states_explored_with_hash++;
+                }
+            }
+            beam2 = next_beam;
+        }
+        
+        avg_states_without_hash += states_explored_without_hash;
+        avg_states_with_hash += states_explored_with_hash;
+        
+        if ((seed + 1) % 5 == 0) {
+            std::cout << "진행: " << (seed + 1) << "/" << num_games << " 게임 완료" << std::endl;
+        }
+    }
+    
+    avg_states_without_hash /= num_games;
+    avg_states_with_hash /= num_games;
+    
+    double reduction_percent = 100.0 * (1.0 - avg_states_with_hash / avg_states_without_hash);
+    
+    std::cout << "\n탐색된 평균 상태 수:" << std::endl;
+    std::cout << "해시 테이블 없이: " << std::fixed << std::setprecision(2) << avg_states_without_hash << std::endl;
+    std::cout << "해시 테이블 사용: " << std::fixed << std::setprecision(2) << avg_states_with_hash << std::endl;
+    std::cout << "탐색 공간 감소율: " << std::fixed << std::setprecision(2) << reduction_percent << "%" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
+    // 사용 가능한 알고리즘 목록
     std::map<std::string, std::string> algorithms = {
         {"random", "Random"},
         {"greedy", "Greedy"},
@@ -211,7 +312,7 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--help") {
             std::cout << "사용법: wallmaze_demo [옵션]" << std::endl
                       << "옵션:" << std::endl
-                      << "  --mode MODE      실행 모드 (play 또는 benchmark)" << std::endl
+                      << "  --mode MODE      실행 모드 (play, benchmark, hash-analysis)" << std::endl
                       << "  --algo ALGO      알고리즘 (random, greedy, beam)" << std::endl
                       << "  --games N        벤치마크 모드에서 실행할 게임 수" << std::endl
                       << "  --seed N         게임 초기화를 위한 시드" << std::endl
@@ -224,9 +325,11 @@ int main(int argc, char* argv[]) {
         playGameWithAlgorithm(algorithm, seed);
     } else if (mode == "benchmark") {
         benchmarkAlgorithms(games);
+    } else if (mode == "hash-analysis") {
+        analyzeHashEffect(games);
     } else {
         std::cout << "알 수 없는 모드: " << mode << std::endl
-                  << "유효한 모드: play, benchmark" << std::endl;
+                  << "유효한 모드: play, benchmark, hash-analysis" << std::endl;
         return 1;
     }
     
