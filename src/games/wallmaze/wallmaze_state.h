@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <queue>
+#include <cstdint>
 
 using ScoreType = GameConstants::ScoreType;
 
@@ -20,6 +22,10 @@ private:
     // 사용하는 경로 찾기 알고리즘 타입
     PathfindingConstants::Algorithm pathAlgorithmType_ = PathfindingConstants::Algorithm::BFS;
 
+    int getDistanceToNearestPoint() const;
+
+    void initHash();
+
     int calculateDistance(const Coord& start, const Coord& goal) const;
     
     ScoreType evaluatePotentialScore() const;
@@ -29,6 +35,7 @@ public:
     int game_score_ = 0;
     int first_action_ = -1;
     ScoreType evaluated_score_ = 0;
+    uint64_t hash_ = 0;  // Zobrist 해시 값
 
     WallMazeState();
     WallMazeState(const int seed);
@@ -46,7 +53,7 @@ public:
         const WallMazeState& maze_other = static_cast<const WallMazeState&>(other);
         return this->evaluated_score_ < maze_other.evaluated_score_;
     }
-
+    
     // 추가 메서드
     // 특정 게임에만 필요한 비교 연산자
     bool operator<(const WallMazeState& other) const;
