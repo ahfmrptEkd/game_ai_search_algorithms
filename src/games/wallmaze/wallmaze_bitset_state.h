@@ -17,7 +17,6 @@ private:
     Mat walls_ = Mat();
     Coord characters_ = Coord();
 
-    int getDistanceToNearestPoint();
     void init_hash();
 
 public:
@@ -36,6 +35,7 @@ public:
     std::string toString() const;
     
     bool operator<(const WallMazeBitSetState& other) const;
+    int getDistanceToNearestPoint();
 };
 
 #endif // WALLMAZE_BITSET_STATE_H
