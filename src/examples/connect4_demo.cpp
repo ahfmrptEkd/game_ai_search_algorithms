@@ -281,6 +281,8 @@ int main(int argc, char* argv[]) {
         benchmarkAlgorithms(algo1, algo2, games);
     } else if (mode == "compare") {
         compareBitboardPerformance();
+    } else if (mode == "human") {
+        playHumanVsAI(algo1);
     } else {
         std::cout << "알 수 없는 모드: " << mode << std::endl;
         std::cout << "사용 가능한 모드: play, benchmark, compare" << std::endl;
