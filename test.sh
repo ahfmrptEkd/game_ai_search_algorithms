@@ -61,6 +61,7 @@ do
   run_test "TwoMaze 게임 ($algo)" "./bin/twomaze_demo $algo"
 done
 
+# use for full test
 # # Connect Four 게임 테스트
 # for algo in ConnectFourRandom ConnectFourMCTS ConnectFourBitMCTS ConnectFourID ConnectFourBitID
 # do
@@ -76,6 +77,8 @@ run_test "TwoMaze 벤치마크" "./bin/twomaze_benchmark --games 2 --mode all"
 # AI 대결 테스트
 echo "===== AI 대결 테스트 ====="
 run_test "Thunder vs AlphaBeta" "./bin/twomaze_battle --algo1 thunder --algo2 alphabeta --games 2"
+
+# use for full test
 # run_test "ConnectFourRandom vs ConnectFourMCTS" "./bin/connect_four_demo ConnectFourRandom ConnectFourMCTS"
 # run_test "ConnectFourMCTS vs ConnectFourBitMCTS" "./bin/connect_four_demo ConnectFourMCTS ConnectFourBitMCTS"
 # run_test "ConnectFourID vs ConnectFourBitID" "./bin/connect_four_demo ConnectFourID ConnectFourBitID"
