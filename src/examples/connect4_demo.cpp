@@ -146,6 +146,76 @@ void compareBitboardPerformance(int simulation_count = 1000) {
     std::cout << "비트보드 MCTS: " << action2 << std::endl;
 }
 
+int getHumanMove(const ConnectFourState& state) {
+    int column;
+    
+    while (true) {
+        std::cout << "열 번호를 입력하세요 (1-7): ";
+        std::cin >> column;
+        
+        // 1-7 입력을 0-6 인덱스로 변환
+        column--;
+        
+        // 입력 유효성 검사
+        if (column >= 0 && column < GameConstants::ConnectFour::W) {
+            auto legal_actions = state.legalActions();
+            if (std::find(legal_actions.begin(), legal_actions.end(), column) != legal_actions.end()) {
+                return column;
+            }
+        }
+        
+        std::cout << "유효하지 않은 수입니다. 다시 시도하세요." << std::endl;
+    }
+}
+
+// 사람 vs AI 게임 실행 함수
+void playHumanVsAI(const std::string& ai_algorithm, int seed = 0) {
+    AlgorithmParams params;
+    params.timeThreshold = 500; // AI 계산 시간 (ms)
+    
+    auto ai = AlgorithmFactory::createAlgorithm(ai_algorithm, params);
+    
+    std::cout << "=== 사람 vs " << ai->getName() << " ===" << std::endl;
+    
+    // 게임 상태 초기화
+    auto state = std::make_unique<ConnectFourState>(seed);
+    
+    std::cout << state->toString() << std::endl;
+    
+    while (!state->isDone()) {
+        int action;
+        
+        if (state->isFirst()) {
+            // 사람 차례 (X)
+            action = getHumanMove(*state);
+            std::cout << "당신의 수: " << (action + 1) << std::endl;
+        } else {
+            // AI 차례 (O)
+            std::cout << "AI가 생각하는 중..." << std::endl;
+            
+            auto start = std::chrono::high_resolution_clock::now();
+            action = ai->selectAction(*state);
+            auto end = std::chrono::high_resolution_clock::now();
+            
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+            std::cout << "AI의 수: " << (action + 1) << " (계산 시간: " << duration << "ms)" << std::endl;
+        }
+        
+        state->progress(action);
+        std::cout << state->toString() << std::endl;
+    }
+    
+    // 게임 결과 출력
+    double result = state->getFirstPlayerScoreForWinRate();
+    if (result == 1.0) {
+        std::cout << "축하합니다! 당신이 이겼습니다! 🎉" << std::endl;
+    } else if (result == 0.0) {
+        std::cout << "AI가 이겼습니다! 😢" << std::endl;
+    } else {
+        std::cout << "무승부입니다! 🤝" << std::endl;
+    }
+}
+
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
