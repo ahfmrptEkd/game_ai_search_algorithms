@@ -67,6 +67,12 @@ public:
     Coord findNearestPoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
     Coord findHighestValuePoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
 
+    // 비트셋 버전 - 인라인 구현함
+    int getTurn() const { return turn_; }
+    int getScore() const { return game_score_; }
+    Coord getCharacterPosition() const { return character_; }
+    int getPoint(int y, int x) const { return points_[y][x]; }
+
     static PathfindingResult benchmarkPathfinding(
         const WallMazeState& state,
         const Coord& start,
