@@ -46,27 +46,13 @@ void playGameWithAlgorithms(const std::string& algo1_name, const std::string& al
     
     std::cout << "게임 종료!" << std::endl;
     
-    switch (state->getWinningStatus()) {
-        case WinningStatus::WIN:
-            if (state->isFirst()) {
-                std::cout << "Player 2 (o) 승리!" << std::endl;
-            } else {
-                std::cout << "Player 1 (x) 승리!" << std::endl;
-            }
-            break;
-        case WinningStatus::LOSE:
-            if (state->isFirst()) {
-                std::cout << "Player 2 (o) 승리!" << std::endl;
-            } else {
-                std::cout << "Player 1 (x) 승리!" << std::endl;
-            }
-            break;
-        case WinningStatus::DRAW:
-            std::cout << "무승부!" << std::endl;
-            break;
-        default:
-            std::cout << "알 수 없는 결과" << std::endl;
-            break;
+    double result = state->getFirstPlayerScoreForWinRate();
+    if (result == 1.0) {
+        std::cout << "Player 1 (x) 승리!" << std::endl;
+    } else if (result == 0.0) {
+        std::cout << "Player 2 (o) 승리!" << std::endl;
+    } else {
+        std::cout << "무승부!" << std::endl;
     }
 }
 
@@ -103,31 +89,16 @@ void benchmarkAlgorithms(const std::string& algo1_name, const std::string& algo2
             state->progress(action);
         }
         
-        switch (state->getWinningStatus()) {
-            case WinningStatus::WIN:
-                if (state->isFirst()) {
-                    algo2_wins++;
-                    std::cout << "Player 2 승리" << std::endl;
-                } else {
-                    algo1_wins++;
-                    std::cout << "Player 1 승리" << std::endl;
-                }
-                break;
-            case WinningStatus::LOSE:
-                if (state->isFirst()) {
-                    algo1_wins++;
-                    std::cout << "Player 2 승리" << std::endl;
-                } else {
-                    algo2_wins++;
-                    std::cout << "Player 1 승리" << std::endl;
-                }
-                break;
-            case WinningStatus::DRAW:
-                draws++;
-                std::cout << "무승부" << std::endl;
-                break;
-            default:
-                break;
+        double result = state->getFirstPlayerScoreForWinRate();
+        if (result == 1.0) {
+            algo1_wins++;
+            std::cout << "Player 1 승리" << std::endl;
+        } else if (result == 0.0) {
+            algo2_wins++;
+            std::cout << "Player 2 승리" << std::endl;
+        } else {
+            draws++;
+            std::cout << "무승부" << std::endl;
         }
     }
     
