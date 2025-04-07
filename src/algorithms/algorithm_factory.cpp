@@ -656,7 +656,7 @@ private:
     static constexpr const double C = 1.;
     static constexpr const int EXPAND_THRESHOLD = 10;
     
-    double playout(ConnectFourState* state) {
+    static double playout(ConnectFourState* state) {
         switch (state->getWinningStatus()) {
             case (WinningStatus::WIN):
                 return 1.;
@@ -703,7 +703,7 @@ private:
             
             if (this->child_nodes_.empty()) {
                 ConnectFourState state_copy = this->state_;
-                double value = playout(&state_copy);
+                double value = ConnectFourMCTSAlgorithm::playout(&state_copy);
                 this->w_ += value;
                 ++this->n_;
                 
@@ -811,7 +811,7 @@ class ConnectFourBitMCTSAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;
     
-    double playout(ConnectFourBitBoardState* state) {
+    static double playout(ConnectFourBitBoardState* state) {
         switch (state->getWinningStatus()) {
             case (WinningStatus::WIN):
                 return 1.;
@@ -864,7 +864,7 @@ private:
             
             if (this->child_nodes_.empty()) {
                 ConnectFourBitBoardState state_copy = this->state_;
-                double value = playout(&state_copy);
+                double value = ConnectFourBitMCTSAlgorithm::playout(&state_copy);
                 this->w_ += value;
                 ++this->n_;
                 
