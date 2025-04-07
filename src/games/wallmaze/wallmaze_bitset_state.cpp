@@ -1,5 +1,6 @@
 #include "wallmaze_bitset_state.h"
 #include <sstream>
+#include <unordered_set>
 
 WallMazeBitSetState::WallMazeBitSetState(const WallMazeState &state) 
     : turn_(state.getTurn()), 
