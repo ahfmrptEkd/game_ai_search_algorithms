@@ -184,23 +184,34 @@ std::vector<int> ConnectFourState::legalActions() const
 
 std::string ConnectFourState::toString() const
 {
-    std::stringstream ss("");
-    ss << "is_first:\t" << this->is_first_ << "\n";
-
-    for (int y = GameConstants::ConnectFour::H - 1; y >= 0; y--) {
-        for (int x = 0; x < GameConstants::ConnectFour::W; x++) {
-            char c = '.';
-
+    std::stringstream ss;
+    
+    ss << "현재 차례: " << (this->is_first_ ? "X" : "O") << "\n\n";
+    
+    // 열 번호 표시
+    ss << "    1   2   3   4   5   6   7\n";
+    ss << "  +---+---+---+---+---+---+---+\n";
+    
+    // 보드 내용 표시 (테두리 포함)
+    for (int y = GameConstants::ConnectFour::H - 1; y >= 0; --y) {
+        ss << "  |";
+        for (int x = 0; x < GameConstants::ConnectFour::W; ++x) {
+            char c = ' ';
+            
             if (my_board_[y][x] == 1) {
                 c = (is_first_ ? 'X' : 'O');
             }
             else if (enemy_board_[y][x] == 1) {
                 c = (is_first_ ? 'O' : 'X');
             }
-            ss << c;
+            
+            // 가운데에 한 칸 공백을 둔 뒤 문자 출력
+            ss << " " << c << " |";
         }
         ss << "\n";
+        ss << "  +---+---+---+---+---+---+---+\n";
     }
+    
     return ss.str();
 }
 
