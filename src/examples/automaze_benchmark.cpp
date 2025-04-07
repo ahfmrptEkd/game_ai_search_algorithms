@@ -37,7 +37,7 @@ void testAlgorithmScore(const std::string& name, const std::string& algorithm_na
     }
     
     score_mean /= static_cast<double>(game_number);
-    std::cout << name << " 알고리즘 평균 점수:\t" << score_mean << std::endl;
+    std::cout << name << " Algorithm average score:\t" << score_mean << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -67,21 +67,21 @@ int main(int argc, char* argv[]) {
     bool found = false;
     for (const auto& algo_pair : algorithms) {
         if (target_algorithm.empty() || target_algorithm == algo_pair.first) {
-            std::cout << algo_pair.first << " 알고리즘을 " << test_count << "회 테스트 중... (시뮬레이션 " 
-                     << simulation_count << "회)\n";
+            std::cout << algo_pair.first << " algorithm is being tested " << test_count << " times... (simulation) " 
+                     << simulation_count << " times)\n";
             testAlgorithmScore(algo_pair.first, algo_pair.second, test_count, simulation_count);
             found = true;
         }
     }
     
     if (!found && !target_algorithm.empty()) {
-        std::cout << "알 수 없는 알고리즘: " << target_algorithm << "\n";
-        std::cout << "사용 가능한 알고리즘:";
+        std::cout << "Unknown algorithm: " << target_algorithm << "\n";
+        std::cout << "Available algorithms:";
         for (const auto& algo_pair : algorithms) {
             std::cout << " " << algo_pair.first;
         }
         std::cout << "\n";
-        std::cout << "사용법: ./automaze_benchmark [알고리즘] [테스트횟수] [시뮬레이션횟수]\n";
+        std::cout << "Usage: ./automaze_benchmark [algorithm] [test count] [simulation count]\n";
         return 1;
     }
     

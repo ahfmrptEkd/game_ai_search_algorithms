@@ -241,7 +241,7 @@ void benchmarkAlgorithms(int num_games) {
     std::map<std::string, double> total_scores;
     std::map<std::string, double> total_times;
     
-    std::cout << "벤치마크 테스트를 " << num_games << "게임씩 실행중..." << std::endl;
+    std::cout << "Benchmarking " << num_games << " games per algorithm..." << std::endl;
     
     for (int seed = 0; seed < num_games; seed++) {
         for (const auto& [name, algo] : algorithms) {
@@ -262,14 +262,14 @@ void benchmarkAlgorithms(int num_games) {
         }
         
         if ((seed + 1) % 10 == 0 || seed == num_games - 1) {
-            std::cout << "진행: " << (seed + 1) << "/" << num_games << " 게임 완료" << std::endl;
+            std::cout << "Progress: " << (seed + 1) << "/" << num_games << " games completed" << std::endl;
         }
     }
     
-    std::cout << "\n===== 알고리즘 벤치마크 결과 =====" << std::endl;
-    std::cout << std::left << std::setw(15) << "알고리즘" 
-              << std::setw(15) << "평균 점수" 
-              << std::setw(15) << "평균 실행시간" << std::endl;
+    std::cout << "\n===== Algorithm Benchmark Results =====" << std::endl;
+    std::cout << std::left << std::setw(15) << "Algorithm" 
+              << std::setw(15) << "Average Score" 
+              << std::setw(15) << "Average Time" << std::endl;
     std::cout << std::string(45, '-') << std::endl;
     
     for (const auto& [name, score] : total_scores) {
@@ -286,8 +286,8 @@ void benchmarkAlgorithms(int num_games) {
 void analyzeHashEffect(int num_games) {
     zobrist_hash::init();
     
-    std::cout << "\n===== 해시 테이블 효과 분석 =====" << std::endl;
-    std::cout << "테스트 게임 수: " << num_games << std::endl;
+    std::cout << "\n===== Hash Table Effect Analysis =====" << std::endl;
+    std::cout << "Test game count: " << num_games << std::endl;
     
     double avg_states_with_hash = 0;
     double avg_states_without_hash = 0;
@@ -350,7 +350,7 @@ void analyzeHashEffect(int num_games) {
         avg_states_with_hash += states_explored_with_hash;
         
         if ((seed + 1) % 5 == 0) {
-            std::cout << "진행: " << (seed + 1) << "/" << num_games << " 게임 완료" << std::endl;
+            std::cout << "Progress: " << (seed + 1) << "/" << num_games << " games completed" << std::endl;
         }
     }
     
@@ -359,10 +359,10 @@ void analyzeHashEffect(int num_games) {
     
     double reduction_percent = 100.0 * (1.0 - avg_states_with_hash / avg_states_without_hash);
     
-    std::cout << "\n탐색된 평균 상태 수:" << std::endl;
-    std::cout << "해시 테이블 없이: " << std::fixed << std::setprecision(2) << avg_states_without_hash << std::endl;
-    std::cout << "해시 테이블 사용: " << std::fixed << std::setprecision(2) << avg_states_with_hash << std::endl;
-    std::cout << "탐색 공간 감소율: " << std::fixed << std::setprecision(2) << reduction_percent << "%" << std::endl;
+    std::cout << "\nAverage states explored:" << std::endl;
+    std::cout << "Without hash: " << std::fixed << std::setprecision(2) << avg_states_without_hash << std::endl;
+    std::cout << "With hash: " << std::fixed << std::setprecision(2) << avg_states_with_hash << std::endl;
+    std::cout << "Search space reduction: " << std::fixed << std::setprecision(2) << reduction_percent << "%" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -395,13 +395,13 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--seed" && i + 1 < argc) {
             seed = std::stoi(argv[++i]);
         } else if (arg == "--help") {
-            std::cout << "사용법: wallmaze_demo [옵션]" << std::endl
-                      << "옵션:" << std::endl
-                      << "  --mode MODE      실행 모드 (play, benchmark, hash-analysis)" << std::endl
-                      << "  --algo ALGO      알고리즘 (random, greedy, beam, bfs, dfs, astar, dijkstra, value)" << std::endl
-                      << "  --games N        벤치마크 모드에서 실행할 게임 수" << std::endl
-                      << "  --seed N         게임 초기화를 위한 시드" << std::endl
-                      << "  --help           이 도움말 메시지 표시" << std::endl;
+            std::cout << "Usage: wallmaze_demo [options]" << std::endl
+                      << "Options:" << std::endl
+                      << "  --mode MODE       Execution mode (play, benchmark, hash-analysis)" << std::endl
+                      << "  --algo ALGO       Algorithm (random, greedy, beam, bfs, dfs, astar, dijkstra, value)" << std::endl
+                      << "  --games N         Number of games to run in benchmark mode" << std::endl
+                      << "  --seed N          Game initialization seed" << std::endl
+                      << "  --help            Display this help message" << std::endl;
             return 0;
         }
     }
@@ -413,8 +413,8 @@ int main(int argc, char* argv[]) {
     } else if (mode == "hash-analysis") {
         analyzeHashEffect(games);
     } else {
-        std::cout << "알 수 없는 모드: " << mode << std::endl
-                  << "유효한 모드: play, benchmark, hash-analysis" << std::endl;
+        std::cout << "Unknown mode: " << mode << std::endl
+                  << "Valid modes: play, benchmark, hash-analysis" << std::endl;
         return 1;
     }
     
