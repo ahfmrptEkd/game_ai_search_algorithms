@@ -4,6 +4,7 @@
 #include "../algorithms/pathfinding/pathfinding.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
+#include "../games/wallmaze/wallmaze_bitset_state.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -90,6 +91,13 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth,
     }
     
     return best_state.first_action_ != -1 ? best_state.first_action_ : randomAction(state);
+}
+
+int beamSearchActionBitset(const WallMazeBitSetState& state, int beam_width, int beam_depth);
+
+int bitsetBeamSearchAction(const WallMazeState& state, int beam_width, int beam_depth, bool use_hash) {
+    WallMazeBitSetState bitset_state(state);
+    return beamSearchActionBitset(bitset_state, beam_width, beam_depth);
 }
 
 // 경로 찾기 알고리즘 기반 행동 선택 (가장 가까운 점수 위치로 이동)
@@ -508,6 +516,102 @@ void compareAllAlgorithms(int test_count) {
               << " (점수 효율: " << std::fixed << std::setprecision(2) << best_efficiency << ")" << std::endl;
 }
 
+void bitsetOptimizationBenchmark(int test_count) {
+    std::cout << "\n===== 비트셋 최적화 성능 비교 =====" << std::endl;
+    
+    // 일반 구현 빔 서치
+    auto standardImpl = [](const WallMazeState& state) {
+        return beamSearchAction(state, 100, 10, true);
+    };
+    
+    // 비트셋 구현 빔 서치
+    auto bitsetImpl = [](const WallMazeState& state) {
+        return bitsetBeamSearchAction(state, 100, 10, true);
+    };
+    
+    auto standard_result = testAlgorithmPerformance("표준 구현", standardImpl, test_count);
+    auto bitset_result = testAlgorithmPerformance("비트셋 최적화", bitsetImpl, test_count);
+    
+    std::cout << "\n===== 비트셋 최적화 결과 =====\n";
+    std::cout << std::string(60, '-') << std::endl;
+    std::cout << std::left << std::setw(20) << "구현 방식" 
+              << std::setw(15) << "평균 점수" 
+              << std::setw(15) << "평균 시간(ms)" << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+    
+    std::cout << std::left << std::setw(20) << "표준 구현" 
+              << std::fixed << std::setprecision(2) << std::setw(15) << standard_result.avg_score
+              << std::setw(15) << standard_result.avg_time_ms << std::endl;
+    
+    std::cout << std::left << std::setw(20) << "비트셋 최적화" 
+              << std::fixed << std::setprecision(2) << std::setw(15) << bitset_result.avg_score
+              << std::setw(15) << bitset_result.avg_time_ms << std::endl;
+    
+    // 성능 향상율 계산
+    double time_improvement = ((standard_result.avg_time_ms - bitset_result.avg_time_ms) / standard_result.avg_time_ms) * 100;
+    
+    std::cout << "\n===== 성능 향상 분석 =====\n";
+    std::cout << "실행 시간 단축: " << std::fixed << std::setprecision(2) << time_improvement << "%" << std::endl;
+    
+    // 거리 계산 알고리즘 개별 성능 측정
+    std::cout << "\n===== 최근접 점수 거리 계산 성능 비교 =====" << std::endl;
+    
+    auto standard_distance = [test_count]() {
+        double total_time = 0;
+        auto seed = time(nullptr);
+        std::mt19937 mt(seed);
+        
+        for (int i = 0; i < test_count; i++) {
+            auto state = WallMazeState(mt());
+            
+            auto start_time = std::chrono::high_resolution_clock::now();
+            for (int j = 0; j < 100; j++) {
+                state.getDistanceToNearestPoint();
+            }
+            auto end_time = std::chrono::high_resolution_clock::now();
+            
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                end_time - start_time).count() / 100.0;
+            
+            total_time += duration;
+        }
+        
+        return total_time / test_count;
+    };
+    
+    auto bitset_distance = [test_count]() {
+        double total_time = 0;
+        auto seed = time(nullptr);
+        std::mt19937 mt(seed);
+        
+        for (int i = 0; i < test_count; i++) {
+            auto state = WallMazeState(mt());
+            auto bitset_state = WallMazeBitSetState(state);
+            
+            auto start_time = std::chrono::high_resolution_clock::now();
+            for (int j = 0; j < 100; j++) {
+                bitset_state.getDistanceToNearestPoint();
+            }
+            auto end_time = std::chrono::high_resolution_clock::now();
+            
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                end_time - start_time).count() / 100.0;
+            
+            total_time += duration;
+        }
+        
+        return total_time / test_count;
+    };
+    
+    double std_time = standard_distance();
+    double bit_time = bitset_distance();
+    double dist_improvement = ((std_time - bit_time) / std_time) * 100;
+    
+    std::cout << "표준 거리계산 시간: " << std::fixed << std::setprecision(2) << std_time << "μs" << std::endl;
+    std::cout << "비트셋 거리계산 시간: " << std::fixed << std::setprecision(2) << bit_time << "μs" << std::endl;
+    std::cout << "거리계산 속도 향상: " << std::fixed << std::setprecision(2) << dist_improvement << "%" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(time(nullptr));
     
@@ -526,7 +630,7 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--help") {
             std::cout << "사용법: wallmaze_benchmark [옵션]" << std::endl
                       << "옵션:" << std::endl
-                      << "  --mode MODE      벤치마크 모드 (all, algorithms, beams, evaluation, hash, pathfinding, compare)" << std::endl
+                      << "  --mode MODE      벤치마크 모드 (all, algorithms, beams, evaluation, hash, pathfinding, compare, bitset)" << std::endl
                       << "  --tests N        각 테스트 당 실행 횟수 (기본값: 50)" << std::endl
                       << "  --help           이 도움말 메시지 표시" << std::endl;
             return 0;
@@ -585,10 +689,14 @@ int main(int argc, char* argv[]) {
     if (benchmark_mode == "all" || benchmark_mode == "pathfinding") {
         pathfindingBenchmark(test_count);
     }
+
+    if (benchmark_mode == "all" || benchmark_mode == "bitset") {
+    bitsetOptimizationBenchmark(test_count);
+    }
     
     if (benchmark_mode == "compare") {
         compareAllAlgorithms(test_count);
     }
-    
+
     return 0;
 }

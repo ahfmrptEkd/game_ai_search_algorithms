@@ -22,8 +22,6 @@ private:
     // 사용하는 경로 찾기 알고리즘 타입
     PathfindingConstants::Algorithm pathAlgorithmType_ = PathfindingConstants::Algorithm::BFS;
 
-    int getDistanceToNearestPoint() const;
-
     void initHash();
 
     int calculateDistance(const Coord& start, const Coord& goal) const;
@@ -58,6 +56,8 @@ public:
     // 특정 게임에만 필요한 비교 연산자
     bool operator<(const WallMazeState& other) const;
 
+    int getDistanceToNearestPoint() const;
+
     bool hasWall(int y, int x) const { return walls_[y][x] == 1; }
     bool isWalkable(int y, int x) const { return !hasWall(y, x); }
     void setPathAlgorithm(PathfindingConstants::Algorithm type) { pathAlgorithmType_ = type; }
@@ -66,6 +66,12 @@ public:
     int getNextActionTowards(const Coord& target, PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
     Coord findNearestPoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
     Coord findHighestValuePoint(PathfindingConstants::Algorithm algo = PathfindingConstants::Algorithm::BFS) const;
+
+    // 비트셋 버전 - 인라인 구현함
+    int getTurn() const { return turn_; }
+    int getScore() const { return game_score_; }
+    Coord getCharacterPosition() const { return character_; }
+    int getPoint(int y, int x) const { return points_[y][x]; }
 
     static PathfindingResult benchmarkPathfinding(
         const WallMazeState& state,
