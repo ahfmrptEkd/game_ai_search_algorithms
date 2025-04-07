@@ -56,9 +56,9 @@ void playGameWithAlgorithms(const std::string& algo1_name, const std::string& al
             break;
         case WinningStatus::LOSE:
             if (state->isFirst()) {
-                std::cout << "Player 1 (x) 승리!" << std::endl;
-            } else {
                 std::cout << "Player 2 (o) 승리!" << std::endl;
+            } else {
+                std::cout << "Player 1 (x) 승리!" << std::endl;
             }
             break;
         case WinningStatus::DRAW:
@@ -116,10 +116,10 @@ void benchmarkAlgorithms(const std::string& algo1_name, const std::string& algo2
             case WinningStatus::LOSE:
                 if (state->isFirst()) {
                     algo1_wins++;
-                    std::cout << "Player 1 승리" << std::endl;
+                    std::cout << "Player 2 승리" << std::endl;
                 } else {
                     algo2_wins++;
-                    std::cout << "Player 2 승리" << std::endl;
+                    std::cout << "Player 1 승리" << std::endl;
                 }
                 break;
             case WinningStatus::DRAW:
@@ -184,22 +184,50 @@ int main(int argc, char* argv[]) {
     std::string algo2 = "ConnectFourMCTS";
     int games = 10;
     
+    std::map<std::string, std::string> algorithms = {
+        {"random", "ConnectFourRandom"},
+        {"mcts", "ConnectFourMCTS"},
+        {"bitmcts", "ConnectFourBitMCTS"}
+    };
+
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "--mode" && i + 1 < argc) {
             mode = argv[++i];
         } else if (arg == "--algo1" && i + 1 < argc) {
-            algo1 = argv[++i];
+            std::string algo_name = argv[++i];
+            if (algorithms.find(algo_name) != algorithms.end()) {
+                algo1 = algorithms[algo_name];
+            } else {
+                std::cout << "알 수 없는 알고리즘: " << algo_name << std::endl;
+                std::cout << "사용 가능한 알고리즘: ";
+                for (const auto& pair : algorithms) {
+                    std::cout << pair.first << " ";
+                }
+                std::cout << std::endl;
+                return 1;
+            }
         } else if (arg == "--algo2" && i + 1 < argc) {
-            algo2 = argv[++i];
+            std::string algo_name = argv[++i];
+            if (algorithms.find(algo_name) != algorithms.end()) {
+                algo2 = algorithms[algo_name];
+            } else {
+                std::cout << "알 수 없는 알고리즘: " << algo_name << std::endl;
+                std::cout << "사용 가능한 알고리즘: ";
+                for (const auto& pair : algorithms) {
+                    std::cout << pair.first << " ";
+                }
+                std::cout << std::endl;
+                return 1;
+            }
         } else if (arg == "--games" && i + 1 < argc) {
             games = std::stoi(argv[++i]);
         } else if (arg == "--help") {
             std::cout << "사용법: connect_four_demo [옵션]" << std::endl;
             std::cout << "옵션:" << std::endl;
             std::cout << "  --mode MODE    실행 모드 (play, benchmark, compare)" << std::endl;
-            std::cout << "  --algo1 ALGO   첫 번째 알고리즘 (ConnectFourRandom, ConnectFourMCTS, ConnectFourBitMCTS)" << std::endl;
-            std::cout << "  --algo2 ALGO   두 번째 알고리즘 (ConnectFourRandom, ConnectFourMCTS, ConnectFourBitMCTS)" << std::endl;
+            std::cout << "  --algo1 ALGO   첫 번째 알고리즘 (random, mcts, bitmcts)" << std::endl;
+            std::cout << "  --algo2 ALGO   두 번째 알고리즘 (random, mcts, bitmcts)" << std::endl;
             std::cout << "  --games N      벤치마크 모드에서 실행할 게임 수" << std::endl;
             std::cout << "  --help         이 도움말 메시지 표시" << std::endl;
             return 0;
