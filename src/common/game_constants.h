@@ -37,13 +37,6 @@ namespace GameConstants {
         constexpr const double START_TEMPERATURE = 500.0;
         constexpr const double END_TEMPERATURE = 10.0;
     }
-
-    namespace ConnectFour {
-        constexpr const int H = 6;
-        constexpr const int W = 7;
-        constexpr const int CONNECT_NUMBER = 4;
-        constexpr const int PLAYOUT_NUMBER = 1000;
-    }
 }
 
 #endif // GAME_CONSTANTS_H 
