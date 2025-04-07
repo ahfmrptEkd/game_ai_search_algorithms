@@ -8,6 +8,7 @@
 #include <array>
 #include <chrono>
 #include <functional>
+#include <unordered_map>
 
 void playGameWithAlgorithms(const std::string& algo1_name, const std::string& algo2_name, int seed = 0) {
     // 알고리즘 파라미터 설정
@@ -243,10 +244,13 @@ int main(int argc, char* argv[]) {
     int games = 10;
     int difficulty = 0;
     
-    std::map<std::string, std::string> algorithms = {
+    // 알고리즘 이름 매핑
+    std::unordered_map<std::string, std::string> algo_map = {
         {"random", "ConnectFourRandom"},
         {"mcts", "ConnectFourMCTS"},
-        {"bitmcts", "ConnectFourBitMCTS"}
+        {"bitmcts", "ConnectFourBitMCTS"},
+        {"id", "ConnectFourID"},
+        {"bitid", "ConnectFourBitID"}  // 비트보드 ID 추가
     };
 
     for (int i = 1; i < argc; i++) {
@@ -255,12 +259,12 @@ int main(int argc, char* argv[]) {
             mode = argv[++i];
         } else if (arg == "--algo1" && i + 1 < argc) {
             std::string algo_name = argv[++i];
-            if (algorithms.find(algo_name) != algorithms.end()) {
-                algo1 = algorithms[algo_name];
+            if (algo_map.find(algo_name) != algo_map.end()) {
+                algo1 = algo_map[algo_name];
             } else {
                 std::cout << "Unknown algorithm: " << algo_name << std::endl;
                 std::cout << "Available algorithms: ";
-                for (const auto& pair : algorithms) {
+                for (const auto& pair : algo_map) {
                     std::cout << pair.first << " ";
                 }
                 std::cout << std::endl;
@@ -268,12 +272,12 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg == "--algo2" && i + 1 < argc) {
             std::string algo_name = argv[++i];
-            if (algorithms.find(algo_name) != algorithms.end()) {
-                algo2 = algorithms[algo_name];
+            if (algo_map.find(algo_name) != algo_map.end()) {
+                algo2 = algo_map[algo_name];
             } else {
                 std::cout << "Unknown algorithm: " << algo_name << std::endl;
                 std::cout << "Available algorithms: ";
-                for (const auto& pair : algorithms) {
+                for (const auto& pair : algo_map) {
                     std::cout << pair.first << " ";
                 }
                 std::cout << std::endl;
@@ -287,8 +291,8 @@ int main(int argc, char* argv[]) {
             std::cout << "Usage: connect_four_demo [options]" << std::endl;
             std::cout << "Options:" << std::endl;
             std::cout << "  --mode MODE     Execution mode (play, benchmark, compare, human)" << std::endl;
-            std::cout << "  --algo1 ALGO    First algorithm (random, mcts, bitmcts)" << std::endl;
-            std::cout << "  --algo2 ALGO    Second algorithm (random, mcts, bitmcts)" << std::endl;
+            std::cout << "  --algo1 ALGO    First algorithm (random, mcts, bitmcts, id, bitid)" << std::endl;
+            std::cout << "  --algo2 ALGO    Second algorithm (random, mcts, bitmcts, id, bitid)" << std::endl;
             std::cout << "  --games N       Number of games to run in benchmark mode" << std::endl;
             std::cout << "  --difficulty D  Human vs AI game difficulty (0: easy, 1: normal, 2: hard)" << std::endl;
             std::cout << "  --help          Display this help message" << std::endl;
