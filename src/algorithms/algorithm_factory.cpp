@@ -1020,6 +1020,15 @@ std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     } else if (algorithmName == "SimMazeMCTS") {
         algorithm = std::make_unique<MCTSSimAlgorithm>();
     }
+    // connect four
+    else if (algorithmName == "ConnectFourRandom") {
+        algorithm = std::make_unique<ConnectFourRandomAlgorithm>();
+    } else if (algorithmName == "ConnectFourMCTS") {
+        algorithm = std::make_unique<ConnectFourMCTSAlgorithm>();
+    } else if (algorithmName == "ConnectFourBitMCTS") {
+        algorithm = std::make_unique<ConnectFourBitMCTSAlgorithm>();
+    }
+    
     else {
         throw std::invalid_argument("Unknown algorithm: " + algorithmName);
     }
