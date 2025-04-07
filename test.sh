@@ -38,6 +38,7 @@ echo
 echo "===== 프로젝트 빌드 ====="
 run_test "전체 빌드" "make clean && make all"
 run_test "벤치마크 빌드" "make benchmark"
+run_test "Connect Four 빌드" "make connect_four"
 
 # 기본 기능 테스트
 echo "===== 기본 기능 테스트 ====="
@@ -60,6 +61,12 @@ do
   run_test "TwoMaze 게임 ($algo)" "./bin/twomaze_demo $algo"
 done
 
+# # Connect Four 게임 테스트
+# for algo in ConnectFourRandom ConnectFourMCTS ConnectFourBitMCTS ConnectFourID ConnectFourBitID
+# do
+#   run_test "Connect Four 게임 ($algo)" "./bin/connect_four_demo $algo"
+# done
+
 # 벤치마크 간단 테스트
 echo "===== 벤치마크 간단 테스트 ====="
 run_test "Maze 벤치마크" "./bin/maze_benchmark random 2"
@@ -69,6 +76,9 @@ run_test "TwoMaze 벤치마크" "./bin/twomaze_benchmark --games 2 --mode all"
 # AI 대결 테스트
 echo "===== AI 대결 테스트 ====="
 run_test "Thunder vs AlphaBeta" "./bin/twomaze_battle --algo1 thunder --algo2 alphabeta --games 2"
+# run_test "ConnectFourRandom vs ConnectFourMCTS" "./bin/connect_four_demo ConnectFourRandom ConnectFourMCTS"
+# run_test "ConnectFourMCTS vs ConnectFourBitMCTS" "./bin/connect_four_demo ConnectFourMCTS ConnectFourBitMCTS"
+# run_test "ConnectFourID vs ConnectFourBitID" "./bin/connect_four_demo ConnectFourID ConnectFourBitID"
 
 # 결과 요약
 echo "===== 테스트 결과 요약 ====="

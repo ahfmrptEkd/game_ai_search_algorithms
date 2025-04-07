@@ -57,14 +57,13 @@ wallmaze: $(BINDIR)/wallmaze_demo
 connect_four: $(BINDIR)/connect_four_demo
 
 # 벤치마크 타겟
-BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark pathfinding_benchmark
+BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark
 benchmark: $(BENCHMARK_TARGETS)
 maze_benchmark: $(BINDIR)/maze_benchmark
 automaze_benchmark: $(BINDIR)/automaze_benchmark
 twomaze_benchmark: $(BINDIR)/twomaze_benchmark
 simmaze_benchmark: $(BINDIR)/simmaze_benchmark
 wallmaze_benchmark: $(BINDIR)/wallmaze_benchmark
-pathfinding_benchmark: $(BINDIR)/pathfinding_benchmark
 
 # 클린 타겟
 clean:
@@ -149,11 +148,11 @@ $(BINDIR)/wallmaze_benchmark: $(EXAMPLES_DIR)/wallmaze_benchmark.cpp $(ALL_SOURC
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "WallMaze benchmark built successfully!"
 
-$(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL_SOURCES)
-	@echo "Building pathfinding benchmark..."
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
-	@echo "Pathfinding benchmark built successfully!"
+# $(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL_SOURCES)
+# 	@echo "Building pathfinding benchmark..."
+# 	@mkdir -p $(BINDIR)
+# 	$(CXX) $(CXXFLAGS) $^ -o $@
+# 	@echo "Pathfinding benchmark built successfully!"
 
 $(BINDIR)/connect_four_demo: $(EXAMPLES_DIR)/connect4_demo.cpp $(ALL_SOURCES)
 	@echo "Building ConnectFour game..."
@@ -181,6 +180,5 @@ help:
 	@echo "  make twomaze_benchmark   - 2인 미로 벤치마크 빌드"
 	@echo "  make simmaze_benchmark   - 동시 미로 벤치마크 빌드"
 	@echo "  make wallmaze_benchmark  - 벽이 있는 미로 벤치마크 빌드"
-	@echo "  make pathfinding_benchmark - 경로 탐색 알고리즘 벤치마크 빌드"
 
 .PHONY: all $(GAMES) benchmark $(BENCHMARK_TARGETS) clean help test twomaze_battle
