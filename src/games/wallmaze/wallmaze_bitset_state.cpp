@@ -156,7 +156,7 @@ bool WallMazeBitSetState::operator<(const WallMazeBitSetState& other) const
     return this->evaluated_score_ < other.evaluated_score_;
 }
 
-int beamSearchAction(const WallMazeBitSetState &state, const int beam_width, const int beam_depth)
+int beamSearchActionBitset(const WallMazeBitSetState &state, int beam_width, int beam_depth)
 {
     std::priority_queue<WallMazeBitSetState> now_beam;
     WallMazeBitSetState best_state;

@@ -93,9 +93,11 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth,
     return best_state.first_action_ != -1 ? best_state.first_action_ : randomAction(state);
 }
 
+int beamSearchActionBitset(const WallMazeBitSetState& state, int beam_width, int beam_depth);
+
 int bitsetBeamSearchAction(const WallMazeState& state, int beam_width, int beam_depth, bool use_hash) {
-    auto bitset_state = WallMazeBitSetState(state);
-    return beamSearchAction(bitset_state, beam_width, beam_depth);
+    WallMazeBitSetState bitset_state(state);
+    return beamSearchActionBitset(bitset_state, beam_width, beam_depth);
 }
 
 // 경로 찾기 알고리즘 기반 행동 선택 (가장 가까운 점수 위치로 이동)
