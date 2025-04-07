@@ -1,5 +1,7 @@
 #include "../algorithms/algorithm_interface.h"
 #include "../games/wallmaze/wallmaze_state.h"
+#include "../games/wallmaze/zobrist_hash.h"
+#include "../algorithms/pathfinding/pathfinding.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
 #include <iostream>
@@ -12,6 +14,7 @@
 #include <chrono>
 #include <ctime>
 #include <queue>
+#include <unordered_set>
 
 int randomAction(const WallMazeState& state) {
     auto legal_actions = state.legalActions();
@@ -38,11 +41,13 @@ int greedyAction(const WallMazeState& state) {
     return best_action != -1 ? best_action : randomAction(state);
 }
 
-int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth) {
+int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth, bool use_hash = true) {
     std::priority_queue<WallMazeState> now_beam;
     WallMazeState best_state;
-
+    std::unordered_set<uint64_t> hash_check;
+    
     now_beam.push(state);
+    
     for (int t = 0; t < beam_depth; t++) {
         std::priority_queue<WallMazeState> next_beam;
         for (int i = 0; i < beam_width; i++) {
@@ -54,6 +59,16 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth)
             for (const auto& action : now_state.legalActions()) {
                 WallMazeState next_state = now_state;
                 next_state.progress(action);
+                
+                // 해시 사용 시 중복 상태 체크
+                if (use_hash && t >= 1 && hash_check.count(next_state.hash_) > 0) {
+                    continue;
+                }
+                
+                if (use_hash) {
+                    hash_check.insert(next_state.hash_);
+                }
+                
                 next_state.evaluateScore();
                 
                 if (t == 0) {
@@ -75,6 +90,50 @@ int beamSearchAction(const WallMazeState& state, int beam_width, int beam_depth)
     }
     
     return best_state.first_action_ != -1 ? best_state.first_action_ : randomAction(state);
+}
+
+// 경로 찾기 알고리즘 기반 행동 선택 (가장 가까운 점수 위치로 이동)
+int pathfindingAction(const WallMazeState& state, PathfindingConstants::Algorithm algo)
+{
+    // 가장 가까운 점수 위치 찾기
+    Coord nearestPoint = state.findNearestPoint(algo);
+    
+    // 적절한 점수 위치를 찾지 못했다면 랜덤 행동
+    if (nearestPoint.x_ == -1 || nearestPoint.y_ == -1) {
+        return randomAction(state);
+    }
+    
+    // 해당 위치로 이동하기 위한 다음 행동 반환
+    int action = state.getNextActionTowards(nearestPoint, algo);
+    
+    // 경로를 찾지 못했거나 다음 행동이 없는 경우 랜덤 행동
+    if (action == -1) {
+        return randomAction(state);
+    }
+    
+    return action;
+}
+
+// 가치 기반 경로 찾기 (점수/거리 비율 최적화)
+int valueBasedPathfindingAction(const WallMazeState& state, PathfindingConstants::Algorithm algo)
+{
+    // 가치가 가장 높은 점수 위치 찾기
+    Coord bestPoint = state.findHighestValuePoint(algo);
+    
+    // 적절한 점수 위치를 찾지 못했다면 랜덤 행동
+    if (bestPoint.x_ == -1 || bestPoint.y_ == -1) {
+        return randomAction(state);
+    }
+    
+    // 해당 위치로 이동하기 위한 다음 행동 반환
+    int action = state.getNextActionTowards(bestPoint, algo);
+    
+    // 경로를 찾지 못했거나 다음 행동이 없는 경우 랜덤 행동
+    if (action == -1) {
+        return randomAction(state);
+    }
+    
+    return action;
 }
 
 // 알고리즘 성능 결과 구조체
@@ -146,7 +205,7 @@ AlgorithmPerformance testAlgorithmPerformance(
     return result;
 }
 
-// 빔 서치 매개변수 최적화 벤치마크
+// 빔 서치 매개변수 최적화 벤치마크 - 기존 벤치마크 
 void beamParameterBenchmark(int test_count) {
     std::cout << "\n===== 빔 서치 매개변수 최적화 =====" << std::endl;
     
@@ -171,6 +230,40 @@ void beamParameterBenchmark(int test_count) {
                       << std::setw(15) << result.avg_time_ms << std::endl;
         }
     }
+}
+
+void hashEffectBenchmark(int test_count) {
+    std::cout << "\n===== 해시 효과 벤치마크 =====" << std::endl;
+    
+    auto withHash = [](const WallMazeState& state) {
+        return beamSearchAction(state, 100, 10, true);
+    };
+    
+    auto withoutHash = [](const WallMazeState& state) {
+        return beamSearchAction(state, 100, 10, false);
+    };
+    
+    auto withHashResult = testAlgorithmPerformance("Beam Search + Hash", withHash, test_count);
+    auto withoutHashResult = testAlgorithmPerformance("Beam Search No Hash", withoutHash, test_count);
+    
+    std::cout << "\n해시 사용 효과 (빔 서치 100x10):" << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+    std::cout << std::left << std::setw(20) << "버전" 
+              << std::setw(15) << "평균 점수" 
+              << std::setw(15) << "평균 시간(ms)" << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+    
+    std::cout << std::left << std::setw(20) << "해시 미사용" 
+              << std::fixed << std::setprecision(2) << std::setw(15) << withoutHashResult.avg_score
+              << std::setw(15) << withoutHashResult.avg_time_ms << std::endl;
+    
+    std::cout << std::left << std::setw(20) << "해시 사용" 
+              << std::fixed << std::setprecision(2) << std::setw(15) << withHashResult.avg_score
+              << std::setw(15) << withHashResult.avg_time_ms << std::endl;
+    
+    double timeImprovement = ((withoutHashResult.avg_time_ms - withHashResult.avg_time_ms) / withoutHashResult.avg_time_ms) * 100;
+    
+    std::cout << "\n시간 단축률: " << std::fixed << std::setprecision(2) << timeImprovement << "%" << std::endl;
 }
 
 void evaluationFunctionTest(int test_count) {
@@ -245,8 +338,181 @@ void evaluationFunctionTest(int test_count) {
     std::cout << "\nBFS 평가 함수 성능 향상: " << std::fixed << std::setprecision(2) << improvement << "%" << std::endl;
 }
 
+// 경로 탐색 알고리즘 성능 비교
+void pathfindingBenchmark(int test_count) {
+    std::cout << "\n===== 경로 탐색 알고리즘 성능 비교 =====" << std::endl;
+    
+    std::map<std::string, std::function<int(const WallMazeState&)>> pathAlgorithms = {
+        {"BFS", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::BFS);
+        }},
+        {"DFS", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DFS);
+        }},
+        {"A*", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        }},
+        {"Dijkstra", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DIJKSTRA);
+        }},
+        {"Value-Based A*", [](const WallMazeState& state) {
+            return valueBasedPathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        }}
+    };
+    
+    std::map<std::string, AlgorithmPerformance> results;
+    
+    for (const auto& [name, algorithm] : pathAlgorithms) {
+        results[name] = testAlgorithmPerformance(name, algorithm, test_count);
+    }
+    
+    std::cout << "\n경로 탐색 알고리즘 성능 비교 결과" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::left << std::setw(20) << "알고리즘" 
+              << std::setw(15) << "평균 점수" 
+              << std::setw(15) << "평균 시간(ms)"
+              << std::setw(15) << "최소 점수"
+              << std::setw(15) << "최대 점수" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    
+    for (const auto& [name, result] : results) {
+        std::cout << std::left << std::setw(20) << name 
+                  << std::fixed << std::setprecision(2) << std::setw(15) << result.avg_score
+                  << std::setw(15) << result.avg_time_ms
+                  << std::setw(15) << result.min_score
+                  << std::setw(15) << result.max_score << std::endl;
+    }
+    
+    std::string best_score_algo;
+    double best_score = -1;
+    
+    std::string fastest_algo;
+    double fastest_time = std::numeric_limits<double>::max();
+    
+    for (const auto& [name, result] : results) {
+        if (result.avg_score > best_score) {
+            best_score = result.avg_score;
+            best_score_algo = name;
+        }
+        
+        if (result.avg_time_ms < fastest_time) {
+            fastest_time = result.avg_time_ms;
+            fastest_algo = name;
+        }
+    }
+    
+    std::cout << "\n분석:" << std::endl;
+    std::cout << "가장 높은 점수 달성 알고리즘: " << best_score_algo << " (평균 " << best_score << "점)" << std::endl;
+    std::cout << "가장 빠른 실행 시간 알고리즘: " << fastest_algo << " (평균 " << fastest_time << "ms)" << std::endl;
+    
+    auto& astar_result = results["A*"];
+    auto& bfs_result = results["BFS"];
+    
+    double score_diff = ((astar_result.avg_score - bfs_result.avg_score) / bfs_result.avg_score) * 100;
+    double time_diff = ((bfs_result.avg_time_ms - astar_result.avg_time_ms) / bfs_result.avg_time_ms) * 100;
+    
+    std::cout << "A* vs BFS 비교: " << std::endl;
+    std::cout << "  - 점수 차이: " << std::fixed << std::setprecision(2) << score_diff << "%" << std::endl;
+    std::cout << "  - 시간 차이: " << std::fixed << std::setprecision(2) << time_diff << "%" << std::endl;
+    
+    auto& value_astar_result = results["Value-Based A*"];
+    
+    double value_score_diff = ((value_astar_result.avg_score - astar_result.avg_score) / astar_result.avg_score) * 100;
+    double value_time_diff = ((astar_result.avg_time_ms - value_astar_result.avg_time_ms) / astar_result.avg_time_ms) * 100;
+    
+    std::cout << "가치 기반 A* vs 일반 A* 비교: " << std::endl;
+    std::cout << "  - 점수 차이: " << std::fixed << std::setprecision(2) << value_score_diff << "%" << std::endl;
+    std::cout << "  - 시간 차이: " << std::fixed << std::setprecision(2) << value_time_diff << "%" << std::endl;
+}
+
+// 모든 알고리즘 통합 비교
+void compareAllAlgorithms(int test_count) {
+    std::cout << "\n===== 모든 알고리즘 통합 비교 =====" << std::endl;
+    
+    // Zobrist 해시 초기화
+    zobrist_hash::init();
+    
+    std::map<std::string, std::function<int(const WallMazeState&)>> algorithms = {
+        {"Random", randomAction},
+        {"Greedy", greedyAction},
+        {"Beam Search", [](const WallMazeState& state) {
+            return beamSearchAction(state, 100, 10, true);
+        }},
+        {"BFS Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::BFS);
+        }},
+        {"DFS Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DFS);
+        }},
+        {"A* Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        }},
+        {"Dijkstra Pathfinding", [](const WallMazeState& state) {
+            return pathfindingAction(state, PathfindingConstants::Algorithm::DIJKSTRA);
+        }},
+        {"Value-Based A*", [](const WallMazeState& state) {
+            return valueBasedPathfindingAction(state, PathfindingConstants::Algorithm::ASTAR);
+        }}
+    };
+    
+    std::map<std::string, AlgorithmPerformance> results;
+    
+    // 각 알고리즘 성능 테스트
+    for (const auto& [name, algorithm] : algorithms) {
+        results[name] = testAlgorithmPerformance(name, algorithm, test_count);
+    }
+    
+    std::vector<std::pair<std::string, AlgorithmPerformance>> sorted_results(results.begin(), results.end());
+    
+    std::sort(sorted_results.begin(), sorted_results.end(), 
+             [](const auto& a, const auto& b) {
+                 return a.second.avg_score > b.second.avg_score;
+             });
+    
+    std::cout << "\n=== 알고리즘 성능 순위 (평균 점수 기준) ===" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::left << std::setw(5) << "순위" 
+              << std::setw(20) << "알고리즘" 
+              << std::setw(15) << "평균 점수" 
+              << std::setw(15) << "평균 시간(ms)"
+              << std::setw(15) << "점수 효율*" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    
+    for (size_t i = 0; i < sorted_results.size(); i++) {
+        const auto& [name, result] = sorted_results[i];
+        
+        // 점수 효율 = 점수 / 시간 (점수 당 소요된 시간의 역수, 높을수록 좋음)
+        double score_efficiency = result.avg_time_ms > 0 ? result.avg_score / result.avg_time_ms : 0;
+        
+        std::cout << std::left << std::setw(5) << (i + 1)
+                  << std::setw(20) << name 
+                  << std::fixed << std::setprecision(2) << std::setw(15) << result.avg_score
+                  << std::setw(15) << result.avg_time_ms
+                  << std::setw(15) << score_efficiency << std::endl;
+    }
+    
+    std::cout << "\n* 점수 효율 = 평균 점수 / 평균 시간 (높을수록 효율적)" << std::endl;
+    
+    std::string most_efficient_algo;
+    double best_efficiency = -1;
+    
+    for (const auto& [name, result] : results) {
+        double efficiency = result.avg_time_ms > 0 ? result.avg_score / result.avg_time_ms : 0;
+        if (efficiency > best_efficiency) {
+            best_efficiency = efficiency;
+            most_efficient_algo = name;
+        }
+    }
+    
+    std::cout << "\n가장 효율적인 알고리즘: " << most_efficient_algo 
+              << " (점수 효율: " << std::fixed << std::setprecision(2) << best_efficiency << ")" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(time(nullptr));
+    
+    // Zobrist 해시 초기화
+    zobrist_hash::init();
     
     std::string benchmark_mode = "all";
     int test_count = 50;
@@ -260,7 +526,7 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--help") {
             std::cout << "사용법: wallmaze_benchmark [옵션]" << std::endl
                       << "옵션:" << std::endl
-                      << "  --mode MODE      벤치마크 모드 (all, algorithms, beams, evaluation)" << std::endl
+                      << "  --mode MODE      벤치마크 모드 (all, algorithms, beams, evaluation, hash, pathfinding, compare)" << std::endl
                       << "  --tests N        각 테스트 당 실행 횟수 (기본값: 50)" << std::endl
                       << "  --help           이 도움말 메시지 표시" << std::endl;
             return 0;
@@ -310,6 +576,18 @@ int main(int argc, char* argv[]) {
     
     if (benchmark_mode == "all" || benchmark_mode == "evaluation") {
         evaluationFunctionTest(test_count);
+    }
+    
+    if (benchmark_mode == "all" || benchmark_mode == "hash") {
+        hashEffectBenchmark(test_count);
+    }
+    
+    if (benchmark_mode == "all" || benchmark_mode == "pathfinding") {
+        pathfindingBenchmark(test_count);
+    }
+    
+    if (benchmark_mode == "compare") {
+        compareAllAlgorithms(test_count);
     }
     
     return 0;

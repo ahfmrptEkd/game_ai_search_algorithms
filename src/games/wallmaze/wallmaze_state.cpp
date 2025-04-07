@@ -1,10 +1,31 @@
 #include "wallmaze_state.h"
+#include "zobrist_hash.h"
 #include "../../common/game_util.h"
+#include "../../algorithms/pathfinding/pathfinding.h"
 #include <iostream>
 #include <sstream>
 #include <random>
-#include <queue>
+#include <deque>
+
 WallMazeState::WallMazeState() {}
+
+void WallMazeState::initHash()
+{
+    hash_ = 0;
+    
+    // 캐릭터 위치 해시
+    hash_ ^= zobrist_hash::character[character_.y_][character_.x_];
+    
+    // 점수 위치 해시
+    for (int y = 0; y < GameConstants::Board::H; y++) {
+        for (int x = 0; x < GameConstants::Board::W; x++) {
+            auto point = points_[y][x];
+            if (point > 0) {
+                hash_ ^= zobrist_hash::points[y][x][point];
+            }
+        }
+    }
+}
 
 WallMazeState::WallMazeState(const int seed) 
 {
@@ -52,6 +73,7 @@ WallMazeState::WallMazeState(const int seed)
             this->points_[y][x] = mt_for_construct() % 10;
         }
     }
+    initHash();
 }
 
 bool WallMazeState::isDone() const
@@ -61,11 +83,21 @@ bool WallMazeState::isDone() const
 
 void WallMazeState::progress(const int action)
 {
+    // 현재 캐릭터 위치 정보를 해시에서 제거
+    hash_ ^= zobrist_hash::character[character_.y_][character_.x_];
+    
     this->character_.x_ += GameConstants::DX[action];
     this->character_.y_ += GameConstants::DY[action];
+    
+    // 새 캐릭터 위치 정보를 해시에 추가
+    hash_ ^= zobrist_hash::character[character_.y_][character_.x_];
+    
     auto &point = this->points_[this->character_.y_][this->character_.x_];
     if (point > 0)
     {
+        // 점수가 없어진 것을 해시에 반영
+        hash_ ^= zobrist_hash::points[character_.y_][character_.x_][point];
+        
         this->game_score_ += point;
         point = 0;
     }
@@ -119,16 +151,52 @@ std::string WallMazeState::toString() const
     return ss.str();
 }
 
+// 기존 BFS 기반 최단 거리 계산 (이전 코드와 호환성 유지)
+int WallMazeState::getDistanceToNearestPoint() const
+{
+    struct DistanceCoord
+    {
+        int y_;
+        int x_;
+        int distance_;
+        DistanceCoord() : y_(0), x_(0), distance_(0) {}
+        DistanceCoord(const int y, const int x, const int distance) : y_(y), x_(x), distance_(distance) {}
+        DistanceCoord(const Coord &coord) : y_(coord.y_), x_(coord.x_), distance_(0) {}
+    };
+
+    auto que = std::deque<DistanceCoord>();
+    que.emplace_back(this->character_);
+    std::vector<std::vector<bool>> check(GameConstants::Board::H, std::vector<bool>(GameConstants::Board::W, false));
+    
+    while (!que.empty())
+    {
+        const auto &tmp_cod = que.front();
+        que.pop_front();
+        if (this->points_[tmp_cod.y_][tmp_cod.x_] > 0)
+        {
+            return tmp_cod.distance_;
+        }
+        check[tmp_cod.y_][tmp_cod.x_] = true;
+
+        for (int action = 0; action < 4; action++)
+        {
+            int ty = tmp_cod.y_ + GameConstants::DY[action];
+            int tx = tmp_cod.x_ + GameConstants::DX[action];
+
+            if (GameUtil::isValidCoord<GameConstants::Board::H, GameConstants::Board::W>(Coord(ty, tx)) && 
+                !this->walls_[ty][tx] && !check[ty][tx])
+            {
+                que.emplace_back(ty, tx, tmp_cod.distance_ + 1);
+            }
+        }
+    }
+    return GameConstants::Board::H * GameConstants::Board::W; // 도달 불가능한 경우
+}
+
 GameConstants::ScoreType WallMazeState::evaluateScore()
 {
-    ScoreType baseScore = static_cast<GameConstants::ScoreType>(this->game_score_);
-    
-    ScoreType potentialScore = evaluatePotentialScore();
-    
-    // 최종 평가 점수 = 현재 점수 + 가중치를 둔 잠재적 점수
-    // 가중치는 0.8로 설정 (현재 점수보다 약간 낮은 중요도)
-    this->evaluated_score_ = baseScore + static_cast<ScoreType>(potentialScore * 0.8);
-    
+    // 평가 함수 개선: 현재 점수에 거리 정보를 고려
+    this->evaluated_score_ = this->game_score_ * GameConstants::Board::H * GameConstants::Board::W - getDistanceToNearestPoint();
     return this->evaluated_score_;
 }
 
@@ -137,83 +205,110 @@ bool WallMazeState::operator<(const WallMazeState& other) const
     return this->evaluated_score_ < other.evaluated_score_;
 }
 
-int WallMazeState::bfsDistance(const Coord& start, const Coord& goal) const
-{
-    bool visited[GameConstants::Board::H][GameConstants::Board::W] = {};
+int WallMazeState::calculateDistance(const Coord& start, const Coord& goal) const {
+    return getDistanceToPoint(goal, pathAlgorithmType_);
+}
+
+int WallMazeState::getDistanceToPoint(const Coord& target, PathfindingConstants::Algorithm algo) const {
+    auto pathfinder = createPathfindingAlgorithm(algo);
     
-    // BFS 큐 - <좌표, 거리> 쌍을 저장
-    std::queue<std::pair<Coord, int>> queue;
+    auto isWalkableFunc = [this](int y, int x) -> bool {
+        return this->isWalkable(y, x);
+    };
     
-    queue.push({start, 0});
-    visited[start.y_][start.x_] = true;
+    PathfindingResult result = pathfinder->findPath(this->character_, target, isWalkableFunc);
     
-    while (!queue.empty()) {
-        auto [current, distance] = queue.front();
-        queue.pop();
+    return result.pathFound ? result.distance : GameConstants::INF;
+}
+
+int WallMazeState::getNextActionTowards(const Coord& target, PathfindingConstants::Algorithm algo) const {
+    auto pathfinder = createPathfindingAlgorithm(algo);
+    
+    auto isWalkableFunc = [this](int y, int x) -> bool {
+        return this->isWalkable(y, x);
+    };
+    
+    PathfindingResult result = pathfinder->findPath(this->character_, target, isWalkableFunc);
+    
+    if (!result.pathFound || result.path.size() < 2) {
+        // 경로를 찾지 못했거나, 이미 목표 위치에 있는 경우
+        return -1;
+    }
+    
+    // 다음 이동할 위치 (경로의 두 번째 노드, 첫 번째는 현재 위치)
+    Coord nextPos = result.path[1];
+    
+    for (int dir = 0; dir < 4; dir++) {
+        int ny = this->character_.y_ + GameConstants::DY[dir];
+        int nx = this->character_.x_ + GameConstants::DX[dir];
         
-        if (current.y_ == goal.y_ && current.x_ == goal.x_) {
-            return distance;
-        }
-        
-        for (int dir = 0; dir < 4; dir++) {
-            int ny = current.y_ + GameConstants::DY[dir];
-            int nx = current.x_ + GameConstants::DX[dir];
-            
-            if (GameUtil::isValidCoord<GameConstants::Board::H, GameConstants::Board::W>(Coord(ny, nx)) && 
-                !this->hasWall(ny, nx) && !visited[ny][nx]) {
-                
-                visited[ny][nx] = true;
-                queue.push({Coord(ny, nx), distance + 1});
-            }
+        if (ny == nextPos.y_ && nx == nextPos.x_) {
+            return dir;
         }
     }
     
-    return GameConstants::INF;
+    return -1;
 }
 
-// 잠재적 점수 평가 (남은 턴으로 얻을 수 있는 최대 점수 예측)
-ScoreType WallMazeState::evaluatePotentialScore() const
-{
-    int remainingTurns = GameConstants::Board::END_TURN - this->turn_;
-    if (remainingTurns <= 0) return 0;
-    
-    // 모든 점수 위치와 거리 정보 수집
-    std::vector<std::tuple<int, int, Coord>> pointData; // <거리, 점수, 위치>
+Coord WallMazeState::findNearestPoint(PathfindingConstants::Algorithm algo) const {
+    Coord nearestPoint(-1, -1);
+    int minDistance = GameConstants::INF;
     
     for (int y = 0; y < GameConstants::Board::H; y++) {
         for (int x = 0; x < GameConstants::Board::W; x++) {
             if (this->points_[y][x] > 0) {
-                Coord pos(y, x);
-                int distance = bfsDistance(this->character_, pos);
-                if (distance < GameConstants::INF) { // 도달 가능한 경우만
-                    pointData.push_back({distance, this->points_[y][x], pos});
+                Coord pointPos(y, x);
+                int distance = getDistanceToPoint(pointPos, algo);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestPoint = pointPos;
                 }
             }
         }
     }
     
-    std::sort(pointData.begin(), pointData.end());
+    return nearestPoint;
+}
+
+Coord WallMazeState::findHighestValuePoint(PathfindingConstants::Algorithm algo) const {
+    Coord bestPoint(-1, -1);
+    double bestValue = -1;
     
-    ScoreType potentialScore = 0;
-    int turnsUsed = 0;
-    Coord currentPos = this->character_;
-    
-    for (size_t i = 0; i < pointData.size(); i++) {
-        const auto& [_, value, pos] = pointData[i];
-        
-        int distance = bfsDistance(currentPos, pos);
-        
-        if (turnsUsed + distance <= remainingTurns) {
-            potentialScore += value;
-            turnsUsed += distance;
-            currentPos = pos;
-            
-            // 이미 처리한 점수는 제외하고 남은 점수들에 대해 재계산
-            // (구현 간소화를 위해 생략되었지만, 보다 정확한 예측을 위해 필요)
-        } else {
-            break; // 남은 턴으로 도달할 수 없음
+    for (int y = 0; y < GameConstants::Board::H; y++) {
+        for (int x = 0; x < GameConstants::Board::W; x++) {
+            if (this->points_[y][x] > 0) {
+                Coord pointPos(y, x);
+                int distance = getDistanceToPoint(pointPos, algo);
+                
+                if (distance < GameConstants::INF) {
+                    // 점수/거리 비율 계산 (거리당 얻는 점수)
+                    double value = static_cast<double>(this->points_[y][x]) / distance;
+                    
+                    if (value > bestValue) {
+                        bestValue = value;
+                        bestPoint = pointPos;
+                    }
+                }
+            }
         }
     }
     
-    return potentialScore;
+    return bestPoint;
+}
+
+// 경로 탐색 알고리즘 벤치마크 실행
+PathfindingResult WallMazeState::benchmarkPathfinding(
+    const WallMazeState& state,
+    const Coord& start,
+    const Coord& goal,
+    PathfindingConstants::Algorithm algo
+) {
+    auto pathfinder = createPathfindingAlgorithm(algo);
+    
+    auto isWalkableFunc = [&state](int y, int x) -> bool {
+        return state.isWalkable(y, x);
+    };
+    
+    return pathfinder->findPath(start, goal, isWalkableFunc);
 }
