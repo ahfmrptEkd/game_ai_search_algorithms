@@ -49,7 +49,7 @@ twomaze: $(BINDIR)/twomaze_demo
 twomaze_battle: $(BINDIR)/twomaze_battle
 simmaze: $(BINDIR)/simmaze_demo
 wallmaze: $(BINDIR)/wallmaze_demo
-connect_four: $(BINDIR)/connect4_demo
+connect_four: $(BINDIR)/connect_four_demo
 
 # 벤치마크 타겟
 BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark pathfinding_benchmark
@@ -150,7 +150,7 @@ $(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "Pathfinding benchmark built successfully!"
 
-$(BINDIR)/connect_four_demo: $(EXAMPLES_DIR)/connect_four_demo.cpp $(ALL_SOURCES)
+$(BINDIR)/connect_four_demo: $(EXAMPLES_DIR)/connect4_demo.cpp $(ALL_SOURCES)
 	@echo "Building ConnectFour game..."
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
