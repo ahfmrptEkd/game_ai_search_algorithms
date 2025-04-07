@@ -27,15 +27,20 @@ include $(GAMES_DIR)/wallmaze/Makefile.inc
 include $(GAMES_DIR)/connect_four/Makefile.inc
 # 단일 플레이어 알고리즘 소스
 SINGLE_PLAYER_ALGOS = $(wildcard $(ALGO_DIR)/with_context/*.cpp) \
-                      $(wildcard $(ALGO_DIR)/without_context/*.cpp)
+                     $(wildcard $(ALGO_DIR)/without_context/*.cpp)
 
 # 두 플레이어 알고리즘 소스
-TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp)
+TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp) \
+                  $(wildcard $(ALGO_DIR_2P)/simultaneous/*.cpp)
+
+# Connect Four 알고리즘 소스
+CONNECT_FOUR_ALGOS = $(wildcard $(ALGO_BASE_DIR)/connect_four/*.cpp)
 
 # 전체 소스 파일들
 ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) $(SIMMAZE_SRC) $(WALLMAZE_SRC) \
               $(MAZE_ALGO) $(AUTOMAZE_ALGO) $(TWOMAZE_ALGO) $(SIMMAZE_ALGO) $(WALLMAZE_ALGO) \
-              $(PATHFINDING_SRC) $(COMMON_SRC) $(ALGO_FACTORY_SRC) $(CONNECT_FOUR_SRC)
+              $(PATHFINDING_SRC) $(COMMON_SRC) $(ALGO_FACTORY_SRC) $(CONNECT_FOUR_SRC) \
+              $(SINGLE_PLAYER_ALGOS) $(TWO_PLAYER_ALGOS) $(CONNECT_FOUR_ALGOS)
 
 # 사용 가능한 게임 목록
 GAMES = maze automaze twomaze simmaze wallmaze connect_four
@@ -52,14 +57,13 @@ wallmaze: $(BINDIR)/wallmaze_demo
 connect_four: $(BINDIR)/connect_four_demo
 
 # 벤치마크 타겟
-BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark pathfinding_benchmark
+BENCHMARK_TARGETS = maze_benchmark automaze_benchmark twomaze_benchmark simmaze_benchmark wallmaze_benchmark
 benchmark: $(BENCHMARK_TARGETS)
 maze_benchmark: $(BINDIR)/maze_benchmark
 automaze_benchmark: $(BINDIR)/automaze_benchmark
 twomaze_benchmark: $(BINDIR)/twomaze_benchmark
 simmaze_benchmark: $(BINDIR)/simmaze_benchmark
 wallmaze_benchmark: $(BINDIR)/wallmaze_benchmark
-pathfinding_benchmark: $(BINDIR)/pathfinding_benchmark
 
 # 클린 타겟
 clean:
@@ -144,11 +148,11 @@ $(BINDIR)/wallmaze_benchmark: $(EXAMPLES_DIR)/wallmaze_benchmark.cpp $(ALL_SOURC
 	$(CXX) $(CXXFLAGS) $^ -o $@
 	@echo "WallMaze benchmark built successfully!"
 
-$(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL_SOURCES)
-	@echo "Building pathfinding benchmark..."
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
-	@echo "Pathfinding benchmark built successfully!"
+# $(BINDIR)/pathfinding_benchmark: $(EXAMPLES_DIR)/pathfinding_benchmark.cpp $(ALL_SOURCES)
+# 	@echo "Building pathfinding benchmark..."
+# 	@mkdir -p $(BINDIR)
+# 	$(CXX) $(CXXFLAGS) $^ -o $@
+# 	@echo "Pathfinding benchmark built successfully!"
 
 $(BINDIR)/connect_four_demo: $(EXAMPLES_DIR)/connect4_demo.cpp $(ALL_SOURCES)
 	@echo "Building ConnectFour game..."
@@ -176,6 +180,5 @@ help:
 	@echo "  make twomaze_benchmark   - 2인 미로 벤치마크 빌드"
 	@echo "  make simmaze_benchmark   - 동시 미로 벤치마크 빌드"
 	@echo "  make wallmaze_benchmark  - 벽이 있는 미로 벤치마크 빌드"
-	@echo "  make pathfinding_benchmark - 경로 탐색 알고리즘 벤치마크 빌드"
 
 .PHONY: all $(GAMES) benchmark $(BENCHMARK_TARGETS) clean help test twomaze_battle
