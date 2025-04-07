@@ -18,7 +18,7 @@ void playGameWithAlgorithms(const std::string& algo1_name, const std::string& al
     auto algo1 = AlgorithmFactory::createAlgorithm(algo1_name, params1);
     auto algo2 = AlgorithmFactory::createAlgorithm(algo2_name, params2);
     
-    std::cout << "게임 시작: " << algo1->getName() << " vs " << algo2->getName() << std::endl;
+    std::cout << "Game Start: " << algo1->getName() << " vs " << algo2->getName() << std::endl;
     
     // 게임 상태 초기화
     auto state = std::make_unique<ConnectFourState>(seed);
@@ -44,15 +44,15 @@ void playGameWithAlgorithms(const std::string& algo1_name, const std::string& al
         std::cout << state->toString() << std::endl;
     }
     
-    std::cout << "게임 종료!" << std::endl;
+    std::cout << "Game End!" << std::endl;
     
     double result = state->getFirstPlayerScoreForWinRate();
     if (result == 1.0) {
-        std::cout << "Player 1 (x) 승리!" << std::endl;
+        std::cout << "Player 1 (x) Wins!" << std::endl;
     } else if (result == 0.0) {
-        std::cout << "Player 2 (o) 승리!" << std::endl;
+        std::cout << "Player 2 (o) Wins!" << std::endl;
     } else {
-        std::cout << "무승부!" << std::endl;
+        std::cout << "Draw!" << std::endl;
     }
 }
 
@@ -65,15 +65,15 @@ void benchmarkAlgorithms(const std::string& algo1_name, const std::string& algo2
     auto algo1 = AlgorithmFactory::createAlgorithm(algo1_name, params1);
     auto algo2 = AlgorithmFactory::createAlgorithm(algo2_name, params2);
     
-    std::cout << "벤치마크 시작: " << algo1->getName() << " vs " << algo2->getName()
-              << " (" << game_count << " 게임)" << std::endl;
+    std::cout << "Benchmark Start: " << algo1->getName() << " vs " << algo2->getName()
+              << " (" << game_count << " games)" << std::endl;
     
     int algo1_wins = 0;
     int algo2_wins = 0;
     int draws = 0;
     
     for (int i = 0; i < game_count; i++) {
-        std::cout << "게임 " << (i + 1) << "/" << game_count << " 진행 중..." << std::endl;
+        std::cout << "Game " << (i + 1) << "/" << game_count << " in progress..." << std::endl;
         
         auto state = std::make_unique<ConnectFourState>(i); // 각 게임마다 다른 시드 사용
         
@@ -92,28 +92,28 @@ void benchmarkAlgorithms(const std::string& algo1_name, const std::string& algo2
         double result = state->getFirstPlayerScoreForWinRate();
         if (result == 1.0) {
             algo1_wins++;
-            std::cout << "Player 1 승리" << std::endl;
+            std::cout << "Player 1 Wins" << std::endl;
         } else if (result == 0.0) {
             algo2_wins++;
-            std::cout << "Player 2 승리" << std::endl;
+            std::cout << "Player 2 Wins" << std::endl;
         } else {
             draws++;
-            std::cout << "무승부" << std::endl;
+            std::cout << "Draw" << std::endl;
         }
     }
     
     // 결과 요약
-    std::cout << "\n===== 벤치마크 결과 =====" << std::endl;
-    std::cout << algo1->getName() << " 승리: " << algo1_wins 
+    std::cout << "\n===== Benchmark Result =====" << std::endl;
+    std::cout << algo1->getName() << " Wins: " << algo1_wins 
               << " (" << (algo1_wins * 100.0 / game_count) << "%)" << std::endl;
-    std::cout << algo2->getName() << " 승리: " << algo2_wins 
+    std::cout << algo2->getName() << " Wins: " << algo2_wins 
               << " (" << (algo2_wins * 100.0 / game_count) << "%)" << std::endl;
-    std::cout << "무승부: " << draws 
+    std::cout << "Draw: " << draws 
               << " (" << (draws * 100.0 / game_count) << "%)" << std::endl;
 }
 
 void compareBitboardPerformance(int simulation_count = 1000) {
-    std::cout << "비트보드 최적화 성능 비교 (" << simulation_count << " 시뮬레이션)" << std::endl;
+    std::cout << "Bitboard Optimization Performance Comparison (" << simulation_count << " simulations)" << std::endl;
     
     AlgorithmParams params;
     params.timeThreshold = 1000; // 1초
@@ -135,22 +135,22 @@ void compareBitboardPerformance(int simulation_count = 1000) {
     end_time = std::chrono::high_resolution_clock::now();
     auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     
-    std::cout << "\n===== 성능 비교 결과 =====" << std::endl;
-    std::cout << "일반 MCTS: " << duration1 << "ms" << std::endl;
-    std::cout << "비트보드 MCTS: " << duration2 << "ms" << std::endl;
-    std::cout << "속도 향상: " << ((duration1 - duration2) * 100.0 / duration1) << "%" << std::endl;
+    std::cout << "\n===== Performance Comparison Result =====" << std::endl;
+    std::cout << "Normal MCTS: " << duration1 << "ms" << std::endl;
+    std::cout << "Bitboard MCTS: " << duration2 << "ms" << std::endl;
+    std::cout << "Speed Improvement: " << ((duration1 - duration2) * 100.0 / duration1) << "%" << std::endl;
     
     // 선택한 행동 확인
-    std::cout << "\n선택한 행동 비교:" << std::endl;
-    std::cout << "일반 MCTS: " << action1 << std::endl;
-    std::cout << "비트보드 MCTS: " << action2 << std::endl;
+    std::cout << "\nSelected Action Comparison:" << std::endl;
+    std::cout << "Normal MCTS: " << action1 << std::endl;
+    std::cout << "Bitboard MCTS: " << action2 << std::endl;
 }
 
 int getHumanMove(const ConnectFourState& state) {
     int column;
     
     while (true) {
-        std::cout << "열 번호를 입력하세요 (1-7): ";
+        std::cout << "Enter the column number (1-7): ";
         std::cin >> column;
         
         // 1-7 입력을 0-6 인덱스로 변환
@@ -164,7 +164,7 @@ int getHumanMove(const ConnectFourState& state) {
             }
         }
         
-        std::cout << "유효하지 않은 수입니다. 다시 시도하세요." << std::endl;
+        std::cout << "Invalid input. Please try again." << std::endl;
     }
 }
 
@@ -192,7 +192,7 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
     
     auto ai = AlgorithmFactory::createAlgorithm(ai_algorithm, params);
     
-    std::cout << "=== 사람 vs " << ai->getName() << " ===" << std::endl;
+    std::cout << "=== Human vs " << ai->getName() << " ===" << std::endl;
     
     // 게임 상태 초기화
     auto state = std::make_unique<ConnectFourState>(seed);
@@ -205,17 +205,17 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
         if (state->isFirst()) {
             // 사람 차례 (X)
             action = getHumanMove(*state);
-            std::cout << "당신의 수: " << (action + 1) << std::endl;
+            std::cout << "Your move: " << (action + 1) << std::endl;
         } else {
             // AI 차례 (O)
-            std::cout << "AI가 생각하는 중..." << std::endl;
+            std::cout << "AI is thinking..." << std::endl;
             
             auto start = std::chrono::high_resolution_clock::now();
             action = ai->selectAction(*state);
             auto end = std::chrono::high_resolution_clock::now();
             
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            std::cout << "AI의 수: " << (action + 1) << " (계산 시간: " << duration << "ms)" << std::endl;
+            std::cout << "AI's move: " << (action + 1) << " (calculation time: " << duration << "ms)" << std::endl;
         }
         
         state->progress(action);
@@ -225,11 +225,11 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
     // 게임 결과 출력
     double result = state->getFirstPlayerScoreForWinRate();
     if (result == 1.0) {
-        std::cout << "축하합니다! 당신이 이겼습니다! 🎉" << std::endl;
+        std::cout << "Congratulations! You win! 🎉" << std::endl;
     } else if (result == 0.0) {
-        std::cout << "AI가 이겼습니다! 😢" << std::endl;
+        std::cout << "AI wins! 😢" << std::endl;
     } else {
-        std::cout << "무승부입니다! 🤝" << std::endl;
+        std::cout << "Draw! 🤝" << std::endl;
     }
 }
 
@@ -258,8 +258,8 @@ int main(int argc, char* argv[]) {
             if (algorithms.find(algo_name) != algorithms.end()) {
                 algo1 = algorithms[algo_name];
             } else {
-                std::cout << "알 수 없는 알고리즘: " << algo_name << std::endl;
-                std::cout << "사용 가능한 알고리즘: ";
+                std::cout << "Unknown algorithm: " << algo_name << std::endl;
+                std::cout << "Available algorithms: ";
                 for (const auto& pair : algorithms) {
                     std::cout << pair.first << " ";
                 }
@@ -271,8 +271,8 @@ int main(int argc, char* argv[]) {
             if (algorithms.find(algo_name) != algorithms.end()) {
                 algo2 = algorithms[algo_name];
             } else {
-                std::cout << "알 수 없는 알고리즘: " << algo_name << std::endl;
-                std::cout << "사용 가능한 알고리즘: ";
+                std::cout << "Unknown algorithm: " << algo_name << std::endl;
+                std::cout << "Available algorithms: ";
                 for (const auto& pair : algorithms) {
                     std::cout << pair.first << " ";
                 }
@@ -284,14 +284,14 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--difficulty" && i + 1 < argc) {
             difficulty = std::stoi(argv[++i]);
         } else if (arg == "--help") {
-            std::cout << "사용법: connect_four_demo [옵션]" << std::endl;
-            std::cout << "옵션:" << std::endl;
-            std::cout << "  --mode MODE    실행 모드 (play, benchmark, compare, human)" << std::endl;
-            std::cout << "  --algo1 ALGO   첫 번째 알고리즘 (random, mcts, bitmcts)" << std::endl;
-            std::cout << "  --algo2 ALGO   두 번째 알고리즘 (random, mcts, bitmcts)" << std::endl;
-            std::cout << "  --games N      벤치마크 모드에서 실행할 게임 수" << std::endl;
-            std::cout << "  --difficulty D  사람 vs AI 게임 난이도 (0: 쉬움, 1: 보통, 2: 어려움)" << std::endl;
-            std::cout << "  --help         이 도움말 메시지 표시" << std::endl;
+            std::cout << "Usage: connect_four_demo [options]" << std::endl;
+            std::cout << "Options:" << std::endl;
+            std::cout << "  --mode MODE     Execution mode (play, benchmark, compare, human)" << std::endl;
+            std::cout << "  --algo1 ALGO    First algorithm (random, mcts, bitmcts)" << std::endl;
+            std::cout << "  --algo2 ALGO    Second algorithm (random, mcts, bitmcts)" << std::endl;
+            std::cout << "  --games N       Number of games to run in benchmark mode" << std::endl;
+            std::cout << "  --difficulty D  Human vs AI game difficulty (0: easy, 1: normal, 2: hard)" << std::endl;
+            std::cout << "  --help          Display this help message" << std::endl;
             return 0;
         }
     }
@@ -305,8 +305,8 @@ int main(int argc, char* argv[]) {
     } else if (mode == "human") {
         playHumanVsAI(algo1, difficulty);
     } else {
-        std::cout << "알 수 없는 모드: " << mode << std::endl;
-        std::cout << "사용 가능한 모드: play, benchmark, compare" << std::endl;
+        std::cout << "Unknown mode: " << mode << std::endl;
+        std::cout << "Available modes: play, benchmark, compare" << std::endl;
         return 1;
     }
     
