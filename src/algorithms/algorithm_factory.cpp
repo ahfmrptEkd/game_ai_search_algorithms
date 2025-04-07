@@ -29,6 +29,9 @@
 #include <stdexcept>
 #include <random>
 
+// connet four
+#include "../games/connect_four/connect_four_state.h"
+#include "../games/connect_four/connect_four_bitboard.h"
 
 // ----- single player, without context -----
 
@@ -612,6 +615,39 @@ public:
         }
     }
 };
+
+// ----- connect four -----
+class ConnectFourRandomAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        auto connectfour_state = static_cast<const ConnectFourState&>(state);
+        auto legal_actions = connectfour_state.legalActions();
+        if (legal_actions.empty()) {
+            return -1;
+        }
+        return legal_actions[GameUtil::mt_for_action() % legal_actions.size()];
+    }
+    
+    std::string getName() const override {
+        return "Random (ConnectFour)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto connectfour_state = static_cast<const ConnectFourState&>(state);
+        auto next_state = std::make_unique<ConnectFourState>(connectfour_state);
+        next_state->progress(action);
+        return next_state;
+    }
+};
+
+
 
 // 알고리즘 팩토리 구현
 std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
