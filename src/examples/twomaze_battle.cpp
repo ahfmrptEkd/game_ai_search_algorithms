@@ -38,8 +38,8 @@ void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name,
     double ai1_win_rate = 0.0;
     int total_games = 0;
     
-    std::cout << "비교 중: " << ai1->getName() << " vs " << ai2->getName() << " (" << game_count << " 게임)" << std::endl;
-    std::cout << "진행 중: ";
+    std::cout << "Comparing: " << ai1->getName() << " vs " << ai2->getName() << " (" << game_count << " games)" << std::endl;
+    std::cout << "Progress: ";
     std::cout.flush();
     
     for (int i = 0; i < game_count; i++) {
@@ -83,9 +83,9 @@ void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name,
     
     ai1_win_rate /= total_games;
     std::cout << std::endl;
-    std::cout << ai1->getName() << " 승률: " << std::fixed << std::setprecision(2) 
+    std::cout << ai1->getName() << " win rate: " << std::fixed << std::setprecision(2) 
               << (ai1_win_rate * 100) << "%" << std::endl;
-    std::cout << ai2->getName() << " 승률: " << std::fixed << std::setprecision(2) 
+    std::cout << ai2->getName() << " win rate: " << std::fixed << std::setprecision(2) 
               << ((1.0 - ai1_win_rate) * 100) << "%" << std::endl;
 }
 
@@ -124,15 +124,15 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--time" && i + 1 < argc) {
             time_ms = std::stol(argv[++i]);
         } else if (arg == "--help") {
-            std::cout << "사용법: twomaze_battle [options]\n"
-                      << "옵션:\n"
+            std::cout << "Usage: twomaze_battle [options]\n"
+                      << "Options:\n"
                       << "  --algo1 NAME     First algorithm name\n"
                       << "  --algo2 NAME     Second algorithm name\n"
                       << "  --games N        Number of games to play; default: 50\n"
                       << "  --sims N         Number of simulations for MC-based algorithms; default: 1000\n"
                       << "  --time N         Time threshold in milliseconds; default: 100\n"
                       << "  --help           Show this help message\n"
-                      << "\n사용 가능한 알고리즘: Random, Minimax, AlphaBeta, Iterative, MonteCarlo, MCTS, Thunder, Thunder_Time\n";
+                      << "\nAvailable algorithms: Random, Minimax, AlphaBeta, Iterative, MonteCarlo, MCTS, Thunder, Thunder_Time\n";
             return 0;
         }
     }
@@ -144,8 +144,8 @@ int main(int argc, char* argv[]) {
         
         compareAlgorithms(algo1_name, algo2_name, game_count, simulation_count, search_depth, time_ms);
     } catch (const std::invalid_argument& e) {
-        std::cout << "오류: " << e.what() << std::endl;
-        std::cout << "사용 가능한 알고리즘: ";
+        std::cout << "Error: " << e.what() << std::endl;
+        std::cout << "Available algorithms: ";
         for (const auto& pair : algorithm_map) {
             std::cout << pair.first << " ";
         }

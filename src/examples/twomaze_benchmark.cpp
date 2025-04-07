@@ -104,7 +104,7 @@ BenchmarkResult testAlgorithmPerformance(
 // 모든 알고리즘 쌍에 대해 대결 시키는 함수
 void runFullBenchmark(const std::map<std::string, std::string>& algorithms, 
                       int game_count, int simulation_count, int64_t time_threshold) {
-    std::cout << "전체 벤치마크 실행 중... " << game_count << "게임/알고리즘 쌍\n" << std::endl;
+    std::cout << "Running full benchmark... " << game_count << " games/algorithm pair" << std::endl;
     
     // 알고리즘 이름 목록 (표시용)
     std::vector<std::string> algo_names;
@@ -116,11 +116,11 @@ void runFullBenchmark(const std::map<std::string, std::string>& algorithms,
     }
     
     // 헤더 출력 - 각 알고리즘 이름 사이에 충분한 간격
-    std::cout << std::left << std::setw(14) << "알고리즘";
+    std::cout << std::left << std::setw(14) << "Algorithm";
     for (const auto& name : algo_names) {
         std::cout << std::setw(14) << name;
     }
-    std::cout << std::setw(12) << "평균 승률%" << std::endl;
+    std::cout << std::setw(12) << "Average win rate (%)" << std::endl;
     
     // 각 알고리즘에 대한 승률 표 생성
     for (size_t i = 0; i < algo_names.size(); i++) {
@@ -168,9 +168,9 @@ void analyzeTimeConstraints(const std::map<std::string, std::string>& time_algor
                            const std::vector<int64_t>& time_limits,
                            int game_count,
                            int simulation_count) {
-    std::cout << "\n시간 제한 기반 성능 분석 중...\n" << std::endl;
+    std::cout << "\nTime-based performance analysis..." << std::endl;
     
-    std::cout << std::setw(20) << "알고리즘";
+    std::cout << std::setw(20) << "Algorithm";
     for (const auto& time_ms : time_limits) {
         std::cout << std::setw(10) << time_ms << "ms";
     }
@@ -217,8 +217,8 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--mode" && i + 1 < argc) {
             benchmark_mode = argv[++i];
         } else if (arg == "--help") {
-            std::cout << "사용법: twomaze_benchmark [옵션]\n"
-                      << "옵션:\n"
+            std::cout << "Usage: twomaze_benchmark [options]\n"
+                      << "Options:\n"
                       << "  --games N        Number of games per algorithm pair\n"
                       << "  --sims N         Number of simulations for simulation-based algorithms\n"
                       << "  --time N         Time threshold in milliseconds for time-based algorithms\n"
@@ -256,11 +256,11 @@ int main(int argc, char* argv[]) {
             // 기준 알고리즘: MonteCarlo
             analyzeTimeConstraints(time_algorithms, "MonteCarlo", time_limits, game_count, simulation_count);
         } else {
-            std::cout << "알 수 없는 모드: " << benchmark_mode << "\n";
+            std::cout << "Unknown mode: " << benchmark_mode << "\n";
             return 1;
         }
     } catch (const std::exception& e) {
-        std::cerr << "오류 발생: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
     

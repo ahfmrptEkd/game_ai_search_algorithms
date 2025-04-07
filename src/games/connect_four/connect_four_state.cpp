@@ -186,7 +186,7 @@ std::string ConnectFourState::toString() const
 {
     std::stringstream ss;
     
-    ss << "현재 차례: " << (this->is_first_ ? "X" : "O") << "\n\n";
+    ss << "Current turn: " << (this->is_first_ ? "X" : "O") << "\n\n";
     
     // 열 번호 표시
     ss << "    1   2   3   4   5   6   7\n";

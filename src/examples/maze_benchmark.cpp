@@ -35,7 +35,7 @@ void testAlgorithmScore(const int game_number, const std::string& algorithm_name
     }
     
     score_mean /= static_cast<double>(game_number);
-    std::cout << "평균 점수:\t" << score_mean << std::endl;
+    std::cout << "Average score:\t" << score_mean << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -65,16 +65,16 @@ int main(int argc, char* argv[]) {
     
     auto it = algorithms.find(algorithm);
     if (it != algorithms.end()) {
-        std::cout << algorithm << " 알고리즘을 " << test_count << "회 테스트 중...\n";
+        std::cout << algorithm << " algorithm is being tested " << test_count << " times...\n";
         testAlgorithmScore(test_count, it->second, time_ms);
     } else {
-        std::cout << "알 수 없는 알고리즘: " << algorithm << "\n";
-        std::cout << "사용 가능한 알고리즘:";
+        std::cout << "Unknown algorithm: " << algorithm << "\n";
+        std::cout << "Available algorithms:";
         for (const auto& pair : algorithms) {
             std::cout << " " << pair.first;
         }
         std::cout << "\n";
-        std::cout << "사용법: ./maze_benchmark [알고리즘] [테스트횟수]\n";
+        std::cout << "Usage: ./maze_benchmark [algorithm] [test count]\n";
         return 1;
     }
     

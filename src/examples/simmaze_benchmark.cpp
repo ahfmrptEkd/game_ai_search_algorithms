@@ -137,8 +137,8 @@ void benchmarkAllCombinations(
     int games_per_match, 
     int simulation_number
 ) {
-    std::cout << "\n===== 알고리즘 종합 벤치마크 =====" << std::endl;
-    std::cout << "각 대결 " << games_per_match << "회, 시뮬레이션 " << simulation_number << "회" << std::endl << std::endl;
+    std::cout << "\n===== Comprehensive algorithm benchmark =====" << std::endl;
+    std::cout << "Each duel " << games_per_match << " games, simulation " << simulation_number << " times" << std::endl << std::endl;
     
     // 결과 행렬 초기화
     std::vector<std::vector<double>> win_rates(algorithms.size(), 
@@ -149,7 +149,7 @@ void benchmarkAllCombinations(
     for (const auto& algo : algorithms) {
         std::cout << std::setw(10) << algo;
     }
-    std::cout << std::setw(10) << "평균 승률" << std::endl;
+    std::cout << std::setw(10) << "Average win rate" << std::endl;
     
     // 구분선
     std::cout << std::string(10 + algorithms.size() * 10 + 10, '-') << std::endl;
@@ -200,9 +200,9 @@ void benchmarkTimeConstraints(
     int games_per_time,
     int simulation_number
 ) {
-    std::cout << "\n===== 시간 제한 기반 성능 분석 =====" << std::endl;
-    std::cout << "기준 알고리즘: " << baseline_algorithm << std::endl;
-    std::cout << "각 시간 제한당 " << games_per_time << "회 게임" << std::endl << std::endl;
+    std::cout << "\n===== Time-based performance analysis =====" << std::endl;
+    std::cout << "Baseline algorithm: " << baseline_algorithm << std::endl;
+    std::cout << "Each time limit: " << games_per_time << " games" << std::endl << std::endl;
     
     // 테이블 헤더 출력
     std::cout << std::left << std::setw(10) << "Algorithm";
@@ -239,18 +239,18 @@ void benchmarkTimeConstraints(
 
 // 도움말 출력
 void printUsage() {
-    std::cout << "사용법: simmaze_benchmark [명령] [옵션]" << std::endl;
-    std::cout << "명령:" << std::endl;
-    std::cout << "  all                      - 모든 알고리즘 조합 벤치마크" << std::endl;
-    std::cout << "  duel <algo1> <algo2>     - 두 알고리즘 대결 벤치마크" << std::endl;
-    std::cout << "  time                     - 시간 제한 기반 성능 분석" << std::endl;
-    std::cout << "  help                     - 도움말 출력" << std::endl;
+    std::cout << "Usage: simmaze_benchmark [command] [options]" << std::endl;
+    std::cout << "Commands:" << std::endl;
+    std::cout << "  all                      - Comprehensive algorithm benchmark" << std::endl;
+    std::cout << "  duel <algo1> <algo2>     - Duel algorithm benchmark" << std::endl;
+    std::cout << "  time                     - Time-based performance analysis" << std::endl;
+    std::cout << "  help                     - Print help message" << std::endl;
     std::cout << std::endl;
-    std::cout << "옵션:" << std::endl;
-    std::cout << "  --games N                - 각 대결당 게임 수 (기본값: 100)" << std::endl;
-    std::cout << "  --sims N                 - 시뮬레이션 횟수 (기본값: 1000)" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  --games N                - Number of games per duel (default: 100)" << std::endl;
+    std::cout << "  --sims N                 - Number of simulations (default: 1000)" << std::endl;
     std::cout << std::endl;
-    std::cout << "사용 가능한 알고리즘: random, pmc, mcts, duct" << std::endl;
+    std::cout << "Available algorithms: random, pmc, mcts, duct" << std::endl;
 }
 
 // 메인 함수
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
     if (argc > 1) {
         command = argv[1];
         
-        if (command == "help") {
+        if (command == "--help") {
             printUsage();
             return 0;
         }
@@ -302,12 +302,12 @@ int main(int argc, char* argv[]) {
     if (command == "all") {
         benchmarkAllCombinations(algorithms, games, simulation_number);
     } else if (command == "duel") {
-        std::cout << "===== 알고리즘 대결 벤치마크 =====" << std::endl;
+        std::cout << "===== Algorithm duel benchmark =====" << std::endl;
         benchmarkDuel(algo1, algo2, games, simulation_number);
     } else if (command == "time") {
         benchmarkTimeConstraints(time_algorithms, "random", time_limits, games / 3, simulation_number);
     } else {
-        std::cout << "알 수 없는 명령: " << command << std::endl;
+        std::cout << "Unknown command: " << command << std::endl;
         printUsage();
         return 1;
     }
