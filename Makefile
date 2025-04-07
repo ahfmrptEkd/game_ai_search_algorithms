@@ -27,15 +27,20 @@ include $(GAMES_DIR)/wallmaze/Makefile.inc
 include $(GAMES_DIR)/connect_four/Makefile.inc
 # 단일 플레이어 알고리즘 소스
 SINGLE_PLAYER_ALGOS = $(wildcard $(ALGO_DIR)/with_context/*.cpp) \
-                      $(wildcard $(ALGO_DIR)/without_context/*.cpp)
+                     $(wildcard $(ALGO_DIR)/without_context/*.cpp)
 
 # 두 플레이어 알고리즘 소스
-TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp)
+TWO_PLAYER_ALGOS = $(wildcard $(ALGO_DIR_2P)/alternate/*.cpp) \
+                  $(wildcard $(ALGO_DIR_2P)/simultaneous/*.cpp)
+
+# Connect Four 알고리즘 소스
+CONNECT_FOUR_ALGOS = $(wildcard $(ALGO_BASE_DIR)/connect_four/*.cpp)
 
 # 전체 소스 파일들
 ALL_SOURCES = $(MAZE_SRC) $(AUTOMAZE_SRC) $(TWOMAZE_SRC) $(SIMMAZE_SRC) $(WALLMAZE_SRC) \
               $(MAZE_ALGO) $(AUTOMAZE_ALGO) $(TWOMAZE_ALGO) $(SIMMAZE_ALGO) $(WALLMAZE_ALGO) \
-              $(PATHFINDING_SRC) $(COMMON_SRC) $(ALGO_FACTORY_SRC) $(CONNECT_FOUR_SRC)
+              $(PATHFINDING_SRC) $(COMMON_SRC) $(ALGO_FACTORY_SRC) $(CONNECT_FOUR_SRC) \
+              $(SINGLE_PLAYER_ALGOS) $(TWO_PLAYER_ALGOS) $(CONNECT_FOUR_ALGOS)
 
 # 사용 가능한 게임 목록
 GAMES = maze automaze twomaze simmaze wallmaze connect_four
