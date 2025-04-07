@@ -48,6 +48,10 @@ public:
     WinningStatus getWinningStatus() const;
     double getFirstPlayerScoreForWinRate() const;
     bool isFirst() const { return is_first_; }
+
+    // 비트보드 변환 유틸리티
+    const int* getMyBoard() const { return &my_board_[0][0]; }
+    const int* getEnemyBoard() const { return &enemy_board_[0][0]; }
 };
 
 #endif // CONNECT_FOUR_STATE_H
