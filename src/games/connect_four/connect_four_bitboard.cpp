@@ -109,24 +109,31 @@ WinningStatus ConnectFourBitBoardState::getWinningStatus() const
 
 std::string ConnectFourBitBoardState::toString() const
 {
-    std::stringstream ss("");
+    std::stringstream ss;
     
-    ss << "is_first:\t" << this->is_first_ << "\n";
+    ss << "Current turn: " << (this->is_first_ ? "X" : "O") << "\n\n";
+    
+    // 열 번호 표시
+    ss << "    1   2   3   4   5   6   7\n";
+    ss << "  +---+---+---+---+---+---+---+\n";
+
     for (int y = GameConstants::ConnectFour::H - 1; y >= 0; y--) {
+        ss << "  |";
         for (int x = 0; x < GameConstants::ConnectFour::W; x++) {
             int index = x * (GameConstants::ConnectFour::H + 1) + y;
-            char c = '.';
+            char c = ' ';
             
-            if (((my_board_ >> index) & 1ULL) != 0) {
-                c = (is_first_ ? 'x' : 'o');
+            if (((my_board_ >> index) & 1ULL) != 0) {   
+                c = (is_first_ ? 'X' : 'O');
             }
             else if ((((all_board_ ^ my_board_) >> index) & 1ULL) != 0) {
-                c = (is_first_ ? 'o' : 'x');
+                c = (is_first_ ? 'O' : 'X');
             }
             
-            ss << c;
+            ss << " " << c << " |";
         }
         ss << "\n";
+        ss << "  +---+---+---+---+---+---+---+\n";
     }
 
     return ss.str();
