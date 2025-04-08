@@ -11,7 +11,8 @@
 #include <unordered_map>
 
 void playGameWithAlgorithms(const std::string& algo1_name, const std::string& algo2_name, int seed = 0) {
-    // 알고리즘 파라미터 설정
+    
+    // 알고리즘 파라미터 설정 (선택)
     AlgorithmParams params1, params2;
     params1.timeThreshold = 100; // 100ms
     params2.timeThreshold = 100; // 100ms
@@ -21,7 +22,6 @@ void playGameWithAlgorithms(const std::string& algo1_name, const std::string& al
     
     std::cout << "Game Start: " << algo1->getName() << " vs " << algo2->getName() << std::endl;
     
-    // 게임 상태 초기화
     auto state = std::make_unique<ConnectFourState>(seed);
     
     std::cout << state->toString() << std::endl;
@@ -103,7 +103,6 @@ void benchmarkAlgorithms(const std::string& algo1_name, const std::string& algo2
         }
     }
     
-    // 결과 요약
     std::cout << "\n===== Benchmark Result =====" << std::endl;
     std::cout << algo1->getName() << " Wins: " << algo1_wins 
               << " (" << (algo1_wins * 100.0 / game_count) << "%)" << std::endl;
@@ -141,7 +140,6 @@ void compareBitboardPerformance(int simulation_count = 1000) {
     std::cout << "Bitboard MCTS: " << duration2 << "ms" << std::endl;
     std::cout << "Speed Improvement: " << ((duration1 - duration2) * 100.0 / duration1) << "%" << std::endl;
     
-    // 선택한 행동 확인
     std::cout << "\nSelected Action Comparison:" << std::endl;
     std::cout << "Normal MCTS: " << action1 << std::endl;
     std::cout << "Bitboard MCTS: " << action2 << std::endl;
@@ -195,7 +193,6 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
     
     std::cout << "=== Human vs " << ai->getName() << " ===" << std::endl;
     
-    // 게임 상태 초기화
     auto state = std::make_unique<ConnectFourState>(seed);
     
     std::cout << state->toString() << std::endl;
@@ -223,7 +220,6 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
         std::cout << state->toString() << std::endl;
     }
     
-    // 게임 결과 출력
     double result = state->getFirstPlayerScoreForWinRate();
     if (result == 1.0) {
         std::cout << "Congratulations! You win! 🎉" << std::endl;
@@ -237,20 +233,18 @@ void playHumanVsAI(const std::string& ai_algorithm, int difficulty = 0) {
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 커맨드 라인 인자 처리
     std::string mode = "play";
     std::string algo1 = "ConnectFourRandom";
     std::string algo2 = "ConnectFourMCTS";
     int games = 10;
     int difficulty = 0;
     
-    // 알고리즘 이름 매핑
     std::unordered_map<std::string, std::string> algo_map = {
         {"random", "ConnectFourRandom"},
         {"mcts", "ConnectFourMCTS"},
         {"bitmcts", "ConnectFourBitMCTS"},
         {"id", "ConnectFourID"},
-        {"bitid", "ConnectFourBitID"}  // 비트보드 ID 추가
+        {"bitid", "ConnectFourBitID"}
     };
 
     for (int i = 1; i < argc; i++) {

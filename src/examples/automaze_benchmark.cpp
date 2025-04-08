@@ -8,10 +8,8 @@
 #include <memory>
 #include <functional>
 
-// 알고리즘 성능 테스트 함수
 void testAlgorithmScore(const std::string& name, const std::string& algorithm_name, 
                          const int game_number, const int simulation_count) {
-    // 알고리즘 파라미터 설정
     AlgorithmParams params;
     params.searchNumber = simulation_count;
 
@@ -21,7 +19,6 @@ void testAlgorithmScore(const std::string& name, const std::string& algorithm_na
         params.endTemperature = 50;
     }
     
-    // 알고리즘 인스턴스 생성
     auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
     
     GameUtil::mt_for_action.seed(0);
@@ -47,11 +44,11 @@ int main(int argc, char* argv[]) {
         {"annealing", "SimulatedAnnealing"}
     };
     
+    // 게임 설정
     int test_count = 100;          // 알고리즘별 테스트 횟수
     int simulation_count = 1000;  // 시뮬레이션 반복 횟수
     std::string target_algorithm = "";
     
-    // 명령줄 인자 처리
     if (argc > 1) {
         target_algorithm = argv[1];
     }
