@@ -53,11 +53,3 @@ AutoMazeState simulatedAnnealingPlacement(const AutoMazeState &state, int number
     
     return best_state;
 }
-
-// // 게임 실행 함수 (원래 버전 - 호환성 유지)
-// void playGame(const std::string& ai_name, AutoMazeState (*ai_func)(const AutoMazeState&, int, double, double), const int seed)
-// {
-//     auto state = AutoMazeState(seed);
-//     state = ai_func(state, 1000, 500.0, 10.0); // 기본값: 1000번 반복, 시작 온도 500, 종료 온도 10
-//     auto score = state.getScore(true);
-// }

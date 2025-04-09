@@ -1,7 +1,6 @@
 #include "algorithm_interface.h"
 #include "single_player/without_context/hillclimb.h"
 #include "single_player/without_context/simulated_annealing.h"
-#include "single_player/without_context/random.h"
 
 #include "single_player/with_context/random.h"
 #include "single_player/with_context/greedy.h"
@@ -39,95 +38,6 @@
 // connet four
 #include "../games/connect_four/connect_four_state.h"
 #include "../games/connect_four/connect_four_bitboard.h"
-
-// ----- single player, without context -----
-
-// 랜덤 알고리즘 구현 (AutoMaze 용)
-class AutoMazeRandomAlgorithm : public Algorithm {
-private:
-    AlgorithmParams params_;
-    
-public:
-    int selectAction(const GameState& state) override {
-        // AutoMaze에서는 action이 없으므로 0을 반환
-        return 0;
-    }
-    
-    std::string getName() const override {
-        return "Random (AutoMaze)";
-    }
-    
-    void setParams(const AlgorithmParams& params) override {
-        params_ = params;
-    }
-    
-    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        // 상태를 복제하고 AutoMazeState로 캐스팅
-        auto maze_state = static_cast<const AutoMazeState&>(state);
-        auto next_state = std::make_unique<AutoMazeState>(maze_state);
-        
-        // 랜덤 위치에 캐릭터 배치
-        for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++) {
-            int y = GameUtil::mt_for_action() % GameConstants::Board::H;
-            int x = GameUtil::mt_for_action() % GameConstants::Board::W;
-            next_state->setCharacter(character_id, y, x);
-        }
-        
-        return next_state;
-    }
-};
-
-class HillClimbAlgorithm : public Algorithm {
-private:
-    AlgorithmParams params_;
-    
-public:
-    int selectAction(const GameState& state) override {
-        return 0;
-    }
-    
-    std::string getName() const override {
-        return "HillClimb";
-    }
-    
-    void setParams(const AlgorithmParams& params) override {
-        params_ = params;
-    }
-    
-    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        auto maze_state = static_cast<const AutoMazeState&>(state);
-        return std::make_unique<AutoMazeState>(
-            hillClimbPlacement(maze_state, params_.searchNumber));
-    }
-};
-
-class SimulatedAnnealingAlgorithm : public Algorithm {
-private:
-    AlgorithmParams params_;
-    
-public:
-    int selectAction(const GameState& state) override {
-        return 0;
-    }
-    
-    std::string getName() const override {
-        return "SimulatedAnnealing";
-    }
-    
-    void setParams(const AlgorithmParams& params) override {
-        params_ = params;
-    }
-    
-    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
-        auto maze_state = static_cast<const AutoMazeState&>(state);
-        return std::make_unique<AutoMazeState>(
-            simulatedAnnealingPlacement(maze_state, 
-                                        params_.searchNumber, 
-                                        params_.startTemperature,
-                                        params_.endTemperature));
-    }
-};
-
 
 // ----- single player, with context -----
 
@@ -247,6 +157,96 @@ public:
         return next_state;
     }
 };
+
+
+// ----- single player, without context -----
+
+// 랜덤 알고리즘 구현 (AutoMaze 용)
+class AutoMazeRandomAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        // AutoMaze에서는 action이 없으므로 0을 반환
+        return 0;
+    }
+    
+    std::string getName() const override {
+        return "Random (AutoMaze)";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        // 상태를 복제하고 AutoMazeState로 캐스팅
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        auto next_state = std::make_unique<AutoMazeState>(maze_state);
+        
+        // 랜덤 위치에 캐릭터 배치
+        for (int character_id = 0; character_id < GameConstants::AutoMaze::CHARACTER_N; character_id++) {
+            int y = GameUtil::mt_for_action() % GameConstants::Board::H;
+            int x = GameUtil::mt_for_action() % GameConstants::Board::W;
+            next_state->setCharacter(character_id, y, x);
+        }
+        
+        return next_state;
+    }
+};
+
+class HillClimbAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        return 0;
+    }
+    
+    std::string getName() const override {
+        return "HillClimb";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        return std::make_unique<AutoMazeState>(
+            hillClimbPlacement(maze_state, params_.searchNumber));
+    }
+};
+
+class SimulatedAnnealingAlgorithm : public Algorithm {
+private:
+    AlgorithmParams params_;
+    
+public:
+    int selectAction(const GameState& state) override {
+        return 0;
+    }
+    
+    std::string getName() const override {
+        return "SimulatedAnnealing";
+    }
+    
+    void setParams(const AlgorithmParams& params) override {
+        params_ = params;
+    }
+    
+    std::unique_ptr<GameState> runAndEvaluate(const GameState& state, int action) override {
+        auto maze_state = static_cast<const AutoMazeState&>(state);
+        return std::make_unique<AutoMazeState>(
+            simulatedAnnealingPlacement(maze_state, 
+                                        params_.searchNumber, 
+                                        params_.startTemperature,
+                                        params_.endTemperature));
+    }
+};
+
 
 // ----- two player, alternate -----
 class TwoMazeRandomAlgorithm : public Algorithm {
