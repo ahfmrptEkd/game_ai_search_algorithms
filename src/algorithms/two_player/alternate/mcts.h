@@ -3,7 +3,6 @@
 
 #include "../../../games/twomaze/twomaze_state.h"
 #include "../../../common/game_util.h"
-#include "random.h"
 #include "mc.h"
 
 namespace mcts {
@@ -34,11 +33,5 @@ namespace mcts {
 }
 
 int mctsSearchAction(const TwoMazeState& state, const int playout_number);
-
-inline void playGameMCTS(const int seed, int playout_number = GameConstants::TwoMaze::PLAYOUT_NUMBER) {
-    playTwoMazeGame([playout_number](const TwoMazeState& state) {
-        return mctsSearchAction(state, playout_number);
-    }, seed);
-}
 
 #endif
