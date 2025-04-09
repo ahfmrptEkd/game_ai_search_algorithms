@@ -9,7 +9,6 @@
 #include <limits>
 #include <algorithm>
 
-// ConnectFourBitIterativeDeepeningAlgorithm 클래스
 class ConnectFourBitIterativeDeepeningAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;

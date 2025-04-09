@@ -5,7 +5,6 @@
 #include "../../games/connect_four/connect_four_state.h"
 #include <random>
 
-// Connect Four 랜덤 알고리즘
 class ConnectFourRandomAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;

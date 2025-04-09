@@ -3,7 +3,6 @@
 
 ConnectFourIterativeDeepeningAlgorithm::ConnectFourIterativeDeepeningAlgorithm() : random_engine_(std::random_device{}()) {}
 
-// 알파베타 알고리즘 구현
 std::pair<int, double> ConnectFourIterativeDeepeningAlgorithm::alphabeta(
     const ConnectFourState& state, int depth, double alpha, double beta, bool maximizing_player) {
     
