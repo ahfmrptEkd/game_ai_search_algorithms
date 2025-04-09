@@ -69,15 +69,4 @@ namespace sim_mcts {
 
 int mctsSimSearchAction(const SimMazeState& state, const int player_id, int simulation_number);
 
-inline void playSimMazeGameMCTS(const int seed, int simulation_number = 1000) {
-    playSimMazeGame(
-        [simulation_number](const SimMazeState& state, const int player_id) {
-            return mctsSimSearchAction(state, player_id, simulation_number);
-        },
-        [simulation_number](const SimMazeState& state, const int player_id) {
-            return mctsSimSearchAction(state, player_id, simulation_number);
-        },
-        seed);
-}
-
 #endif // SIM_MCTS_SIM_H
