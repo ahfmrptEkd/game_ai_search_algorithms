@@ -625,26 +625,6 @@ public:
 
 // ----- 게임 타입별 알고리즘 생성 함수들 -----
 
-// 단일 플레이어 컨텍스트 없음 (AutoMaze) 생성
-std::unique_ptr<Algorithm> createSinglePlayerWithoutContextAlgorithm(
-    const std::string& algorithmName, const AlgorithmParams& params) {
-    
-    std::unique_ptr<Algorithm> algorithm;
-    
-    if (algorithmName == "AutoMazeRandom") {
-        algorithm = std::make_unique<AutoMazeRandomAlgorithm>();
-    } else if (algorithmName == "HillClimb") {
-        algorithm = std::make_unique<HillClimbAlgorithm>();
-    } else if (algorithmName == "SimulatedAnnealing") {
-        algorithm = std::make_unique<SimulatedAnnealingAlgorithm>();
-    } else {
-        throw std::invalid_argument("Unknown single player without context algorithm: " + algorithmName);
-    }
-    
-    algorithm->setParams(params);
-    return algorithm;
-}
-
 // 단일 플레이어 컨텍스트 있음 (Maze) 생성
 std::unique_ptr<Algorithm> createSinglePlayerWithContextAlgorithm(
     const std::string& algorithmName, const AlgorithmParams& params) {
@@ -661,6 +641,26 @@ std::unique_ptr<Algorithm> createSinglePlayerWithContextAlgorithm(
         algorithm = std::make_unique<ChokudaiAlgorithm>();
     } else {
         throw std::invalid_argument("Unknown single player with context algorithm: " + algorithmName);
+    }
+    
+    algorithm->setParams(params);
+    return algorithm;
+}
+
+// 단일 플레이어 컨텍스트 없음 (AutoMaze) 생성
+std::unique_ptr<Algorithm> createSinglePlayerWithoutContextAlgorithm(
+    const std::string& algorithmName, const AlgorithmParams& params) {
+    
+    std::unique_ptr<Algorithm> algorithm;
+    
+    if (algorithmName == "AutoMazeRandom") {
+        algorithm = std::make_unique<AutoMazeRandomAlgorithm>();
+    } else if (algorithmName == "HillClimb") {
+        algorithm = std::make_unique<HillClimbAlgorithm>();
+    } else if (algorithmName == "SimulatedAnnealing") {
+        algorithm = std::make_unique<SimulatedAnnealingAlgorithm>();
+    } else {
+        throw std::invalid_argument("Unknown single player without context algorithm: " + algorithmName);
     }
     
     algorithm->setParams(params);
@@ -748,20 +748,19 @@ std::unique_ptr<Algorithm> AlgorithmFactory::createAlgorithm(
     const std::string& algorithmName, const AlgorithmParams& params) {
     
     // 각 게임 타입에 맞는 알고리즘 이름 접두사를 검사
-    
-    // 단일 플레이어 컨텍스트 없음 (AutoMaze)
-    if (algorithmName == "AutoMazeRandom" || 
-        algorithmName == "HillClimb" || 
-        algorithmName == "SimulatedAnnealing") {
-        return createSinglePlayerWithoutContextAlgorithm(algorithmName, params);
-    }
-    
     // 단일 플레이어 컨텍스트 있음 (Maze)
-    else if (algorithmName == "MazeRandom" || 
+    if (algorithmName == "MazeRandom" || 
              algorithmName == "Greedy" || 
              algorithmName == "BeamSearch" || 
              algorithmName == "Chokudai") {
         return createSinglePlayerWithContextAlgorithm(algorithmName, params);
+    }
+
+    // 단일 플레이어 컨텍스트 없음 (AutoMaze)
+    else if (algorithmName == "AutoMazeRandom" || 
+        algorithmName == "HillClimb" || 
+        algorithmName == "SimulatedAnnealing") {
+        return createSinglePlayerWithoutContextAlgorithm(algorithmName, params);
     }
     
     // 두 플레이어 교대 (TwoMaze)

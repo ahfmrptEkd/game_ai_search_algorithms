@@ -14,12 +14,4 @@ struct ChokudaiConfig {
 
 int chokudaiSearchAction(const MazeState& state, const ChokudaiConfig& config);
 
-inline void playMazeGameChokudai(const int seed, int64_t time_threshold = 1) {
-    playGameWithStrategy<MazeState>(seed, [time_threshold](const MazeState& state) {
-        ChokudaiConfig config;
-        config.time_threshold = time_threshold;
-        return chokudaiSearchAction(state, config);
-    });
-}
-
 #endif // CHOKUDAI_H
