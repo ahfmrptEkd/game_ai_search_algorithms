@@ -1,4 +1,4 @@
-# TwoMaze 게임 소스 파일 - 변수 정의만 유지
+# TwoMaze 게임 소스 파일
 TWOMAZE_SRC := $(GAMES_DIR)/twomaze/twomaze_state.cpp
 
 # TwoMaze 알고리즘 파일
