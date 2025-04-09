@@ -6,7 +6,6 @@
 
 MazeState::MazeState() {}
 
-// h*w 크기의 미로를 생성한다.
 MazeState::MazeState(const int seed)
 {
     auto mt_for_construct = std::mt19937(seed);
@@ -17,13 +16,11 @@ MazeState::MazeState(const int seed)
     this->points_[this->character_.y_][this->character_.x_] = 0;
 }
 
-// 게임 종료 판정
 bool MazeState::isDone() const
 {
     return this->turn_ == GameConstants::Board::END_TURN;
 }
 
-// 지정한 action으로 게임을 1턴 진행
 void MazeState::progress(const int action)
 {
     this->character_.x_ += GameConstants::DX[action];
@@ -37,7 +34,6 @@ void MazeState::progress(const int action)
     this->turn_++;
 }
 
-// 현재 상황에서 가능한 행동을 모두 수집.
 std::vector<int> MazeState::legalActions() const
 {
     std::vector<int> actions;
@@ -53,7 +49,6 @@ std::vector<int> MazeState::legalActions() const
     return actions;
 }
 
-// 현재 게임 상황을 문자열로 출력
 std::string MazeState::toString() const
 {
     std::stringstream ss;
@@ -63,7 +58,6 @@ std::string MazeState::toString() const
     return ss.str();
 }
 
-// 평가 점수 계산 및 반환
 GameConstants::ScoreType MazeState::evaluateScore()
 {
     this->evaluated_score_ = static_cast<GameConstants::ScoreType>(this->game_score_);
