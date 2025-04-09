@@ -13,15 +13,4 @@ namespace sim_pmc {
 
 int pmcSearchAction(const SimMazeState& state, const int player_id, int simulation_number);
 
-inline void playSimMazeGamePMC(const int seed, int simulation_number = 1000) {
-    playSimMazeGame(
-        [simulation_number](const SimMazeState& state, const int player_id) {
-            return pmcSearchAction(state, player_id, simulation_number);
-        },
-        [simulation_number](const SimMazeState& state, const int player_id) {
-            return pmcSearchAction(state, player_id, simulation_number);
-        },
-        seed);
-}
-
 #endif // SIM_PMC_H

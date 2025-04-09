@@ -10,10 +10,9 @@
 
 // 알고리즘을 사용해 TwoMaze 게임을 플레이하는 함수
 void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
-    // 알고리즘 파라미터 설정
     AlgorithmParams params;
 
-        // 게임 설정
+    // 게임 설정
     params.searchWidth = 5; 
     params.searchDepth = 4; // 최대 미로 깊이 - 1 : 현재 4x4 미로
     
@@ -47,7 +46,6 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘 목록
     std::map<std::string, std::string> algorithms = {
         {"random", "TwoMazeRandom"},
         {"minimax", "Minimax"},

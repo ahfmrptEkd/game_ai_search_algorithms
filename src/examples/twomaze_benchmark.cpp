@@ -54,6 +54,7 @@ BenchmarkResult testAlgorithmPerformance(
     double total_time_ms = 0;
     
     for (int i = 0; i < game_count; i++) {
+        
         // 선공과 후공을 번갈아가며 테스트 (공정성 확보)
         for (int first_player = 0; first_player < 2; first_player++) {
             auto state = std::make_unique<TwoMazeState>(i);
@@ -106,7 +107,6 @@ void runFullBenchmark(const std::map<std::string, std::string>& algorithms,
                       int game_count, int simulation_count, int64_t time_threshold) {
     std::cout << "Running full benchmark... " << game_count << " games/algorithm pair" << std::endl;
     
-    // 알고리즘 이름 목록 (표시용)
     std::vector<std::string> algo_names;
     std::vector<std::string> algo_internal_names;
     
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    // 알고리즘 매핑 (커맨드라인 -> 내부 이름)
+    // 알고리즘 매핑
     std::map<std::string, std::string> algorithms = {
         {"Random", "TwoMazeRandom"},
         {"Minimax", "Minimax"},
@@ -248,7 +248,6 @@ int main(int argc, char* argv[]) {
     
     std::vector<int64_t> time_limits = {1, 10, 50, 100, 250, 500, 1000};
     
-    // 벤치마크 모드에 따라 실행
     try {
         if (benchmark_mode == "all" || benchmark_mode == "full") {
             runFullBenchmark(algorithms, game_count, simulation_count, time_threshold);

@@ -7,7 +7,6 @@
 #include "../../common/coord.h"
 #include "../../common/game_state.h"
 
-// 중복 정의를 제거하고 공통 상수 사용
 using ScoreType = GameConstants::ScoreType;
 
 class MazeState : public GameState {
@@ -44,7 +43,6 @@ public:
         return this->evaluated_score_ < maze_other.evaluated_score_;
     }
     
-    // 특정 게임에만 필요한 비교 연산자
     bool operator<(const MazeState& other) const;
 };
 

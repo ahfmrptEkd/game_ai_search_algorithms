@@ -8,7 +8,6 @@
 #include <cmath>
 #include <chrono>
 
-// ConnectFour MCTS 알고리즘 클래스
 class ConnectFourMCTSAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;

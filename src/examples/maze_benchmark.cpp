@@ -8,7 +8,6 @@
 #include <memory>
 #include <functional>
 
-// 알고리즘 성능 테스트 함수
 void testAlgorithmScore(const int game_number, const std::string& algorithm_name, int64_t time_ms) {
     AlgorithmParams params;
     
@@ -16,7 +15,6 @@ void testAlgorithmScore(const int game_number, const std::string& algorithm_name
         params.timeThreshold = time_ms; // 1ms 시간 제한
     }
     
-    // 알고리즘 인스턴스 생성
     auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
     
     GameUtil::mt_for_action.seed(0);
@@ -39,7 +37,7 @@ void testAlgorithmScore(const int game_number, const std::string& algorithm_name
 }
 
 int main(int argc, char* argv[]) {
-    // 사용 가능한 알고리즘 목록
+
     std::map<std::string, std::string> algorithms = {
         {"random", "MazeRandom"},
         {"greedy", "MazeGreedy"},
@@ -47,6 +45,7 @@ int main(int argc, char* argv[]) {
         {"chokudai", "MazeChokudai"}
     };
     
+    // 게임 기본 설정 (선택)
     std::string algorithm = "random";
     int test_count = 100; // 기본 테스트 횟수
     int64_t time_ms = 1; // 기본 시간 제한

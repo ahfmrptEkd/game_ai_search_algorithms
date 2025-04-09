@@ -96,14 +96,12 @@ namespace GameUtil {
         return ss.str();
     }
 
-    // 위치 유효성 검사
     template <int H, int W>
     inline bool isValidCoord(const Coord& coord)
     {
         return coord.y_ >= 0 && coord.y_ < H && coord.x_ >= 0 && coord.x_ < W;
     }
 
-    // 랜덤 점수 맵 생성
     template <int H, int W>
     inline void generateRandomPoints(int points[H][W], std::mt19937& mt, int min_point = 0, int max_point = 9)
     {
@@ -129,7 +127,6 @@ inline void playGameWithStrategy(const int seed, std::function<int(const GameSta
 }
 
 // 두 플레이어 미로 게임 관련 유틸리티
-
 enum WinningStatus {
     WIN,
     LOSE,

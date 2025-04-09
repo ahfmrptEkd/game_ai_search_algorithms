@@ -53,7 +53,6 @@ namespace minimax {
     }
 };
 
-// 외부에서 호출할 수 있는 MiniMax 함수
 int miniMaxSearchAction(const TwoMazeState& state, int depth) {
     return minimax::miniMaxAction(state, depth);
 }

@@ -9,7 +9,6 @@
 #include <cmath>
 #include <chrono>
 
-// ConnectFour 비트보드 MCTS 알고리즘 클래스
 class ConnectFourBitMCTSAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;

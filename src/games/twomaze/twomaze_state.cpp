@@ -20,7 +20,6 @@ TwoMazeState::TwoMazeState(const int seed)
     for (int y = 0; y < GameConstants::Board::H; y++)
         for (int x = 0; x < GameConstants::Board::W; x++)
         {
-            // 플레이어가 있는 위치는 점수 0 설정
             bool is_player = false;
             for (const auto& player : players_)
             {
@@ -32,12 +31,10 @@ TwoMazeState::TwoMazeState(const int seed)
             }
             if (!is_player)
             {
-                // 랜덤 점수 할당
                 GameUtil::generateRandomPoints<GameConstants::Board::H, GameConstants::Board::W>(this->points_, mt_for_construct, 0, 9);
             }
             else
             {
-                // 플레이어가 있는 위치는 점수 0 설정
                 this->points_[y][x] = 0;
             }
         }
@@ -50,12 +47,10 @@ bool TwoMazeState::isDone() const
 
 void TwoMazeState::progress(const int action)
 {
-    // 현재 플레이어 이동
     auto& player = this->players_[0];
     player.coord_.y_ += GameConstants::DY[action];
     player.coord_.x_ += GameConstants::DX[action];
 
-    // 포인트 획득
     auto& point = this->points_[player.coord_.y_][player.coord_.x_];
     if (point > 0)
     {
@@ -63,10 +58,8 @@ void TwoMazeState::progress(const int action)
         point = 0;
     }
 
-    // 턴 증가
     this->turn_++;
 
-    // 플레이어 교체
     std::swap(players_[0], players_[1]);
 }
 

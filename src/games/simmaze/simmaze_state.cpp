@@ -150,7 +150,6 @@ std::string SimMazeState::toString() const
         ss << "\n";
     }
 
-    // 게임 보드
     for (int h = 0; h < GameConstants::Board::H; h++) {
         for (int w = 0; w < GameConstants::Board::W; w++) {
             bool is_player = false;

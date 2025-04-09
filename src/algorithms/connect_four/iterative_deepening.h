@@ -8,7 +8,6 @@
 #include <limits>
 #include <algorithm>
 
-// ConnectFourIterativeDeepeningAlgorithm 클래스
 class ConnectFourIterativeDeepeningAlgorithm : public Algorithm {
 private:
     AlgorithmParams params_;

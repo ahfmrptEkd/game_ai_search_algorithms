@@ -25,6 +25,7 @@ void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& par
 
 // 두 알고리즘의 승률 비교
 void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name, int game_count, int simulation_count, int search_depth, int64_t time_ms) {
+    
     // 알고리즘 1의 파라미터 설정
     AlgorithmParams params1;
     configureAlgorithmParams(ai1_name, params1, simulation_count, search_depth, time_ms);
@@ -90,7 +91,8 @@ void compareAlgorithms(const std::string& ai1_name, const std::string& ai2_name,
 }
 
 int main(int argc, char* argv[]) {
-    // (설정)
+
+    // 게임 설정 (선택)
     std::string algo1_name = "Thunder";
     std::string algo2_name = "AlphaBeta";
     int game_count = 50;
@@ -98,7 +100,6 @@ int main(int argc, char* argv[]) {
     int search_depth = 4;
     int64_t time_ms = 100;
     
-    // 알고리즘 매핑 (커맨드라인 -> 내부 이름)
     std::map<std::string, std::string> algorithm_map = {
         {"random", "TwoMazeRandom"},
         {"minimax", "Minimax"},
@@ -110,7 +111,6 @@ int main(int argc, char* argv[]) {
         {"thunder_time", "ThunderTime"}
     };
     
-    // 명령줄 인자 처리
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "--algo1" && i + 1 < argc) {

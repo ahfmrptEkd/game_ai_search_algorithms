@@ -11,7 +11,7 @@
 void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
     
-    // 게임 설정
+    // 게임 설정 (선택)
     params.searchWidth = 5;
     params.searchDepth = 5; // 최대 미로 깊이 - 1 : 현재 5x5 미로
     params.searchNumber = 100;
@@ -20,13 +20,10 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
         params.timeThreshold = 1; // 1ms 시간 제한
     }
     
-    // 알고리즘 인스턴스 생성
     auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
     
-    // 게임 상태 초기화
     auto state = std::make_unique<MazeState>(seed);
     
-    // 게임 진행
     std::cout << state->toString() << std::endl;
     
     while (!state->isDone()) {
@@ -41,7 +38,6 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
     
-    // 사용 가능한 알고리즘 목록 
     std::map<std::string, std::string> algorithms = {
         {"random", "MazeRandom"},
         {"greedy", "Greedy"},          

@@ -1,82 +1,90 @@
 #include "../games/simmaze/simmaze_state.h"
 #include "../common/coord.h"
 #include "../common/game_util.h"
-#include "../algorithms/two_player/simultaneous/random.h"
-#include "../algorithms/two_player/simultaneous/duct.h"
-#include "../algorithms/two_player/simultaneous/pmc.h"
-#include "../algorithms/two_player/simultaneous/mcts_sim.h"
+#include "../algorithms/algorithm_interface.h"
 #include <iostream>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
-#include <memory>
 #include <functional>
 
-void playGameWithAlgorithm(const std::string& algo1_name, const std::string& algo2_name, const int seed) {
-    int simulation_number = 1000;
+static const std::string direction_strings[4] = {"RIGHT", "LEFT", "DOWN", "UP"};
+
+void playGameWithAlgorithms(
+    const std::string& algo1_name, 
+    const std::string& algo2_name, 
+    const int seed = 0
+) {
     
-    std::function<int(const SimMazeState&, const int)> algo1;
-    std::function<int(const SimMazeState&, const int)> algo2;
+    // 알고리즘 파라미터 설정 (선택)
+    AlgorithmParams params1, params2;
+    params1.timeThreshold = 100; // 100ms
+    params1.playoutNumber = 1000;
+    params1.playerId = 0;
+
+    params2.timeThreshold = 100; // 100ms
+    params2.playoutNumber = 1000;
+    params2.playerId = 1;
+
+    auto algo1 = AlgorithmFactory::createAlgorithm(algo1_name, params1);
+    auto algo2 = AlgorithmFactory::createAlgorithm(algo2_name, params2);
     
-    if (algo1_name == "random") {
-        algo1 = simMazeRandomAction;
-        std::cout << "Player 1: Random" << std::endl;
-    } else if (algo1_name == "duct") {
-        algo1 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return ductSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 1: DUCT (simulations=" << simulation_number << ")" << std::endl;
-    } else if (algo1_name == "pmc") {
-        algo1 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return pmcSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 1: Primitive Monte Carlo (simulations=" << simulation_number << ")" << std::endl;
-    } else if (algo1_name == "mcts") {
-        algo1 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return mctsSimSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 1: MCTS Simulation (simulations=" << simulation_number << ")" << std::endl;
-    } else {
-        std::cout << "Unknown algorithm: " << algo1_name << ". Using Random instead." << std::endl;
-        algo1 = simMazeRandomAction;
+    std::cout << "Game Start: " << algo1->getName() << " vs " << algo2->getName() << std::endl;
+
+    auto state = std::make_unique<SimMazeState>(seed);
+
+    std::cout << state->toString() << std::endl;
+    
+    while (!state->isDone()) {
+        int action0 = algo1->selectAction(*state);
+        int action1 = algo2->selectAction(*state);
+
+        std::cout << "actions: " 
+                  << "Player 0: " << direction_strings[action0] << " "
+                  << "Player 1: " << direction_strings[action1] << std::endl;
+        
+        state->advance(action0, action1);
+
+        std::cout << state->toString() << std::endl;
     }
-    
-    if (algo2_name == "random") {
-        algo2 = simMazeRandomAction;
-        std::cout << "Player 2: Random" << std::endl;
-    } else if (algo2_name == "duct") {
-        algo2 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return ductSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 2: DUCT (simulations=" << simulation_number << ")" << std::endl;
-    } else if (algo2_name == "pmc") {
-        algo2 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return pmcSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 2: Primitive Monte Carlo (simulations=" << simulation_number << ")" << std::endl;
-    } else if (algo2_name == "mcts") {
-        algo2 = [simulation_number](const SimMazeState& state, const int player_id) {
-            return mctsSimSearchAction(state, player_id, simulation_number);
-        };
-        std::cout << "Player 2: MCTS Simulation (simulations=" << simulation_number << ")" << std::endl;
-    } else {
-        std::cout << "Unknown algorithm: " << algo2_name << ". Using Random instead." << std::endl;
-        algo2 = simMazeRandomAction;
+
+    std::cout << "Game End!" << std::endl;
+
+    auto status = state->getWinningStatus();
+    printGameResult(status);
+}
+
+void printHelp(const std::map<std::string, std::string>& algorithms) {
+    std::cout << "Usage: simmaze_demo [algorithm1] [algorithm2] [seed]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  --help                 : print help message" << std::endl;
+    std::cout << "  algorithm1, algorithm2 : algorithm name (default: random)" << std::endl;
+    std::cout << "  seed                   : seed value for game initialization (default: random)" << std::endl;
+    std::cout << std::endl;
+    std::cout << "available algorithm list:" << std::endl;
+    for (const auto& algo : algorithms) {
+        std::cout << "  " << algo.first << std::endl;
     }
-    
-    playSimMazeGame(algo1, algo2, seed);
 }
 
 int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(0);
 
     // 사용가능한 알고리즘 목록
-    std::vector<std::string> algorithms = {
-        "random",
-        "duct",
-        "pmc",
-        "mcts",
+    std::map<std::string, std::string> algorithms = {
+        {"random", "SimMazeRandom"},
+        {"duct", "SimMazeDUCT"},
+        {"pmc", "SimMazePMC"},
+        {"mcts", "SimMazeMCTS"},
     };
+
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--help" || arg == "-h") {
+            printHelp(algorithms);
+            return 0;
+        }
+    }
 
     std::string algo1 = "random";
     std::string algo2 = "random";
@@ -94,10 +102,23 @@ int main(int argc, char* argv[]) {
         seed = std::stoi(argv[3]);
     }
     
+    
+    if (algorithms.find(algo1) == algorithms.end()) {
+        std::cerr << "error: algo 1 unknown algorithm - " << algo1 << std::endl;
+        printHelp(algorithms);
+        return 1;
+    }
+    
+    if (algorithms.find(algo2) == algorithms.end()) {
+        std::cerr << "error: algo 2 unknown algorithm - " << algo2 << std::endl;
+        printHelp(algorithms);
+        return 1;
+    }
+
     std::cout << "Running SimMaze with " << algo1 << " and " << algo2 << " algorithms..." << std::endl;
     std::cout << "----------------------------------------" << std::endl;
-
-    playGameWithAlgorithm(algo1, algo2, seed);
+    
+    playGameWithAlgorithms(algorithms[algo1], algorithms[algo2], seed);
 
     return 0;
 }

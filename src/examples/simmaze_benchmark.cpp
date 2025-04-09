@@ -5,6 +5,7 @@
 #include "../algorithms/two_player/simultaneous/duct.h"
 #include "../algorithms/two_player/simultaneous/pmc.h"
 #include "../algorithms/two_player/simultaneous/mcts_sim.h"
+#include "../algorithms/algorithm_interface.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -23,31 +24,6 @@ struct AlgorithmPerformance {
     int total_games = 0;           // 총 게임 수
 };
 
-// 알고리즘 선택 함수 타입 정의
-using AlgorithmFunction = std::function<int(const SimMazeState&, const int)>;
-
-// 알고리즘 선택 함수 생성
-AlgorithmFunction createAlgorithm(const std::string& name, int simulation_number) {
-    if (name == "random") {
-        return simMazeRandomAction;
-    } else if (name == "duct") {
-        return [simulation_number](const SimMazeState& state, const int player_id) {
-            return ductSearchAction(state, player_id, simulation_number);
-        };
-    } else if (name == "pmc") {
-        return [simulation_number](const SimMazeState& state, const int player_id) {
-            return pmcSearchAction(state, player_id, simulation_number);
-        };
-    } else if (name == "mcts") {
-        return [simulation_number](const SimMazeState& state, const int player_id) {
-            return mctsSimSearchAction(state, player_id, simulation_number);
-        };
-    } else {
-        std::cerr << "Unknown algorithm: " << name << ". Using Random instead." << std::endl;
-        return simMazeRandomAction;
-    }
-}
-
 // 단일 대결 벤치마크 (자세한 정보 출력)
 AlgorithmPerformance benchmarkDuel(
     const std::string& algo1_name, 
@@ -56,9 +32,16 @@ AlgorithmPerformance benchmarkDuel(
     int simulation_number,
     bool verbose = true
 ) {
-    auto algo1 = createAlgorithm(algo1_name, simulation_number);
-    auto algo2 = createAlgorithm(algo2_name, simulation_number);
-    
+    AlgorithmParams params1, params2;
+    params1.playoutNumber = 1000;
+    params1.playerId = 0;
+
+    params2.playoutNumber = 1000;
+    params2.playerId = 1;
+
+    auto algo1 = AlgorithmFactory::createAlgorithm(algo1_name, params1);
+    auto algo2 = AlgorithmFactory::createAlgorithm(algo2_name, params2);
+
     AlgorithmPerformance result;
     result.total_games = games;
     
@@ -77,30 +60,26 @@ AlgorithmPerformance benchmarkDuel(
         auto start_time = std::chrono::high_resolution_clock::now();
         
         while (!state.isDone()) {
-            // 플레이어 1 (algo1) 행동
             auto p1_start = std::chrono::high_resolution_clock::now();
-            int action1 = algo1(state, 0);
+            int action1 = algo1->selectAction(state);
             auto p1_end = std::chrono::high_resolution_clock::now();
             
-            // 플레이어 2 (algo2) 행동
-            int action2 = algo2(state, 1);
+            int action2 = algo2->selectAction(state);
             
             // 시간 측정 (플레이어 1의 시간만 측정)
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(p1_end - p1_start).count();
             total_time_ms += duration;
             
-            // 게임 진행
             state.advance(action1, action2);
         }
         
-        // 결과 평가
         WinningStatus status = state.getWinningStatus();
         double game_result = 0.0;
         
         if (status == WinningStatus::WIN) {
-            game_result = 1.0;  // 승리
+            game_result = 1.0;
         } else if (status == WinningStatus::DRAW) {
-            game_result = 0.5;  // 무승부
+            game_result = 0.5;
         }
         
         wins += game_result;
@@ -175,7 +154,6 @@ void benchmarkAllCombinations(
             
             win_rates[i][j] = result.win_rate;
             
-            // 승률 출력
             std::cout << std::right << std::setw(8) << std::fixed << std::setprecision(1) 
                       << (result.win_rate * 100.0) << "% ";
             
@@ -192,7 +170,6 @@ void benchmarkAllCombinations(
     std::cout << std::endl;
 }
 
-// 시간 제한 기반 알고리즘 성능 분석
 void benchmarkTimeConstraints(
     const std::vector<std::string>& time_based_algorithms,
     const std::string& baseline_algorithm,
@@ -237,7 +214,6 @@ void benchmarkTimeConstraints(
     std::cout << std::endl;
 }
 
-// 도움말 출력
 void printUsage() {
     std::cout << "Usage: simmaze_benchmark [command] [options]" << std::endl;
     std::cout << "Commands:" << std::endl;
@@ -273,7 +249,6 @@ int main(int argc, char* argv[]) {
     // 시간 제한 목록 (밀리초)
     std::vector<int> time_limits = {10, 50, 100, 250, 500, 1000};
     
-    // 명령행 인자 처리
     if (argc > 1) {
         command = argv[1];
         
@@ -282,8 +257,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
     }
-    
-    // 추가 옵션 처리
     for (int i = 2; i < argc; i++) {
         std::string arg = argv[i];
         
@@ -298,7 +271,6 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    // 명령 실행
     if (command == "all") {
         benchmarkAllCombinations(algorithms, games, simulation_number);
     } else if (command == "duel") {
