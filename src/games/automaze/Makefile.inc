@@ -1,4 +1,4 @@
-# AutoMaze 게임 소스 파일 - 변수 정의만 유지
+# AutoMaze 게임 소스 파일
 AUTOMAZE_SRC := $(GAMES_DIR)/automaze/automaze_state.cpp
 AUTOMAZE_ALGO := $(ALGO_DIR)/without_context/random.cpp \
                  $(ALGO_DIR)/without_context/hillclimb.cpp \
