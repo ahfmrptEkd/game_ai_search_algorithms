@@ -13,9 +13,9 @@ namespace GameConstants {
     
     // 모든 게임에 공통으로 사용되는 보드 관련 상수
     namespace Board {
-        constexpr const int H = 5;
-        constexpr const int W = 5;
-        constexpr const int END_TURN = 5;
+        constexpr const int H = 8;
+        constexpr const int W = 8;
+        constexpr const int END_TURN = 15;
     }
     
     namespace AutoMaze {
@@ -30,10 +30,10 @@ namespace GameConstants {
     
     // 알고리즘 파라미터 상수 추가
     namespace AlgorithmParams {
-        constexpr const int SEARCH_WIDTH = 2;
-        constexpr const int SEARCH_DEPTH = GameConstants::Board::H - 1;
-        constexpr const int SEARCH_NUMBER = 2;
-        constexpr const int64_t TIME_THRESHOLD = 1;
+        constexpr const int SEARCH_WIDTH = 3;
+        constexpr const int SEARCH_DEPTH = 7;
+        constexpr const int SEARCH_NUMBER = 4;
+        constexpr const int64_t TIME_THRESHOLD = 10;
         constexpr const double START_TEMPERATURE = 500.0;
         constexpr const double END_TEMPERATURE = 10.0;
     }
