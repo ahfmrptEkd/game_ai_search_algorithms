@@ -217,8 +217,8 @@ AlgorithmPerformance testAlgorithmPerformance(
 void beamParameterBenchmark(int test_count) {
     std::cout << "\n===== 빔 서치 매개변수 최적화 =====" << std::endl;
     
-    std::vector<int> beam_widths = {10, 50, 100, 200};
-    std::vector<int> beam_depths = {5, 10, 15, 20};
+    std::vector<int> beam_widths = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<int> beam_depths = {1, 2, 3, 4, 5, 6, 7, 8};
     
     std::cout << std::left << std::setw(10) << "Width" << std::setw(10) << "Depth" 
               << std::setw(15) << "Avg Score" << std::setw(15) << "Avg Time (ms)" << std::endl;
@@ -244,17 +244,17 @@ void hashEffectBenchmark(int test_count) {
     std::cout << "\n===== 해시 효과 벤치마크 =====" << std::endl;
     
     auto withHash = [](const WallMazeState& state) {
-        return beamSearchAction(state, 100, 10, true);
+        return beamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH, true);
     };
     
     auto withoutHash = [](const WallMazeState& state) {
-        return beamSearchAction(state, 100, 10, false);
+        return beamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH, false);
     };
     
     auto withHashResult = testAlgorithmPerformance("Beam Search + Hash", withHash, test_count);
     auto withoutHashResult = testAlgorithmPerformance("Beam Search No Hash", withoutHash, test_count);
     
-    std::cout << "\n해시 사용 효과 (빔 서치 100x10):" << std::endl;
+    std::cout << "\n해시 사용 효과 (빔 서치 3x7):" << std::endl;
     std::cout << std::string(60, '-') << std::endl;
     std::cout << std::left << std::setw(20) << "버전" 
               << std::setw(15) << "평균 점수" 
@@ -444,7 +444,7 @@ void compareAllAlgorithms(int test_count) {
         {"Random", randomAction},
         {"Greedy", greedyAction},
         {"Beam Search", [](const WallMazeState& state) {
-            return beamSearchAction(state, 100, 10, true);
+            return beamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH, true);
         }},
         {"BFS Pathfinding", [](const WallMazeState& state) {
             return pathfindingAction(state, PathfindingConstants::Algorithm::BFS);
@@ -521,12 +521,12 @@ void bitsetOptimizationBenchmark(int test_count) {
     
     // 일반 구현 빔 서치
     auto standardImpl = [](const WallMazeState& state) {
-        return beamSearchAction(state, 100, 10, true);
+        return beamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH, true);
     };
     
     // 비트셋 구현 빔 서치
     auto bitsetImpl = [](const WallMazeState& state) {
-        return bitsetBeamSearchAction(state, 100, 10, true);
+        return bitsetBeamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH, true);
     };
     
     auto standard_result = testAlgorithmPerformance("표준 구현", standardImpl, test_count);
@@ -644,7 +644,7 @@ int main(int argc, char* argv[]) {
         {"Random", randomAction},
         {"Greedy", greedyAction},
         {"Beam Search", [](const WallMazeState& state) {
-            return beamSearchAction(state, 100, 10);    
+            return beamSearchAction(state, GameConstants::AlgorithmParams::SEARCH_WIDTH, GameConstants::AlgorithmParams::SEARCH_DEPTH);    
         }}
     };
     

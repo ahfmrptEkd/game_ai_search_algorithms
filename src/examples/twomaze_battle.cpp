@@ -95,9 +95,9 @@ int main(int argc, char* argv[]) {
     // 게임 설정 (선택)
     std::string algo1_name = "Thunder";
     std::string algo2_name = "AlphaBeta";
-    int game_count = 50;
+    int game_count = 100;
     int simulation_count = 1000;
-    int search_depth = 4;
+    int search_depth = GameConstants::AlgorithmParams::SEARCH_DEPTH;
     int64_t time_ms = 100;
     
     std::map<std::string, std::string> algorithm_map = {

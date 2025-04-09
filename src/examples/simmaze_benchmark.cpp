@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> time_algorithms = {"pmc", "mcts", "duct"};
     
     // 시간 제한 목록 (밀리초)
-    std::vector<int> time_limits = {10, 50, 100, 250, 500, 1000};
+    std::vector<int> time_limits = {1, 10, 50, 100, 250, 500, 1000};
     
     if (argc > 1) {
         command = argv[1];

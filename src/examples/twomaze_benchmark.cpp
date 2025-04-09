@@ -22,7 +22,7 @@ struct BenchmarkResult {
 void configureAlgorithmParams(const std::string& algo_name, AlgorithmParams& params, 
                              int simulation_count, int64_t time_threshold) {
     if (algo_name == "Minimax" || algo_name == "AlphaBeta") {
-        params.searchDepth = 4;
+        params.searchDepth = GameConstants::AlgorithmParams::SEARCH_DEPTH;
     } else if (algo_name == "IterativeDeepening") {
         params.timeThreshold = time_threshold;
     } else if (algo_name == "MonteCarlo" || algo_name == "MCTS" || algo_name == "Thunder") {
@@ -201,9 +201,9 @@ int main(int argc, char* argv[]) {
     GameUtil::mt_for_action.seed(time(nullptr));
     
     // 기본 설정값
-    int game_count = 10;        // 기본 게임 수
-    int simulation_count = 1000; // 기본 시뮬레이션 수
-    int64_t time_threshold = 100; // 기본 시간 제한 (밀리초)
+    int game_count = 100;        // 기본 게임 수
+    int simulation_count = GameConstants::AlgorithmParams::SEARCH_NUMBER; // 기본 시뮬레이션 수
+    int64_t time_threshold = 10; // 기본 시간 제한 (밀리초)
     std::string benchmark_mode = "all"; // 기본 모드: 모든 알고리즘 비교
     
     for (int i = 1; i < argc; i++) {

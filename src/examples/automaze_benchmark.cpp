@@ -15,8 +15,8 @@ void testAlgorithmScore(const std::string& name, const std::string& algorithm_na
 
     // 알고리즘 설정(선택)
     if (algorithm_name == "SimulatedAnnealing") {
-        params.startTemperature = 1000;
-        params.endTemperature = 50;
+        params.startTemperature = GameConstants::AlgorithmParams::START_TEMPERATURE * 2;    // 1000
+        params.endTemperature = GameConstants::AlgorithmParams::END_TEMPERATURE;          // 10
     }
     
     auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     
     // 게임 설정
     int test_count = 100;          // 알고리즘별 테스트 횟수
-    int simulation_count = 1000;  // 시뮬레이션 반복 횟수
+    int simulation_count = GameConstants::AlgorithmParams::SEARCH_NUMBER;  // 1000; 시뮬레이션 반복 횟수
     std::string target_algorithm = "";
     
     if (argc > 1) {

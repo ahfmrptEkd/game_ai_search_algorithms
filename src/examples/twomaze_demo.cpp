@@ -13,8 +13,8 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
 
     // 게임 설정
-    params.searchWidth = 5; 
-    params.searchDepth = 4; // 최대 미로 깊이 - 1 : 현재 4x4 미로
+    params.searchWidth = GameConstants::AlgorithmParams::SEARCH_WIDTH; 
+    params.searchDepth = GameConstants::AlgorithmParams::SEARCH_DEPTH; 
     
     // 알고리즘별 파라미터 조정
     if (algorithm_name == "Minimax" || algorithm_name == "AlphaBeta") {
