@@ -212,8 +212,6 @@ int main(int argc, char* argv[]) {
             game_count = std::stoi(argv[++i]);
         } else if (arg == "--sims" && i + 1 < argc) {
             simulation_count = std::stoi(argv[++i]);
-        } else if (arg == "--time" && i + 1 < argc) {
-            time_threshold = std::stol(argv[++i]);
         } else if (arg == "--mode" && i + 1 < argc) {
             benchmark_mode = argv[++i];
         } else if (arg == "--help") {
@@ -221,7 +219,6 @@ int main(int argc, char* argv[]) {
                       << "Options:\n"
                       << "  --games N        Number of games per algorithm pair\n"
                       << "  --sims N         Number of simulations for simulation-based algorithms\n"
-                      << "  --time N         Time threshold in milliseconds for time-based algorithms\n"
                       << "  --mode MODE      Benchmark mode (all, time)\n"
                       << "  --help           Show this help message\n";
             return 0;
