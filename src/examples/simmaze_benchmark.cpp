@@ -300,7 +300,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     } else if (command == "time") {
-        benchmarkTimeConstraints(time_algorithms, "random", time_limits, games / 3, simulation_number);
+        benchmarkTimeConstraints(time_algorithms, "SimMazeRandom", time_limits, games / 3, simulation_number);
     } else {
         std::cout << "Unknown command: " << command << std::endl;
         printUsage();
