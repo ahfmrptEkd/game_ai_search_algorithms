@@ -152,8 +152,8 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
     
     // 게임 설정
-    params.searchWidth = 100;
-    params.searchDepth = 10;
+    params.searchWidth = GameConstants::AlgorithmParams::SEARCH_WIDTH;
+    params.searchDepth = GameConstants::AlgorithmParams::SEARCH_DEPTH;
     
     zobrist_hash::init(); 
     std::function<int(const WallMazeState&)> algorithm;
@@ -381,7 +381,7 @@ int main(int argc, char* argv[]) {
     
     std::string mode = "play";
     std::string algorithm = "beam";
-    int games = 50;
+    int games = 100;
     int seed = GameUtil::mt_for_action();
     
     for (int i = 1; i < argc; i++) {

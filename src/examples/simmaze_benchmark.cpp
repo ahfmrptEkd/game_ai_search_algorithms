@@ -112,35 +112,39 @@ AlgorithmPerformance benchmarkDuel(
 
 // 모든 알고리즘 조합 벤치마크
 void benchmarkAllCombinations(
-    const std::vector<std::string>& algorithms, 
+    const std::map<std::string, std::string>& algorithms, 
     int games_per_match, 
     int simulation_number
 ) {
     std::cout << "\n===== Comprehensive algorithm benchmark =====" << std::endl;
     std::cout << "Each duel " << games_per_match << " games, simulation " << simulation_number << " times" << std::endl << std::endl;
     
-    // 결과 행렬 초기화
-    std::vector<std::vector<double>> win_rates(algorithms.size(), 
-                                               std::vector<double>(algorithms.size(), 0.0));
+    std::vector<std::string> algo_names;
+    std::vector<std::string> algo_values;
+    
+    for (const auto& pair : algorithms) {
+        algo_names.push_back(pair.first);
+        algo_values.push_back(pair.second);
+    }
     
     // 테이블 헤더 출력
     std::cout << std::left << std::setw(10) << "Algorithm";
-    for (const auto& algo : algorithms) {
-        std::cout << std::setw(10) << algo;
+    for (const auto& name : algo_names) {
+        std::cout << std::setw(10) << name;
     }
     std::cout << std::setw(10) << "Average win rate" << std::endl;
     
     // 구분선
-    std::cout << std::string(10 + algorithms.size() * 10 + 10, '-') << std::endl;
+    std::cout << std::string(10 + algo_names.size() * 10 + 10, '-') << std::endl;
     
     // 모든 알고리즘 조합에 대해 벤치마크 실행
-    for (size_t i = 0; i < algorithms.size(); i++) {
-        std::cout << std::left << std::setw(10) << algorithms[i];
+    for (size_t i = 0; i < algo_names.size(); i++) {
+        std::cout << std::left << std::setw(10) << algo_names[i];
         
         double total_win_rate = 0.0;
         int opponent_count = 0;
         
-        for (size_t j = 0; j < algorithms.size(); j++) {
+        for (size_t j = 0; j < algo_names.size(); j++) {
             if (i == j) {
                 // 같은 알고리즘끼리는 테스트하지 않음
                 std::cout << std::setw(10) << "-";
@@ -149,10 +153,9 @@ void benchmarkAllCombinations(
             
             // 벤치마크 실행 (상세 출력 없이)
             AlgorithmPerformance result = benchmarkDuel(
-                algorithms[i], algorithms[j], games_per_match, simulation_number, false
+                algo_values[i], algo_values[j], 
+                games_per_match, simulation_number, false
             );
-            
-            win_rates[i][j] = result.win_rate;
             
             std::cout << std::right << std::setw(8) << std::fixed << std::setprecision(1) 
                       << (result.win_rate * 100.0) << "% ";
@@ -171,7 +174,7 @@ void benchmarkAllCombinations(
 }
 
 void benchmarkTimeConstraints(
-    const std::vector<std::string>& time_based_algorithms,
+    const std::map<std::string, std::string>& time_based_algorithms,
     const std::string& baseline_algorithm,
     const std::vector<int>& time_limits,
     int games_per_time,
@@ -192,8 +195,8 @@ void benchmarkTimeConstraints(
     std::cout << std::string(10 + time_limits.size() * 10, '-') << std::endl;
     
     // 각 알고리즘별 시간 제한 테스트
-    for (const auto& algo : time_based_algorithms) {
-        std::cout << std::left << std::setw(10) << algo;
+    for (const auto& algo_pair : time_based_algorithms) {
+        std::cout << std::left << std::setw(10) << algo_pair.first;
         
         for (int time_ms : time_limits) {
             // 시간 제한에 맞춰 시뮬레이션 횟수 조정
@@ -201,7 +204,7 @@ void benchmarkTimeConstraints(
             
             // 벤치마크 실행 (상세 출력 없이)
             AlgorithmPerformance result = benchmarkDuel(
-                algo, baseline_algorithm, games_per_time, adjusted_sims, false
+                algo_pair.second, baseline_algorithm, games_per_time, adjusted_sims, false
             );
             
             // 승률 출력
@@ -241,13 +244,22 @@ int main(int argc, char* argv[]) {
     int simulation_number = 1000;
     
     // 사용 가능한 알고리즘 목록
-    std::vector<std::string> algorithms = {"random", "pmc", "mcts", "duct"};
+    std::map<std::string, std::string> algorithms = {
+        {"random", "SimMazeRandom"},
+        {"pmc", "SimMazePMC"},
+        {"mcts", "SimMazeMCTS"},
+        {"duct", "SimMazeDUCT"}
+    };
     
     // 시간 제한 테스트용 알고리즘 (계산 집약적인 알고리즘만)
-    std::vector<std::string> time_algorithms = {"pmc", "mcts", "duct"};
+    std::map<std::string, std::string> time_algorithms = {
+        {"pmc", "SimMazePMC"},
+        {"mcts", "SimMazeMCTS"},
+        {"duct", "SimMazeDUCT"}
+    };
     
     // 시간 제한 목록 (밀리초)
-    std::vector<int> time_limits = {10, 50, 100, 250, 500, 1000};
+    std::vector<int> time_limits = {1, 10, 50, 100, 250, 500, 1000};
     
     if (argc > 1) {
         command = argv[1];
@@ -275,9 +287,20 @@ int main(int argc, char* argv[]) {
         benchmarkAllCombinations(algorithms, games, simulation_number);
     } else if (command == "duel") {
         std::cout << "===== Algorithm duel benchmark =====" << std::endl;
-        benchmarkDuel(algo1, algo2, games, simulation_number);
+
+        if (algorithms.find(algo1) != algorithms.end() && algorithms.find(algo2) != algorithms.end()) {
+        benchmarkDuel(algorithms[algo1], algorithms[algo2], games, simulation_number);
+        } 
+        else {
+            std::cout << "Unknown algorithm name(s). Available algorithms: ";
+            for (const auto& pair : algorithms) {
+                std::cout << pair.first << " ";
+            }
+            std::cout << std::endl;
+            return 1;
+        }
     } else if (command == "time") {
-        benchmarkTimeConstraints(time_algorithms, "random", time_limits, games / 3, simulation_number);
+        benchmarkTimeConstraints(time_algorithms, "SimMazeRandom", time_limits, games / 3, simulation_number);
     } else {
         std::cout << "Unknown command: " << command << std::endl;
         printUsage();

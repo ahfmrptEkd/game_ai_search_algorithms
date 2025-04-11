@@ -13,11 +13,11 @@ void playGameWithAlgorithm(const std::string& algorithm_name, int seed) {
     AlgorithmParams params;
     
         // 게임 설정
-    params.searchWidth = 5;
-    params.searchDepth = 5; // 최대 미로 깊이 - 1 : 현재 5x5 미로
+    params.searchWidth = 3;
+    params.searchDepth = 7;
 
     if (algorithm_name == "HillClimb" || algorithm_name == "SimulatedAnnealing") {
-        params.searchNumber = 1000; // 1000번 반복
+        params.searchNumber = GameConstants::AlgorithmParams::SEARCH_NUMBER; // 1000번 반복
     }
     
     auto algorithm = AlgorithmFactory::createAlgorithm(algorithm_name, params);

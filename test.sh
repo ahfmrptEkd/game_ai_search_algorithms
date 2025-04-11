@@ -61,6 +61,12 @@ do
   run_test "TwoMaze 게임 ($algo)" "./bin/twomaze_demo $algo"
 done
 
+# WallMaze 게임 테스트
+for algo in random greedy beam bfs dfs astar dijkstra value
+do 
+  run_test "WallMaze 게임 ($algo)" "./bin/wallmaze_demo --algo $algo"
+done
+
 # use for full test
 # # Connect Four 게임 테스트
 # for algo in ConnectFourRandom ConnectFourMCTS ConnectFourBitMCTS ConnectFourID ConnectFourBitID
@@ -73,6 +79,7 @@ echo "===== 벤치마크 간단 테스트 ====="
 run_test "Maze 벤치마크" "./bin/maze_benchmark random 2"
 run_test "AutoMaze 벤치마크" "./bin/automaze_benchmark random 2 100"
 run_test "TwoMaze 벤치마크" "./bin/twomaze_benchmark --games 2 --mode all"
+run_test "WallMaze 벤치마크" "./bin/wallmaze_benchmark --mode all"
 
 # AI 대결 테스트
 echo "===== AI 대결 테스트 ====="

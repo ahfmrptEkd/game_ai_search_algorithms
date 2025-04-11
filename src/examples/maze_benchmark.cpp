@@ -40,9 +40,9 @@ int main(int argc, char* argv[]) {
 
     std::map<std::string, std::string> algorithms = {
         {"random", "MazeRandom"},
-        {"greedy", "MazeGreedy"},
-        {"beam", "MazeBeam"},
-        {"chokudai", "MazeChokudai"}
+        {"greedy", "Greedy"},
+        {"beam", "BeamSearch"},
+        {"chokudai", "Chokudai"}
     };
     
     // 게임 기본 설정 (선택)
